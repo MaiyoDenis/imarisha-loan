@@ -1,11 +1,11 @@
-import { forwardRef, type HTMLAttributes } from "react"
-import { cn } from "@/lib/utils"
+"use client"
 
-const Collapsible = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn("", className)} {...props} />
-  )
-)
-Collapsible.displayName = "Collapsible"
+import * as CollapsiblePrimitive from "@radix-ui/react-collapsible"
 
-export { Collapsible }
+const Collapsible = CollapsiblePrimitive.Root
+
+const CollapsibleTrigger = CollapsiblePrimitive.CollapsibleTrigger
+
+const CollapsibleContent = CollapsiblePrimitive.CollapsibleContent
+
+export { Collapsible, CollapsibleTrigger, CollapsibleContent }
