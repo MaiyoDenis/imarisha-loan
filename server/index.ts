@@ -51,7 +51,7 @@ app.use(
 );
 
 // API routes
-registerRoutes(app, httpServer);
+registerRoutes(httpServer, app);
 
 // Serve static files
 serveStatic(app);
