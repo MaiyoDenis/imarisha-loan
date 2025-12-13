@@ -1,22 +1,79 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, MoreHorizontal, UserPlus, ArrowRight } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Users, MoreHorizontal, UserPlus, ArrowRight, Eye, X } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { api } from "@/lib/api";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { api } from "@/lib/api";
+import { useState } from "react";
+
 
 export default function Groups() {
   const { data: groups = [], isLoading } = useQuery({
     queryKey: ["groups"],
     queryFn: api.getGroups,
   });
+
+  const [selectedGroup, setSelectedGroup] = useState<any>(null);
+  const [isMembersOpen, setIsMembersOpen] = useState(false);
+
+  const { data: groupMembers = [] } = useQuery({
+    queryKey: ["group-members", selectedGroup?.id],
+    queryFn: async () => {
+      if (!selectedGroup) return [];
+      // Simulate fetching members for the selected group
+      return [
+        {
+          id: 1,
+          firstName: "John",
+          lastName: "Doe",
+          memberCode: "M001",
+          phone: "+254700000001",
+          status: "active",
+          joinDate: "2024-01-15T10:30:00Z"
+        },
+        {
+          id: 2,
+          firstName: "Jane",
+          lastName: "Smith",
+          memberCode: "M002",
+          phone: "+254700000002",
+          status: "active",
+          joinDate: "2024-01-20T14:15:00Z"
+        },
+        {
+          id: 3,
+          firstName: "Mike",
+          lastName: "Johnson",
+          memberCode: "M003",
+          phone: "+254700000003",
+          status: "active",
+          joinDate: "2024-02-01T09:45:00Z"
+        }
+      ];
+    },
+    enabled: !!selectedGroup && isMembersOpen,
+  });
+
+  const handleViewMembers = (group: any) => {
+    setSelectedGroup(group);
+    setIsMembersOpen(true);
+  };
 
   return (
     <div className="flex h-screen bg-background">
@@ -84,8 +141,13 @@ export default function Groups() {
                           {group.isActive ? "Active" : "Inactive"}
                         </Badge>
                       </div>
+
                       <div className="pt-4">
-                        <Button variant="outline" className="w-full text-xs">
+                        <Button 
+                          variant="outline" 
+                          className="w-full text-xs"
+                          onClick={() => handleViewMembers(group)}
+                        >
                           View Members <ArrowRight className="ml-2 h-3 w-3" />
                         </Button>
                       </div>
@@ -94,9 +156,55 @@ export default function Groups() {
                 </Card>
               ))}
             </div>
+
           )}
         </div>
       </main>
+
+      {/* Group Members Dialog */}
+      <Dialog open={isMembersOpen} onOpenChange={setIsMembersOpen}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Group Members - {selectedGroup?.name}</DialogTitle>
+            <DialogDescription>
+              View all members in this lending group.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Member Code</TableHead>
+                  <TableHead>Full Name</TableHead>
+                  <TableHead>Phone Number</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Join Date</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {groupMembers.map((member: any) => (
+                  <TableRow key={member.id}>
+                    <TableCell className="font-medium">{member.memberCode}</TableCell>
+                    <TableCell>{member.firstName} {member.lastName}</TableCell>
+                    <TableCell>{member.phone}</TableCell>
+                    <TableCell>
+                      <Badge variant={member.status === "active" ? "default" : "secondary"}>
+                        {member.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{new Date(member.joinDate).toLocaleDateString()}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            {groupMembers.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                No members found in this group.
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
