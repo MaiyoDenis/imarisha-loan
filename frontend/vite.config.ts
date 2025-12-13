@@ -24,13 +24,10 @@ export default defineConfig({
       plugins: [],
     },
   },
-  root: path.resolve(import.meta.dirname, "client"),
+  root: "client",
   build: {
-    outDir: path.resolve(import.meta.dirname, "dist"),
+    outDir: "../dist",
     emptyOutDir: true,
-    rollupOptions: {
-      input: path.resolve(import.meta.dirname, "client", "index.html")
-    }
   },
   server: {
     host: "0.0.0.0",
