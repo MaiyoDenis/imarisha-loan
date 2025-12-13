@@ -4,23 +4,23 @@
     {
       "src": "frontend/package.json",
       "use": "@vercel/static-build",
-      "config": { "installCommand": "npm install", "buildCommand": "npm run build:vercel" }
+      "config": {
+        "installCommand": "npm install",
+        "buildCommand": "npm run build:vercel"
+      }
     },
     {
       "src": "backend/run.py",
       "use": "@vercel/python",
-      "config": { "runtime": "python3.12" }
+      "config": {
+        "runtime": "python3.12"
+      }
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
       "dest": "backend/run.py"
-    },
-    {
-      "src": "/assets/(.*)",
-      "headers": { "cache-control": "s-maxage=31536000, immutable" },
-      "dest": "/assets/$1"
     },
     {
       "handle": "filesystem"
