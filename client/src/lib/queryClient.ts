@@ -1,5 +1,5 @@
 
-import { QueryClient } from "@tanstack/react-query";
+import { QueryClient, QueryFunction, QueryFunctionContext } from "@tanstack/react-query";
 
 type UnauthorizedBehavior = "returnNull" | "throw";
 
@@ -30,7 +30,7 @@ export const getQueryFn: <T>(options: {
   on401: UnauthorizedBehavior;
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
-  async ({ queryKey }) => {
+  async ({ queryKey }: QueryFunctionContext) => {
     const res = await fetch(queryKey.join("/") as string, {
       credentials: "include",
     });
