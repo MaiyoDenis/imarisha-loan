@@ -1,8 +1,10 @@
 {
+  "version": 2,
   "builds": [
     {
       "src": "frontend/package.json",
-      "use": "@vercel/static-build"
+      "use": "@vercel/static-build",
+      "config": { "distDir": "dist" }
     },
     {
       "src": "backend/run.py",
@@ -13,6 +15,11 @@
     {
       "src": "/api/(.*)",
       "dest": "backend/run.py"
+    },
+    {
+      "src": "/assets/(.*)",
+      "headers": { "cache-control": "s-maxage=31536000, immutable" },
+      "dest": "/assets/$1"
     },
     {
       "handle": "filesystem"
