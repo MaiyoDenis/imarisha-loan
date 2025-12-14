@@ -1,5 +1,10 @@
+
 {
   "version": 2,
+  "env": {
+    "VITE_API_URL": "https://imarisha-loans.onrender.com/api",
+    "VITE_APP_ENV": "production"
+  },
   "builds": [
     {
       "src": "frontend/package.json",
