@@ -1,9 +1,10 @@
-
 {
   "version": 2,
+  "buildCommand": "cd frontend && VITE_API_URL=https://imarisha-loans.onrender.com/api VITE_APP_ENV=production npm run build",
   "env": {
     "VITE_API_URL": "https://imarisha-loans.onrender.com/api",
-    "VITE_APP_ENV": "production"
+    "VITE_APP_ENV": "production",
+    "NODE_ENV": "production"
   },
   "builds": [
     {
