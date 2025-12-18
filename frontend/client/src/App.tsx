@@ -18,6 +18,7 @@ import Users from "@/pages/Users";
 import Savings from "@/pages/Savings";
 import Reports from "@/pages/Reports";
 import Settings from "@/pages/Settings";
+import Store from "@/pages/Store";
 import { ReportsPage } from "@/pages/reports/ReportsPage";
 import ExecutiveDashboard from "@/pages/dashboards/ExecutiveDashboard";
 import OperationsDashboard from "@/pages/dashboards/OperationsDashboard";
@@ -52,6 +53,7 @@ function Router() {
       <Route path="/loans" component={Loans} />
       <Route path="/products" component={LoanProducts} />
       <Route path="/savings" component={Savings} />
+      <Route path="/store" component={Store} />
       <Route path="/reports" component={Reports} />
       <Route path="/reports/advanced" component={ReportsPage} />
       <Route path="/settings" component={Settings} />

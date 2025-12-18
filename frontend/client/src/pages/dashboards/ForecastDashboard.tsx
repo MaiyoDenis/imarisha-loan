@@ -168,14 +168,14 @@ export default function ForecastDashboard() {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
+      <div className="min-h-screen p-6">
         <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-start mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Financial Forecast Dashboard</h1>
-            <p className="text-gray-600 mt-1">12-month projections and scenario planning</p>
+            <h1 className="text-3xl md:text-4xl font-heading font-extrabold tracking-tight text-gradient">Financial Forecast Dashboard</h1>
+            <p className="text-sm text-muted-foreground mt-1">12-month projections and scenario planning</p>
             {dashboard?.timestamp && (
-              <p className="text-xs text-gray-500 mt-2">
+              <p className="text-xs text-muted-foreground mt-2">
                 Last updated: {new Date(dashboard.timestamp).toLocaleString()}
               </p>
             )}
@@ -184,11 +184,7 @@ export default function ForecastDashboard() {
             <button
               onClick={handleRefresh}
               disabled={isRefreshing}
-              className={`flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg transition ${
-                isRefreshing 
-                  ? 'opacity-50 cursor-not-allowed' 
-                  : 'hover:bg-gray-50 cursor-pointer'
-              }`}
+              className={`btn-neon px-4 py-2 rounded-lg ${isRefreshing ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <RefreshCw 
                 size={18}
@@ -200,7 +196,7 @@ export default function ForecastDashboard() {
             </button>
             <button
               onClick={handleExport}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition cursor-pointer"
+              className="btn-neon px-4 py-2 rounded-lg cursor-pointer"
             >
               <Download size={18} />
               <span className="text-sm font-medium">Export</span>
@@ -212,8 +208,9 @@ export default function ForecastDashboard() {
         <div className="mb-8">
           <h2 className="text-xl font-bold text-gray-900 mb-4">Budget vs Actual (YTD)</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-sm font-medium text-gray-600 mb-2">Revenue</h3>
+            <div className="glass-card gradient-border hover-tilt p-6 relative overflow-hidden">
+              <span className="aura"></span>
+              <h3 className="text-sm font-heading font-medium text-foreground mb-2">Revenue</h3>
               <p className="text-2xl font-bold text-gray-900 mb-2">
                 {formatCurrency(dashboard.budget_variance.revenue.actual)}
               </p>
@@ -238,8 +235,9 @@ export default function ForecastDashboard() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-sm font-medium text-gray-600 mb-2">Expenses</h3>
+            <div className="glass-card gradient-border hover-tilt p-6 relative overflow-hidden">
+              <span className="aura"></span>
+              <h3 className="text-sm font-heading font-medium text-foreground mb-2">Expenses</h3>
               <p className="text-2xl font-bold text-gray-900 mb-2">
                 {formatCurrency(dashboard.budget_variance.expenses.actual)}
               </p>
@@ -264,8 +262,9 @@ export default function ForecastDashboard() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-sm font-medium text-gray-600 mb-2">Profit</h3>
+            <div className="glass-card gradient-border hover-tilt p-6 relative overflow-hidden">
+              <span className="aura"></span>
+              <h3 className="text-sm font-heading font-medium text-foreground mb-2">Profit</h3>
               <p className="text-2xl font-bold text-gray-900 mb-2">
                 {formatCurrency(dashboard.budget_variance.profit.actual)}
               </p>
@@ -293,8 +292,9 @@ export default function ForecastDashboard() {
         </div>
 
         {/* Revenue Forecast */}
-        <div className="mb-8 bg-white rounded-lg shadow p-6">
-          <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+        <div className="mb-8 glass-card gradient-border hover-tilt p-6 relative overflow-hidden">
+          <span className="aura"></span>
+          <h3 className="font-heading font-semibold text-foreground mb-4 flex items-center gap-2">
             <TrendingUp size={20} className="text-green-600" />
             12-Month Revenue Forecast
           </h3>
@@ -320,8 +320,9 @@ export default function ForecastDashboard() {
         {/* Loan Volume & Cash Flow */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Loan Volume */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="font-bold text-gray-900 mb-4">Loan Volume Forecast</h3>
+          <div className="glass-card gradient-border hover-tilt p-6 relative overflow-hidden">
+            <span className="aura"></span>
+            <h3 className="font-heading font-semibold text-foreground mb-4">Loan Volume Forecast</h3>
             <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={loanData}>
@@ -338,8 +339,9 @@ export default function ForecastDashboard() {
           </div>
 
           {/* Cash Flow */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="font-bold text-gray-900 mb-4">Cash Flow Forecast</h3>
+          <div className="glass-card gradient-border hover-tilt p-6 relative overflow-hidden">
+            <span className="aura"></span>
+            <h3 className="font-heading font-semibold text-foreground mb-4">Cash Flow Forecast</h3>
             <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={cashFlowData}>
@@ -358,8 +360,9 @@ export default function ForecastDashboard() {
         </div>
 
         {/* Arrears Forecast */}
-        <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+        <div className="glass-card gradient-border hover-tilt p-6 mb-8 relative overflow-hidden">
+          <span className="aura"></span>
+          <h3 className="font-heading font-semibold text-foreground mb-4 flex items-center gap-2">
             <AlertTriangle size={20} className="text-yellow-600" />
             Arrears Rate Forecast (Confidence: {(dashboard.arrears_forecast.confidence_level * 100).toFixed(0)}%)
           </h3>
@@ -391,8 +394,9 @@ export default function ForecastDashboard() {
         </div>
 
         {/* Loan Volume Trend */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="font-bold text-gray-900 mb-4">
+        <div className="glass-card gradient-border hover-tilt p-6 relative overflow-hidden">
+          <span className="aura"></span>
+          <h3 className="font-heading font-semibold text-foreground mb-4">
             Loan Volume Trend: <span className="text-green-600 uppercase text-sm ml-2">{dashboard.loan_volume_forecast.trend}</span>
           </h3>
           <p className="text-sm text-gray-600 mb-4">

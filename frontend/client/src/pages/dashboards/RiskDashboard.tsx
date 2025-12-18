@@ -129,14 +129,14 @@ export default function RiskDashboard() {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
+      <div className="min-h-screen p-6">
         <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-start mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Risk Management Dashboard</h1>
-            <p className="text-gray-600 mt-1">Monitor portfolio risk and early warning indicators</p>
+            <h1 className="text-3xl md:text-4xl font-heading font-extrabold tracking-tight text-gradient">Risk Management Dashboard</h1>
+            <p className="text-sm text-muted-foreground mt-1">Monitor portfolio risk and early warning indicators</p>
             {dashboard?.timestamp && (
-              <p className="text-xs text-gray-500 mt-2">
+              <p className="text-xs text-muted-foreground mt-2">
                 Last updated: {new Date(dashboard.timestamp).toLocaleString()}
               </p>
             )}
@@ -145,11 +145,7 @@ export default function RiskDashboard() {
             <button
               onClick={handleRefresh}
               disabled={isRefreshing}
-              className={`flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg transition ${
-                isRefreshing 
-                  ? 'opacity-50 cursor-not-allowed' 
-                  : 'hover:bg-gray-50 cursor-pointer'
-              }`}
+              className={`btn-neon px-4 py-2 rounded-lg ${isRefreshing ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <RefreshCw 
                 size={18}
@@ -161,7 +157,7 @@ export default function RiskDashboard() {
             </button>
             <button
               onClick={handleExport}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition cursor-pointer"
+              className="btn-neon px-4 py-2 rounded-lg cursor-pointer"
             >
               <Download size={18} />
               <span className="text-sm font-medium">Export</span>
@@ -225,8 +221,9 @@ export default function RiskDashboard() {
         </div>
 
         {/* Risk Distribution Chart */}
-        <div className="mb-8 bg-white rounded-lg shadow p-6">
-          <h3 className="font-bold text-gray-900 mb-4">Member Risk Distribution</h3>
+        <div className="mb-8 glass-card gradient-border hover-tilt p-6 relative overflow-hidden">
+          <span className="aura"></span>
+          <h3 className="font-heading font-semibold text-foreground mb-4">Member Risk Distribution</h3>
           <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
             <ResponsiveContainer width="100%" height="100%">
             <PieChart>
@@ -256,8 +253,9 @@ export default function RiskDashboard() {
         {/* Portfolio Concentration */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* By Product */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="font-bold text-gray-900 mb-4">Concentration by Product</h3>
+          <div className="glass-card gradient-border hover-tilt p-6 relative overflow-hidden">
+            <span className="aura"></span>
+            <h3 className="font-heading font-semibold text-foreground mb-4">Concentration by Product</h3>
             <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={dashboard.portfolio_concentration.by_product}>
@@ -274,8 +272,9 @@ export default function RiskDashboard() {
           </div>
 
           {/* By Location */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="font-bold text-gray-900 mb-4">Concentration by Location</h3>
+          <div className="glass-card gradient-border hover-tilt p-6 relative overflow-hidden">
+            <span className="aura"></span>
+            <h3 className="font-heading font-semibold text-foreground mb-4">Concentration by Location</h3>
             <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={dashboard.portfolio_concentration.by_location}>
@@ -293,8 +292,9 @@ export default function RiskDashboard() {
         </div>
 
         {/* Scenario Analysis */}
-        <div className="mb-8 bg-white rounded-lg shadow p-6">
-          <h3 className="font-bold text-gray-900 mb-4">Stress Testing Scenarios</h3>
+        <div className="mb-8 glass-card gradient-border hover-tilt p-6 relative overflow-hidden">
+          <span className="aura"></span>
+          <h3 className="font-heading font-semibold text-foreground mb-4">Stress Testing Scenarios</h3>
           <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
             <ResponsiveContainer width="100%" height="100%">
             <BarChart data={[
@@ -315,8 +315,8 @@ export default function RiskDashboard() {
 
         {/* Early Warnings */}
         {dashboard.early_warnings.length > 0 && (
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <div className="glass-card gradient-border hover-tilt p-6">
+            <h2 className="text-xl font-heading font-semibold text-foreground mb-4 flex items-center gap-2">
               <AlertTriangle size={24} className="text-yellow-600" />
               Early Warning Indicators
             </h2>

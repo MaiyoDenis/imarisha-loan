@@ -200,7 +200,7 @@ export default function Groups() {
       <div className="p-8 space-y-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-heading font-bold tracking-tight text-foreground">
+            <h1 className="text-4xl font-heading font-extrabold tracking-tight text-gradient">
               Groups
             </h1>
             <p className="text-muted-foreground mt-1">
@@ -210,7 +210,7 @@ export default function Groups() {
           <div className="flex gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="shadow-lg shadow-primary/20">
+                <Button variant="outline" className="btn-neon">
                   <Download className="mr-2 h-4 w-4" /> Export Reports
                 </Button>
               </DropdownMenuTrigger>
@@ -227,23 +227,23 @@ export default function Groups() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Button className="shadow-lg shadow-primary/20">
+            <Button className="btn-neon">
               <UserPlus className="mr-2 h-4 w-4" /> Create New Group
             </Button>
           </div>
         </div>
 
-        <div className="flex items-center gap-4 bg-card p-4 rounded-lg border border-border/50 shadow-sm">
+        <div className="flex items-center gap-4 glass-card gradient-border p-4 rounded-lg">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input 
               placeholder="Search by group name, ID, or branch..." 
-              className="pl-9 bg-background"
+              className="pl-9 bg-background neon-input"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <Button variant="outline" className="gap-2">
+          <Button variant="outline" className="gap-2 btn-neon">
             <Filter className="h-4 w-4" /> Filter
           </Button>
         </div>
@@ -294,8 +294,9 @@ export default function Groups() {
               return (
                 <Card
                   key={group.id}
-                  className="border-border/50 hover:border-primary/50 transition-colors"
+                  className="relative overflow-visible transition-shadow duration-300 hover:shadow-xl"
                 >
+                  <span className="aura" style={{pointerEvents: 'none', position: 'absolute', inset: 0}}></span>
                   <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
                     <div className="space-y-1">
                       <CardTitle className="text-xl font-heading">

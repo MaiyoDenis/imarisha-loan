@@ -13,7 +13,8 @@ import {
   TrendingUp,
   Users2,
   Gamepad2,
-  MapPin
+  MapPin,
+  Store
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -46,6 +47,7 @@ const sidebarItems = [
   { icon: Users, label: "Members", href: "/members" },
   { icon: CreditCard, label: "Loans", href: "/loans" },
   { icon: Package, label: "Loan Products", href: "/products" },
+  { icon: Store, label: "Store & Inventory", href: "/store" },
   { icon: Wallet, label: "Savings", href: "/savings" },
   { icon: BarChart3, label: "Reports", href: "/reports" },
   { icon: Settings, label: "Settings", href: "/settings" },
@@ -75,15 +77,20 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar collapsible="icon" className="md:sticky md:top-0 md:h-screen">
+    <Sidebar 
+      collapsible="icon" 
+      className="md:sticky md:top-0 md:h-screen glass-card gradient-border"
+      aria-label="Main navigation"
+    >
       <SidebarHeader>
-        <div className="flex items-center gap-3 px-2 py-2">
-          <img src={logo} alt="Imarisha" className="h-7 w-7 md:h-8 md:w-8 rounded-md" />
-          <span className="text-lg md:text-xl font-heading font-bold tracking-tight group-data-[collapsible=icon]:hidden">Imarisha</span>
+        <div className="relative flex items-center gap-3 px-2 py-2">
+          <span className="aura" aria-hidden="true"></span>
+          <img src={logo} alt="Imarisha Logo" className="h-7 w-7 md:h-8 md:w-8 rounded-md shadow-md" />
+          <span className="text-lg md:text-xl font-heading font-bold tracking-tight text-gradient group-data-[collapsible=icon]:hidden" aria-label="Imarisha">Imarisha</span>
         </div>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarMenu>
+        <SidebarMenu role="navigation" aria-label="Main menu">
           {sidebarItems.map((item) => {
             const isActive = location === item.href;
             return (
@@ -92,9 +99,11 @@ export function AppSidebar() {
                   isActive={isActive} 
                   onClick={() => navigate(item.href)}
                   tooltip={item.label}
-                  className="h-9 md:h-10 text-xs md:text-sm"
+                  className="h-9 md:h-10 text-xs md:text-sm focus-ring-enhanced"
+                  aria-current={isActive ? "page" : undefined}
+                  aria-label={item.label}
                 >
-                  <item.icon className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
+                  <item.icon className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" aria-hidden="true" />
                   <span className="truncate">{item.label}</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -115,10 +124,11 @@ export function AppSidebar() {
           </div>
           <Button 
             variant="ghost" 
-            className="w-full justify-start text-xs md:text-sm text-sidebar-foreground/70 hover:text-destructive hover:bg-destructive/10 h-9 md:h-10"
+            className="w-full justify-start text-xs md:text-sm text-sidebar-foreground/70 hover:text-destructive hover:bg-destructive/10 h-9 md:h-10 focus-ring-enhanced"
             onClick={handleLogout}
+            aria-label="Log out of your account"
           >
-            <LogOut className="mr-2 h-4 w-4 flex-shrink-0" />
+            <LogOut className="mr-2 h-4 w-4 flex-shrink-0" aria-hidden="true" />
             <span className="truncate">Log Out</span>
           </Button>
         </div>
@@ -126,11 +136,11 @@ export function AppSidebar() {
           <Button 
             variant="ghost" 
             size="icon"
-            className="text-sidebar-foreground/70 hover:text-destructive hover:bg-destructive/10 h-9 w-9 md:h-10 md:w-10"
+            className="text-sidebar-foreground/70 hover:text-destructive hover:bg-destructive/10 h-9 w-9 md:h-10 md:w-10 focus-ring-enhanced"
             onClick={handleLogout}
-            title="Log Out"
+            aria-label="Log out of your account"
           >
-            <LogOut className="h-4 w-4" />
+            <LogOut className="h-4 w-4" aria-hidden="true" />
           </Button>
         </div>
       </SidebarFooter>

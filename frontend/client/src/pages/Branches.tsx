@@ -263,7 +263,7 @@ export default function Branches() {
       <div className="p-8 space-y-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-heading font-bold tracking-tight text-foreground">
+            <h1 className="text-4xl font-heading font-extrabold tracking-tight text-gradient">
               Branches
             </h1>
             <p className="text-muted-foreground mt-1">
@@ -273,7 +273,7 @@ export default function Branches() {
           <div className="flex gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="shadow-lg shadow-primary/20">
+                <Button variant="outline" className="btn-neon">
                   <Download className="mr-2 h-4 w-4" /> Export Reports
                 </Button>
               </DropdownMenuTrigger>
@@ -291,7 +291,7 @@ export default function Branches() {
             </DropdownMenu>
 
             <Button
-              className="shadow-lg shadow-primary/20"
+              className="btn-neon"
               onClick={() => setIsAddOpen(true)}
             >
               <Plus className="mr-2 h-4 w-4" /> Add Branch
@@ -299,17 +299,17 @@ export default function Branches() {
           </div>
         </div>
 
-        <div className="flex items-center gap-4 bg-card p-4 rounded-lg border border-border/50 shadow-sm">
+        <div className="flex items-center gap-4 glass-card gradient-border p-4 rounded-lg">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input 
               placeholder="Search by name, location, or ID..." 
-              className="pl-9 bg-background"
+              className="pl-9 bg-background neon-input"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <Button variant="outline" className="gap-2">
+          <Button variant="outline" className="gap-2 btn-neon">
             <Filter className="h-4 w-4" /> Filter
           </Button>
         </div>
@@ -341,25 +341,38 @@ export default function Branches() {
             {filteredBranches.map((branch: Branch) => (
               <Card
                 key={branch.id}
-                className="border-border/50 hover:shadow-lg transition-all"
+                className="relative overflow-visible transition-shadow duration-300 hover:shadow-xl"
               >
+                <span className="aura" style={{pointerEvents: 'none', position: 'absolute', inset: 0}}></span>
                 <CardHeader className="flex flex-row items-start justify-between space-y-0">
                   <div
-                    className="space-y-1 cursor-pointer flex-1"
-                    onClick={() => navigate(`/branches/${branch.id}`)}
+                    className="space-y-1 cursor-pointer flex-1 min-w-0 relative z-40 group"
+                    onClick={() => {
+                      console.log("Branch clicked:", branch.id);
+                      navigate(`/branches/${branch.id}`);
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        navigate(`/branches/${branch.id}`);
+                      }
+                    }}
                   >
-                    <CardTitle className="text-xl font-heading flex items-center gap-2 hover:text-primary transition-colors">
+                    <CardTitle className="text-xl font-heading flex items-center gap-2 group-hover:text-primary transition-colors pointer-events-none">
                       <Building2 className="h-5 w-5 text-primary" />
                       {branch.name}
                     </CardTitle>
-                    <CardDescription className="flex items-center gap-1">
+                    <CardDescription className="flex items-center gap-1 pointer-events-none">
                       <MapPin className="h-3 w-3" />
                       {branch.location}
                     </CardDescription>
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
+                      <Button variant="ghost" className="h-8 w-8 p-0 shrink-0 relative z-50">
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>

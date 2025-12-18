@@ -237,15 +237,15 @@ export default function ExecutiveDashboard() {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
+      <div className="min-h-screen p-6">
         <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-start mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Executive Dashboard</h1>
-            <p className="text-gray-600 mt-1">Real-time overview of key metrics and performance indicators</p>
+            <h1 className="text-3xl md:text-4xl font-heading font-extrabold tracking-tight text-gradient">Executive Dashboard</h1>
+            <p className="text-sm text-muted-foreground mt-1">Real-time overview of key metrics and performance indicators</p>
             {dashboard?.timestamp && (
-              <p className="text-xs text-gray-500 mt-2">
+              <p className="text-xs text-muted-foreground mt-2">
                 Last updated: {new Date(dashboard.timestamp).toLocaleString()}
               </p>
             )}
@@ -254,11 +254,7 @@ export default function ExecutiveDashboard() {
             <button
               onClick={handleRefresh}
               disabled={isRefreshing}
-              className={`flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg transition ${
-                isRefreshing 
-                  ? 'opacity-50 cursor-not-allowed' 
-                  : 'hover:bg-gray-50 cursor-pointer'
-              }`}
+              className={`btn-neon px-4 py-2 rounded-lg ${isRefreshing ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <RefreshCw 
                 size={18}
@@ -270,7 +266,7 @@ export default function ExecutiveDashboard() {
             </button>
             <button
               onClick={handleExport}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition cursor-pointer"
+              className="btn-neon px-4 py-2 rounded-lg cursor-pointer"
             >
               <Download size={18} />
               <span className="text-sm font-medium">Export</span>
@@ -284,21 +280,18 @@ export default function ExecutiveDashboard() {
             {dashboard.key_alerts.map((alert, idx) => (
               <div
                 key={idx}
-                className={`p-4 rounded-lg border flex items-start gap-3 cursor-pointer transition ${
-                  alert.severity === 'high'
-                    ? 'bg-red-50 border-red-200'
-                    : 'bg-yellow-50 border-yellow-200'
-                }`}
+                className={`p-4 rounded-lg border flex items-start gap-3 cursor-pointer transition glass-card gradient-border hover-tilt`}
               >
+                <span className="aura"></span>
                 <AlertCircle
                   size={20}
-                  className={alert.severity === 'high' ? 'text-red-600' : 'text-yellow-600'}
+                  className={alert.severity === 'high' ? 'text-red-500' : 'text-yellow-500'}
                 />
                 <div className="flex-1">
-                  <h3 className={`font-semibold ${alert.severity === 'high' ? 'text-red-900' : 'text-yellow-900'}`}>
+                  <h3 className={`font-semibold ${alert.severity === 'high' ? 'text-red-600' : 'text-yellow-600'}`}>
                     {alert.title}
                   </h3>
-                  <p className={`text-sm mt-1 ${alert.severity === 'high' ? 'text-red-700' : 'text-yellow-700'}`}>
+                  <p className={`text-sm mt-1 ${alert.severity === 'high' ? 'text-red-500/90' : 'text-yellow-600/90'}`}>
                     {alert.message}
                   </p>
                 </div>
@@ -444,8 +437,9 @@ export default function ExecutiveDashboard() {
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* PAR Trend */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="font-bold text-gray-900 mb-4">Portfolio at Risk Trend</h3>
+          <div className="glass-card gradient-border hover-tilt p-6 relative overflow-hidden">
+            <span className="aura"></span>
+            <h3 className="font-heading font-semibold text-foreground mb-4">Portfolio at Risk Trend</h3>
             <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={generateTrendData(dashboard?.risk_metrics?.par_ratio || 5)}>
@@ -460,8 +454,9 @@ export default function ExecutiveDashboard() {
           </div>
 
           {/* Revenue by Source */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="font-bold text-gray-900 mb-4">Revenue by Source</h3>
+          <div className="glass-card gradient-border hover-tilt p-6 relative overflow-hidden">
+            <span className="aura"></span>
+            <h3 className="font-heading font-semibold text-foreground mb-4">Revenue by Source</h3>
             <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -487,8 +482,9 @@ export default function ExecutiveDashboard() {
         </div>
 
         {/* Growth Comparison */}
-        <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <h3 className="font-bold text-gray-900 mb-4">Member & Loan Growth</h3>
+        <div className="glass-card gradient-border hover-tilt p-6 mb-8 relative overflow-hidden">
+          <span className="aura"></span>
+          <h3 className="font-heading font-semibold text-foreground mb-4">Member & Loan Growth</h3>
           <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
             <ResponsiveContainer width="100%" height="100%">
             <BarChart data={generateGrowthData(dashboard?.growth_metrics)}>

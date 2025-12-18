@@ -269,7 +269,7 @@ export default function BranchDetail() {
               >
                 <ArrowLeft className="h-4 w-4" />
               </Button>
-              <h1 className="text-3xl font-heading font-bold tracking-tight text-foreground">
+              <h1 className="text-4xl font-heading font-extrabold tracking-tight text-gradient">
                 {branch.name}
               </h1>
             </div>
@@ -406,7 +406,8 @@ export default function BranchDetail() {
 
           {/* Groups Tab with Search & Export */}
           <TabsContent value="groups">
-            <Card>
+            <Card className="glass-card gradient-border hover-tilt relative overflow-hidden">
+              <span className="aura"></span>
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
@@ -418,7 +419,7 @@ export default function BranchDetail() {
                       <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                       <Input 
                         placeholder="Search groups..." 
-                        className="pl-9 w-64"
+                        className="pl-9 w-64 neon-input"
                         value={groupSearchQuery}
                         onChange={(e) => setGroupSearchQuery(e.target.value)}
                       />
@@ -480,7 +481,8 @@ export default function BranchDetail() {
 
           {/* Customers Tab with Search & Export */}
           <TabsContent value="customers">
-            <Card>
+            <Card className="glass-card gradient-border hover-tilt relative overflow-hidden">
+              <span className="aura"></span>
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
@@ -492,7 +494,7 @@ export default function BranchDetail() {
                       <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                       <Input 
                         placeholder="Search members..." 
-                        className="pl-9 w-64"
+                        className="pl-9 w-64 neon-input"
                         value={memberSearchQuery}
                         onChange={(e) => setMemberSearchQuery(e.target.value)}
                       />
@@ -553,7 +555,8 @@ export default function BranchDetail() {
 
           {/* Loans Tab */}
           <TabsContent value="loans">
-            <Card>
+            <Card className="glass-card gradient-border hover-tilt relative overflow-hidden">
+              <span className="aura"></span>
               <CardHeader>
                 <CardTitle>All Loans</CardTitle>
                 <CardDescription>Loans from all customers in this branch</CardDescription>
@@ -597,7 +600,8 @@ export default function BranchDetail() {
 
           {/* Products Tab */}
           <TabsContent value="products">
-            <Card>
+            <Card className="glass-card gradient-border hover-tilt relative overflow-hidden">
+              <span className="aura"></span>
               <CardHeader>
                 <CardTitle>Available Products</CardTitle>
                 <CardDescription>Products that can be distributed through this branch</CardDescription>
@@ -631,7 +635,8 @@ export default function BranchDetail() {
 
           {/* Staff Tab */}
           <TabsContent value="staff">
-            <Card>
+            <Card className="glass-card gradient-border hover-tilt relative overflow-hidden">
+              <span className="aura"></span>
               <CardHeader>
                 <CardTitle>Branch Staff</CardTitle>
                 <CardDescription>Team members assigned to this branch</CardDescription>

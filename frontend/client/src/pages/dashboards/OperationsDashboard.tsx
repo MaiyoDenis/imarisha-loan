@@ -135,14 +135,14 @@ export default function OperationsDashboard() {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
+      <div className="min-h-screen p-6">
         <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-start mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Operations Dashboard</h1>
-            <p className="text-gray-600 mt-1">Daily operations management and task tracking</p>
+            <h1 className="text-3xl md:text-4xl font-heading font-extrabold tracking-tight text-gradient">Operations Dashboard</h1>
+            <p className="text-sm text-muted-foreground mt-1">Daily operations management and task tracking</p>
             {dashboard?.timestamp && (
-              <p className="text-xs text-gray-500 mt-2">
+              <p className="text-xs text-muted-foreground mt-2">
                 Last updated: {new Date(dashboard.timestamp).toLocaleString()}
               </p>
             )}
@@ -151,11 +151,7 @@ export default function OperationsDashboard() {
             <button
               onClick={handleRefresh}
               disabled={isRefreshing}
-              className={`flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg transition ${
-                isRefreshing 
-                  ? 'opacity-50 cursor-not-allowed' 
-                  : 'hover:bg-gray-50 cursor-pointer'
-              }`}
+              className={`btn-neon px-4 py-2 rounded-lg ${isRefreshing ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <RefreshCw 
                 size={18}
@@ -167,7 +163,7 @@ export default function OperationsDashboard() {
             </button>
             <button
               onClick={handleExport}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition cursor-pointer"
+              className="btn-neon px-4 py-2 rounded-lg cursor-pointer"
             >
               <Download size={18} />
               <span className="text-sm font-medium">Export</span>
@@ -209,8 +205,9 @@ export default function OperationsDashboard() {
         </div>
 
         {/* Pending Member Queue */}
-        <div className="mb-8 bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Member Approval Queue</h2>
+        <div className="mb-8 glass-card gradient-border hover-tilt p-6 relative overflow-hidden">
+          <span className="aura"></span>
+          <h2 className="text-xl font-heading font-semibold text-foreground mb-4">Member Approval Queue</h2>
           <div className="grid grid-cols-3 gap-4 mb-6">
             <KPICard
               title="Total Pending"
@@ -261,8 +258,9 @@ export default function OperationsDashboard() {
         </div>
 
         {/* Payment Status */}
-        <div className="mb-8 bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Payment Status</h2>
+        <div className="mb-8 glass-card gradient-border hover-tilt p-6 relative overflow-hidden">
+          <span className="aura"></span>
+          <h2 className="text-xl font-heading font-semibold text-foreground mb-4">Payment Status</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <KPICard
               title="Pending"
@@ -294,8 +292,9 @@ export default function OperationsDashboard() {
 
         {/* Pending Tasks */}
         {dashboard.pending_tasks.length > 0 && (
-          <div className="mb-8 bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Pending Tasks</h2>
+          <div className="mb-8 glass-card gradient-border hover-tilt p-6 relative overflow-hidden">
+            <span className="aura"></span>
+            <h2 className="text-xl font-heading font-semibold text-foreground mb-4">Pending Tasks</h2>
             <div className="space-y-3">
               {dashboard.pending_tasks.map((task) => (
                 <div
@@ -326,8 +325,9 @@ export default function OperationsDashboard() {
         )}
 
         {/* Staff Performance */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Staff Performance (Top 5)</h2>
+        <div className="glass-card gradient-border hover-tilt p-6 relative overflow-hidden">
+          <span className="aura"></span>
+          <h2 className="text-xl font-heading font-semibold text-foreground mb-4">Staff Performance (Top 5)</h2>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50">

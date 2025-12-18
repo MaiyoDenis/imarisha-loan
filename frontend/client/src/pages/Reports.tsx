@@ -38,22 +38,22 @@ export default function Reports() {
         <div className="p-8 space-y-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-heading font-bold tracking-tight text-foreground">Reports & Analytics</h1>
+              <h1 className="text-4xl font-heading font-extrabold tracking-tight text-gradient">Reports & Analytics</h1>
               <p className="text-muted-foreground mt-1">Generate insights and monitor performance across your organization.</p>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline">
+              <Button variant="outline" className="btn-neon">
                 <Download className="mr-2 h-4 w-4" /> Export
               </Button>
-              <Button>
+              <Button className="btn-neon">
                 <FileText className="mr-2 h-4 w-4" /> Generate Report
               </Button>
             </div>
           </div>
 
-          <div className="flex items-center gap-4 bg-card p-4 rounded-lg border border-border/50 shadow-sm">
+          <div className="flex items-center gap-4 glass-card gradient-border p-4 rounded-lg">
             <Select value={reportType} onValueChange={setReportType}>
-              <SelectTrigger className="w-48">
+              <SelectTrigger className="w-48 neon-input">
                 <Filter className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Report Type" />
               </SelectTrigger>
@@ -66,7 +66,7 @@ export default function Reports() {
               </SelectContent>
             </Select>
             <Select value={dateRange} onValueChange={setDateRange}>
-              <SelectTrigger className="w-48">
+              <SelectTrigger className="w-48 neon-input">
                 <Calendar className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Date Range" />
               </SelectTrigger>
@@ -176,9 +176,10 @@ export default function Reports() {
           </div>
 
           {/* Recent Reports */}
-          <div className="rounded-md border border-border bg-card">
+          <div className="glass-card gradient-border hover-tilt relative overflow-hidden">
+            <span className="aura"></span>
             <div className="p-6 border-b">
-              <h3 className="text-lg font-semibold">Recent Reports</h3>
+              <h3 className="text-lg font-heading font-semibold">Recent Reports</h3>
             </div>
             <Table>
               <TableHeader>

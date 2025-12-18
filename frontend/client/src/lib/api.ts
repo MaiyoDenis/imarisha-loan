@@ -2,7 +2,7 @@
 
 
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_BASE = import.meta.env.VITE_API_URL || "https://imarisha-loans.onrender.com/api";
 
 if (typeof window !== 'undefined') {
   console.log('[API] Using API base:', API_BASE);
@@ -341,6 +341,104 @@ export const api = {
     }),
   deleteTransaction: (id: number) =>
     fetchAPI(`/transactions/${id}`, { method: "DELETE" }),
+
+  // Users (Admin Management)
+  getUsers: (page?: number, perPage?: number, role?: string, branchId?: number) => {
+    const params = new URLSearchParams();
+    if (page) params.append("page", page.toString());
+    if (perPage) params.append("per_page", perPage.toString());
+    if (role) params.append("role", role);
+    if (branchId) params.append("branch_id", branchId.toString());
+    return fetchAPI(`/users?${params}`);
+  },
+  getUser: (id: number) => fetchAPI(`/users/${id}`),
+  createUser: (data: any) =>
+    fetchAPI("/users", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  updateUser: (id: number, data: any) =>
+    fetchAPI(`/users/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+  deleteUser: (id: number) =>
+    fetchAPI(`/users/${id}`, { method: "DELETE" }),
+  activateUser: (id: number) =>
+    fetchAPI(`/users/${id}/activate`, { method: "PUT" }),
+  deactivateUser: (id: number) =>
+    fetchAPI(`/users/${id}/deactivate`, { method: "PUT" }),
+
+  // Suppliers
+  getSuppliers: (page?: number, perPage?: number, isActive?: boolean) => {
+    const params = new URLSearchParams();
+    if (page) params.append("page", page.toString());
+    if (perPage) params.append("per_page", perPage.toString());
+    if (isActive !== undefined) params.append("is_active", isActive.toString());
+    return fetchAPI(`/suppliers?${params}`);
+  },
+  getSupplier: (id: number) => fetchAPI(`/suppliers/${id}`),
+  createSupplier: (data: any) =>
+    fetchAPI("/suppliers", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  updateSupplier: (id: number, data: any) =>
+    fetchAPI(`/suppliers/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+  deleteSupplier: (id: number) =>
+    fetchAPI(`/suppliers/${id}`, { method: "DELETE" }),
+  getSupplierProducts: (supplierId: number) =>
+    fetchAPI(`/suppliers/${supplierId}/products`),
+  addSupplierProduct: (supplierId: number, data: any) =>
+    fetchAPI(`/suppliers/${supplierId}/products`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  removeSupplierProduct: (productId: number) =>
+    fetchAPI(`/suppliers/products/${productId}`, { method: "DELETE" }),
+  rateSupplier: (supplierId: number, rating: number) =>
+    fetchAPI(`/suppliers/${supplierId}/rating`, {
+      method: "PUT",
+      body: JSON.stringify({ rating }),
+    }),
+
+  // Stock Management
+  getStockMovements: (page?: number, perPage?: number, productId?: number, branchId?: number, movementType?: string) => {
+    const params = new URLSearchParams();
+    if (page) params.append("page", page.toString());
+    if (perPage) params.append("per_page", perPage.toString());
+    if (productId) params.append("product_id", productId.toString());
+    if (branchId) params.append("branch_id", branchId.toString());
+    if (movementType) params.append("movement_type", movementType);
+    return fetchAPI(`/stock/movements?${params}`);
+  },
+  getStockMovement: (id: number) => fetchAPI(`/stock/movements/${id}`),
+  createStockMovement: (data: any) =>
+    fetchAPI("/stock/movements", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  createRestockRequest: (data: any) =>
+    fetchAPI("/stock/restock", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  getLowStockProducts: (branchId?: number) => {
+    const params = branchId ? `?branch_id=${branchId}` : "";
+    return fetchAPI(`/stock/low-stock${params}`);
+  },
+  getCriticalStockProducts: () =>
+    fetchAPI("/stock/critical-stock"),
+  getBranchInventory: (branchId: number) =>
+    fetchAPI(`/stock/branch/${branchId}/inventory`),
+  updateBranchInventory: (branchId: number, data: any) =>
+    fetchAPI(`/stock/branch/${branchId}/inventory`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
 
   // Generic methods for API calls
   get: (endpoint: string) => fetchAPI(endpoint),

@@ -60,16 +60,16 @@ export const AIAnalyticsDashboard: React.FC = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gray-50">
-        <div className="sticky top-0 bg-white border-b border-gray-200 z-40">
+      <div className="min-h-screen">
+        <div className="sticky top-0 z-40 glass-card gradient-border">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex justify-between items-start mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+              <h1 className="text-3xl md:text-4xl font-heading font-extrabold tracking-tight text-gradient flex items-center gap-3">
                 <Brain className="w-8 h-8 text-purple-600" />
                 AI Analytics Dashboard
               </h1>
-              <p className="text-gray-600 mt-1">
+              <p className="text-sm text-muted-foreground mt-1">
                 AI-powered insights for predictive analytics and member intelligence
               </p>
             </div>
@@ -77,14 +77,14 @@ export const AIAnalyticsDashboard: React.FC = () => {
               <button
                 onClick={handleRefresh}
                 disabled={isLoading}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition"
+                className="btn-neon px-4 py-2 rounded-lg disabled:opacity-50"
               >
                 <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
                 Refresh
               </button>
               <button
                 onClick={handleExport}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                className="btn-neon px-4 py-2 rounded-lg"
               >
                 <Download className="w-4 h-4" />
                 Export
@@ -96,7 +96,7 @@ export const AIAnalyticsDashboard: React.FC = () => {
             <select
               value={filters.timeRange}
               onChange={(e) => setFilters({ ...filters, timeRange: e.target.value as any })}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-sm"
+              className="neon-input text-sm"
             >
               <option value="month">Last Month</option>
               <option value="quarter">Last Quarter</option>
@@ -109,7 +109,8 @@ export const AIAnalyticsDashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div>
+            <div className="glass-card gradient-border hover-tilt relative overflow-hidden p-4 md:p-6">
+              <span className="aura"></span>
               {arrearsForcast.data && (
                 <ArrearsForcastChart
                   data={arrearsForcast.data}
@@ -118,7 +119,8 @@ export const AIAnalyticsDashboard: React.FC = () => {
               )}
             </div>
 
-            <div>
+            <div className="glass-card gradient-border hover-tilt relative overflow-hidden p-4 md:p-6">
+              <span className="aura"></span>
               <MemberSegmentationChart
                 segments={memberBehavior.data?.segments || {}}
                 totalMembers={memberBehavior.data?.total_members || 0}
@@ -128,22 +130,29 @@ export const AIAnalyticsDashboard: React.FC = () => {
           </div>
 
           {atRiskMembers.data && (
-            <AtRiskMembersTable
-              members={atRiskMembers.data.members}
-              totalScanned={atRiskMembers.data.total_members_scanned}
-              isLoading={atRiskMembers.isLoading}
-            />
+            <div className="glass-card gradient-border hover-tilt relative overflow-hidden p-4 md:p-6">
+              <span className="aura"></span>
+              <AtRiskMembersTable
+                members={atRiskMembers.data.members}
+                totalScanned={atRiskMembers.data.total_members_scanned}
+                isLoading={atRiskMembers.isLoading}
+              />
+            </div>
           )}
 
-          <CohortAnalysisChart
-            cohorts={cohortAnalysis.data?.cohorts || []}
-            insights={cohortAnalysis.data?.insights || { best_performing_cohort: null, average_active_rate: 0, average_default_rate: 0 }}
-            isLoading={cohortAnalysis.isLoading}
-          />
+          <div className="glass-card gradient-border hover-tilt relative overflow-hidden p-4 md:p-6">
+            <span className="aura"></span>
+            <CohortAnalysisChart
+              cohorts={cohortAnalysis.data?.cohorts || []}
+              insights={cohortAnalysis.data?.insights || { best_performing_cohort: null, average_active_rate: 0, average_default_rate: 0 }}
+              isLoading={cohortAnalysis.isLoading}
+            />
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Key Metrics</h3>
+            <div className="glass-card gradient-border hover-tilt p-6 relative overflow-hidden">
+              <span className="aura"></span>
+              <h3 className="text-lg font-heading font-semibold text-foreground mb-4">Key Metrics</h3>
               <div className="space-y-4">
                 <div className="flex justify-between items-center pb-4 border-b border-gray-200">
                   <span className="text-gray-600">Portfolio Health Score</span>
@@ -168,8 +177,9 @@ export const AIAnalyticsDashboard: React.FC = () => {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Recommendations</h3>
+            <div className="glass-card gradient-border hover-tilt p-6 relative overflow-hidden">
+              <span className="aura"></span>
+              <h3 className="text-lg font-heading font-semibold text-foreground mb-4">Recommendations</h3>
               <div className="space-y-3">
                 <div className="flex gap-3">
                   <div className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0 mt-1.5"></div>

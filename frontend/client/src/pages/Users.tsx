@@ -1,6 +1,6 @@
 
 import React from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { api } from "@/lib/api";
 
 interface User {
   id: number;
@@ -49,80 +50,19 @@ interface CreateUserData {
   branchId?: number;
 }
 
+interface Branch {
+  id: number;
+  name: string;
+  location: string;
+}
+
 export default function Users() {
-  const { data: users = [], isLoading } = useQuery({
-    queryKey: ["users"],
-    queryFn: async () => {
-      // Simulate users data - in real implementation you'd call api.getUsers()
-      return [
-        {
-          id: 1,
-          username: "admin",
-          phone: "+254700000001",
-          role: "admin",
-          firstName: "System",
-          lastName: "Administrator",
-          isActive: true,
-          createdAt: "2024-01-01T00:00:00Z",
-          branch: { id: 1, name: "Head Office", location: "Nairobi" }
-        },
-        {
-          id: 2,
-          username: "jane.doe",
-          phone: "+254700000002",
-          role: "branch_manager",
-          firstName: "Jane",
-          lastName: "Doe",
-          branchId: 1,
-          isActive: true,
-          createdAt: "2024-01-15T10:30:00Z",
-          branch: { id: 1, name: "Head Office", location: "Nairobi" }
-        },
-        {
-          id: 3,
-          username: "john.smith",
-          phone: "+254700000003",
-          role: "loan_officer",
-          firstName: "John",
-          lastName: "Smith",
-          branchId: 2,
-          isActive: true,
-          createdAt: "2024-02-01T14:15:00Z",
-          branch: { id: 2, name: "Mombasa Branch", location: "Mombasa" }
-        },
-        {
-          id: 4,
-          username: "sarah.wilson",
-          phone: "+254700000004",
-          role: "customer",
-          firstName: "Sarah",
-          lastName: "Wilson",
-          branchId: 1,
-          isActive: false,
-          createdAt: "2024-02-10T09:45:00Z",
-          branch: { id: 1, name: "Head Office", location: "Nairobi" }
-        }
-      ] as User[];
-    },
-  });
-
-  const { data: branches = [] } = useQuery({
-    queryKey: ["branches"],
-    queryFn: async () => {
-      // Simulate branches data
-      return [
-        { id: 1, name: "Head Office", location: "Nairobi" },
-        { id: 2, name: "Mombasa Branch", location: "Mombasa" },
-        { id: 3, name: "Kisumu Branch", location: "Kisumu" }
-      ];
-    },
-  });
-
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("");
   const [branchFilter, setBranchFilter] = useState<string>("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const [createForm, setCreateForm] = useState<CreateUserData>({
     username: "",
@@ -134,8 +74,71 @@ export default function Users() {
     branchId: undefined,
   });
 
+  const { data: usersData = { users: [] }, isLoading } = useQuery({
+    queryKey: ["users", roleFilter, branchFilter],
+    queryFn: () => api.getUsers(1, 20, roleFilter || undefined, branchFilter ? parseInt(branchFilter) : undefined),
+  });
 
-  const filteredUsers = users.filter((user) => {
+  const users = usersData.users || [];
+
+  const mockUsers = [
+    {
+      id: 1,
+      username: "admin",
+      phone: "+254700000001",
+      role: "admin",
+      firstName: "System",
+      lastName: "Administrator",
+      isActive: true,
+      createdAt: "2024-01-01T00:00:00Z",
+      branch: { id: 1, name: "Head Office", location: "Nairobi" }
+    },
+    {
+      id: 2,
+      username: "jane.doe",
+      phone: "+254700000002",
+      role: "branch_manager",
+      firstName: "Jane",
+      lastName: "Doe",
+      branchId: 1,
+      isActive: true,
+      createdAt: "2024-01-15T10:30:00Z",
+      branch: { id: 1, name: "Head Office", location: "Nairobi" }
+    },
+    {
+      id: 3,
+      username: "john.smith",
+      phone: "+254700000003",
+      role: "loan_officer",
+      firstName: "John",
+      lastName: "Smith",
+      branchId: 2,
+      isActive: true,
+      createdAt: "2024-02-01T14:15:00Z",
+      branch: { id: 2, name: "Mombasa Branch", location: "Mombasa" }
+    },
+    {
+      id: 4,
+      username: "sarah.wilson",
+      phone: "+254700000004",
+      role: "customer",
+      firstName: "Sarah",
+      lastName: "Wilson",
+      branchId: 1,
+      isActive: false,
+      createdAt: "2024-02-10T09:45:00Z",
+      branch: { id: 1, name: "Head Office", location: "Nairobi" }
+    }
+  ];
+
+  const { data: branches = [] } = useQuery<Branch[]>({
+    queryKey: ["branches"],
+    queryFn: () => api.getBranches(),
+  });
+
+
+
+  const filteredUsers = users.filter((user: User) => {
     const matchesSearch = 
       user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -149,16 +152,13 @@ export default function Users() {
   });
 
 
-  const handleCreateUser = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    try {
-      // In real implementation, you'd call api.createUser()
+  const createUserMutation = useMutation({
+    mutationFn: (data: CreateUserData) => api.createUser(data),
+    onSuccess: () => {
       toast({
         title: "Success",
-        description: `User ${createForm.firstName} ${createForm.lastName} created successfully`,
+        description: `User created successfully`,
       });
-      
       setIsCreateOpen(false);
       setCreateForm({
         username: "",
@@ -169,13 +169,19 @@ export default function Users() {
         lastName: "",
         branchId: undefined,
       });
-    } catch (error) {
+    },
+    onError: (error: any) => {
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create user",
+        description: error.message || "Failed to create user",
         variant: "destructive",
       });
-    }
+    },
+  });
+
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    createUserMutation.mutate(createForm);
   };
 
   const getRoleBadgeColor = (role: string) => {
@@ -205,7 +211,7 @@ export default function Users() {
     }
   };
 
-  const activeUsers = users.filter(user => user.isActive).length;
+  const activeUsers = users.filter((user: User) => user.isActive).length;
   const totalUsers = users.length;
 
   return (
@@ -305,7 +311,7 @@ export default function Users() {
                             <SelectValue placeholder="Select branch" />
                           </SelectTrigger>
                           <SelectContent>
-                            {branches.map((branch) => (
+                            {branches.map((branch: Branch) => (
                               <SelectItem key={branch.id} value={branch.id.toString()}>
                                 {branch.name}
                               </SelectItem>
@@ -354,7 +360,7 @@ export default function Users() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Branches</SelectItem>
-                {branches.map((branch) => (
+                {branches.map((branch: Branch) => (
                   <SelectItem key={branch.id} value={branch.id.toString()}>
                     {branch.name}
                   </SelectItem>
@@ -390,7 +396,7 @@ export default function Users() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-red-600">
-                  {users.filter(u => u.role === 'admin').length}
+                  {users.filter((u: User) => u.role === 'admin').length}
                 </div>
               </CardContent>
             </Card>
@@ -401,7 +407,7 @@ export default function Users() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-blue-600">
-                  {users.filter(u => u.role === 'loan_officer').length}
+                  {users.filter((u: User) => u.role === 'loan_officer').length}
                 </div>
               </CardContent>
             </Card>
@@ -426,7 +432,7 @@ export default function Users() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredUsers.map((user) => (
+                {filteredUsers.map((user: User) => (
                   <TableRow key={user.id}>
                     <TableCell>
                       <div className="flex items-center gap-3">

@@ -91,12 +91,13 @@ export const GamificationDashboard: React.FC = () => {
     <Layout>
       <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* Header */}
-      <Paper sx={{ p: 3, mb: 3, background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", color: "white" }}>
+      <Paper className="glass-card gradient-border hover-tilt relative overflow-hidden" sx={{ p: 3, mb: 3 }}>
+        <Box className="aura" />
 
 
         <Grid container spacing={3} alignItems="center">
           <Grid size={{ xs: 12, md: 6 }}>
-            <Typography variant="h3" sx={{ fontWeight: "bold", mb: 1 }}>
+            <Typography variant="h3" sx={{ fontWeight: "bold", mb: 1 }} className="text-gradient">
               Gamification Dashboard
             </Typography>
             <Typography variant="body1" sx={{ opacity: 0.9 }}>
@@ -110,7 +111,8 @@ export const GamificationDashboard: React.FC = () => {
               <Stack spacing={2}>
                 {/* Points Card */}
                 {pointsQuery.data && (
-                  <Card sx={{ background: "rgba(255,255,255,0.2)" }}>
+                  <Card sx={{ background: "rgba(255,255,255,0.08)" }} className="hover-tilt relative overflow-hidden">
+                    <Box className="aura" />
                     <CardContent>
                       <Box
                         sx={{
@@ -148,7 +150,8 @@ export const GamificationDashboard: React.FC = () => {
 
                 {/* Rank Card */}
                 {rankQuery.data && (
-                  <Card sx={{ background: "rgba(255,255,255,0.2)" }}>
+                  <Card sx={{ background: "rgba(255,255,255,0.08)" }} className="hover-tilt relative overflow-hidden">
+                    <Box className="aura" />
                     <CardContent>
                       <Typography variant="caption" sx={{ opacity: 0.8 }}>
                         Current Rank
@@ -220,7 +223,8 @@ export const GamificationDashboard: React.FC = () => {
       )}
 
       {/* Tabs */}
-      <Paper>
+      <Paper className="glass-card gradient-border hover-tilt relative overflow-hidden">
+        <Box className="aura" />
         <Tabs
           value={tabValue}
           onChange={(e, newValue) => setTabValue(newValue)}
@@ -228,7 +232,7 @@ export const GamificationDashboard: React.FC = () => {
           sx={{
             borderBottom: 1,
             borderColor: "divider",
-            background: "#f5f5f5",
+            background: "transparent",
           }}
         >
           <Tab label="Leaderboard" id="gamification-tab-0" />

@@ -160,14 +160,14 @@ export default function MemberAnalyticsDashboard() {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
+      <div className="min-h-screen p-6">
         <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-start mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Member Analytics Dashboard</h1>
-            <p className="text-gray-600 mt-1">Understand your member base and growth patterns</p>
+            <h1 className="text-3xl md:text-4xl font-heading font-extrabold tracking-tight text-gradient">Member Analytics Dashboard</h1>
+            <p className="text-sm text-muted-foreground mt-1">Understand your member base and growth patterns</p>
             {dashboard?.timestamp && (
-              <p className="text-xs text-gray-500 mt-2">
+              <p className="text-xs text-muted-foreground mt-2">
                 Last updated: {new Date(dashboard.timestamp).toLocaleString()}
               </p>
             )}
@@ -176,11 +176,7 @@ export default function MemberAnalyticsDashboard() {
             <button
               onClick={handleRefresh}
               disabled={isRefreshing}
-              className={`flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg transition ${
-                isRefreshing 
-                  ? 'opacity-50 cursor-not-allowed' 
-                  : 'hover:bg-gray-50 cursor-pointer'
-              }`}
+              className={`btn-neon px-4 py-2 rounded-lg ${isRefreshing ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <RefreshCw 
                 size={18}
@@ -192,7 +188,7 @@ export default function MemberAnalyticsDashboard() {
             </button>
             <button
               onClick={handleExport}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition cursor-pointer"
+              className="btn-neon px-4 py-2 rounded-lg cursor-pointer"
             >
               <Download size={18} />
               <span className="text-sm font-medium">Export</span>
@@ -237,8 +233,9 @@ export default function MemberAnalyticsDashboard() {
         {/* Lifecycle & Segmentation */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Lifecycle Stages */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="font-bold text-gray-900 mb-4">Member Lifecycle Stages</h3>
+          <div className="glass-card gradient-border hover-tilt p-6 relative overflow-hidden">
+            <span className="aura"></span>
+            <h3 className="font-heading font-semibold text-foreground mb-4">Member Lifecycle Stages</h3>
             <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -263,8 +260,9 @@ export default function MemberAnalyticsDashboard() {
           </div>
 
           {/* Member Segments */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="font-bold text-gray-900 mb-4">Member Segmentation</h3>
+          <div className="glass-card gradient-border hover-tilt p-6 relative overflow-hidden">
+            <span className="aura"></span>
+            <h3 className="font-heading font-semibold text-foreground mb-4">Member Segmentation</h3>
             <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={segmentData}>
@@ -280,8 +278,9 @@ export default function MemberAnalyticsDashboard() {
         </div>
 
         {/* Cohort Analysis */}
-        <div className="mb-8 bg-white rounded-lg shadow p-6">
-          <h3 className="font-bold text-gray-900 mb-4">Cohort Analysis (Last 6 Months)</h3>
+        <div className="mb-8 glass-card gradient-border hover-tilt p-6 relative overflow-hidden">
+          <span className="aura"></span>
+          <h3 className="font-heading font-semibold text-foreground mb-4">Cohort Analysis (Last 6 Months)</h3>
           <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
             <ResponsiveContainer width="100%" height="100%">
             <LineChart data={cohortData}>
@@ -298,14 +297,15 @@ export default function MemberAnalyticsDashboard() {
         </div>
 
         {/* Member Journey Map */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+        <div className="glass-card gradient-border hover-tilt p-6 relative overflow-hidden">
+          <span className="aura"></span>
+          <h2 className="text-xl font-heading font-semibold text-foreground mb-4 flex items-center gap-2">
             <Target size={24} />
             Member Journey Map
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {dashboard.journey_map.stages.map((stageInfo, idx) => (
-              <div key={idx} className="p-4 border-2 border-blue-200 rounded-lg bg-blue-50">
+              <div key={idx} className="p-4 rounded-lg glass-card">
                 <h4 className="font-bold text-gray-900 text-lg">{stageInfo.stage}</h4>
                 <p className="text-sm text-gray-600 mt-2">
                   <strong>Duration:</strong> {stageInfo.average_duration}
@@ -319,8 +319,8 @@ export default function MemberAnalyticsDashboard() {
               </div>
             ))}
           </div>
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
-            <p className="text-sm text-gray-700">
+          <div className="mt-6 p-4 glass-card">
+            <p className="text-sm text-foreground">
               <strong>Journey Success Rate:</strong> {dashboard.journey_map.success_rate.toFixed(1)}% of members successfully progress through their lifecycle stages.
             </p>
           </div>

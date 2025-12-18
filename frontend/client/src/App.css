@@ -1,42 +1,330 @@
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  width: 100%;
+  height: 100%;
+  display: flex;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* FIX: Override card overflow to allow buttons to be clickable */
+.glass-card,
+[class*="card"] {
+  overflow: visible !important;
 }
 
-@keyframes logo-spin {
+button {
+  pointer-events: auto !important;
+}
+
+/* CRITICAL FIX: gradient-border::before was blocking all clicks */
+.gradient-border::before {
+  pointer-events: none !important;
+}
+
+@keyframes fadeIn {
   from {
-    transform: rotate(0deg);
+    opacity: 0;
+    transform: translateY(10px);
   }
   to {
-    transform: rotate(360deg);
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 
-.card {
-  padding: 2em;
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
-.read-the-docs {
-  color: #888;
+.fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.slide-in-right {
+  animation: slideInRight 0.5s ease-out;
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.5s ease-out;
+}
+
+.page-header {
+  animation: fadeIn 0.6s ease-out;
+  background: linear-gradient(135deg, hsl(var(--primary))/10 0%, hsl(var(--secondary))/5 100%);
+  border-bottom: 1px solid hsl(var(--border))/50;
+  padding-bottom: 2rem;
+  margin-bottom: 2rem;
+}
+
+.page-header h1 {
+  animation: slideInLeft 0.6s ease-out;
+}
+
+.page-header p {
+  animation: slideInLeft 0.7s ease-out;
+}
+
+.stats-grid {
+  animation: fadeIn 0.8s ease-out;
+}
+
+.stat-item {
+  animation: slideInRight 0.6s ease-out;
+}
+
+.content-card {
+  animation: fadeIn 0.5s ease-out;
+  border: 1px solid hsl(var(--border))/50;
+  border-radius: calc(var(--radius) + 0.25rem);
+  transition: all 0.3s ease;
+}
+
+.content-card:hover {
+  border-color: hsl(var(--primary))/30;
+  box-shadow: 0 8px 32px hsl(var(--primary))/10;
+}
+
+.button-primary {
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 100%);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.button-primary::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.button-primary:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+.loading-skeleton {
+  background: linear-gradient(90deg, hsl(var(--muted)) 25%, hsl(var(--card)) 50%, hsl(var(--muted)) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* ===== CRITICAL FIXES FOR BUTTON CLICKS ===== */
+
+/* Ensure all form elements are clickable */
+form button[type="submit"],
+form button,
+button[type="submit"] {
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 30 !important;
+  cursor: pointer !important;
+}
+
+/* Remove overlay blocking on form interactive areas */
+form {
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 20;
+}
+
+/* Disable pointer-events on decorative gradient border for form areas */
+form .gradient-border::before {
+  pointer-events: none !important;
+}
+
+/* Inputs and labels */
+input, textarea, select, label {
+  pointer-events: auto !important;
+}
+
+/* Ensure CardContent (form wrapper) doesn't block clicks */
+[class*="CardContent"] {
+  pointer-events: auto !important;
+  z-index: 20;
+}
+
+/* ===== GLOBAL FIX: Fix all cards with overflow-hidden ===== */
+
+/* Allow dropdowns and menus to overflow cards */
+.relative.overflow-hidden {
+  overflow: visible !important;
+}
+
+/* Fix .aura decorative elements - should not block clicks */
+.aura {
+  pointer-events: none !important;
+  position: absolute !important;
+  inset: 0 !important;
+}
+
+/* CRITICAL: Override ALL overflow-hidden on any card-like element */
+.overflow-hidden {
+  overflow: visible !important;
+}
+
+.stat-card {
+  overflow: visible !important;
+}
+
+[class*="Card"] {
+  overflow: visible !important;
+}
+
+/* Fix all dropdown menus */
+[role="menu"],
+[role="menuitem"],
+.dropdown-menu,
+[class*="DropdownMenu"] {
+  pointer-events: auto !important;
+}
+
+/* Dropdown trigger buttons */
+[class*="DropdownMenuTrigger"] button,
+button[class*="trigger"] {
+  pointer-events: auto !important;
+  z-index: 1000 !important;
+}
+
+/* DropdownMenuTrigger needs highest z-index to be clickable */
+[data-radix-dropdown-menu-trigger],
+button[aria-haspopup="menu"] {
+  pointer-events: auto !important;
+  z-index: 1000 !important;
+}
+
+/* Interactive divs with role="button" - ensure they're clickable but NOT blocking buttons */
+[role="button"] {
+  pointer-events: auto !important;
+  position: relative;
+  cursor: pointer !important;
+}
+
+/* Dialog and modal fixes */
+[role="dialog"],
+.dialog {
+  pointer-events: auto !important;
+}
+
+/* Generic button fixes across all pages */
+button,
+[role="button"],
+a[role="button"],
+.btn,
+[class*="button"] {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  position: relative;
+  z-index: 100 !important;
+}
+
+/* Nested buttons ALWAYS clickable with max z-index */
+[role="button"] button,
+div button,
+span button {
+  pointer-events: auto !important;
+  z-index: 1000 !important;
+}
+
+/* Fix table row clickable elements */
+table button,
+table [role="button"],
+tbody tr button,
+tbody tr [role="button"] {
+  pointer-events: auto !important;
+  z-index: 20;
+}
+
+/* Fix grid card buttons */
+.grid button,
+.grid [role="button"],
+.gap-6 button {
+  pointer-events: auto !important;
+}
+
+/* Links that act as navigation */
+a,
+[role="link"] {
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 100 !important;
+}
+
+/* Forms must be interactive */
+form {
+  pointer-events: auto !important;
+}
+
+form * {
+  pointer-events: auto !important;
+}
+
+/* Disable pointer-events only on truly decorative elements */
+[aria-hidden="true"],
+.aura,
+.orb,
+.gradient-border::before {
+  pointer-events: none !important;
+}
+
+/* EMERGENCY: Completely disable gradient-border overlay that's blocking all clicks */
+.gradient-border::before {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
+/* Icons and SVGs inside buttons should NOT steal clicks */
+button svg,
+button [class*="icon"],
+[role="button"] svg {
+  pointer-events: none !important;
+}
+
+/* CardHeader fixes - KEEP SIMPLE */
+[class*="CardHeader"] {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  position: relative;
+  z-index: 20;
+}
+
+/* Ensure SVGs don't block clicks inside CardHeader */
+[class*="CardHeader"] svg,
+[class*="CardHeader"] button svg,
+[class*="CardHeader"] [role="button"] svg {
+  pointer-events: none !important;
+}
+
+[class*="CardHeader"] button,
+[class*="CardHeader"] [role="button"] {
+  z-index: 1000 !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  position: relative;
 }

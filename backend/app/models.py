@@ -835,3 +835,96 @@ class BiometricAuth(db.Model):
             'enabled': self.enabled,
             'createdAt': self.created_at.isoformat()
         }
+
+class Supplier(db.Model):
+    __tablename__ = 'suppliers'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Text, nullable=False)
+    phone = db.Column(db.String(20), nullable=False)
+    email = db.Column(db.String(100))
+    location = db.Column(db.Text)
+    company_name = db.Column(db.Text)
+    contact_person = db.Column(db.Text)
+    bank_name = db.Column(db.Text)
+    bank_account = db.Column(db.Text)
+    mpesa_number = db.Column(db.String(20))
+    is_active = db.Column(db.Boolean, default=True, nullable=False)
+    rating = db.Column(db.Numeric(3, 2), default=0, nullable=False)
+    total_supplies = db.Column(db.Integer, default=0, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'phone': self.phone,
+            'email': self.email,
+            'location': self.location,
+            'companyName': self.company_name,
+            'contactPerson': self.contact_person,
+            'bankName': self.bank_name,
+            'bankAccount': self.bank_account,
+            'mpesaNumber': self.mpesa_number,
+            'isActive': self.is_active,
+            'rating': str(self.rating),
+            'totalSupplies': self.total_supplies,
+            'createdAt': self.created_at.isoformat()
+        }
+
+class SupplierProduct(db.Model):
+    __tablename__ = 'supplier_products'
+    id = db.Column(db.Integer, primary_key=True)
+    supplier_id = db.Column(db.Integer, db.ForeignKey('suppliers.id'), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('loan_products.id'), nullable=False)
+    cost_price = db.Column(db.Numeric(10, 2), nullable=False)
+    minimum_order = db.Column(db.Integer, default=1, nullable=False)
+    delivery_days = db.Column(db.Integer, default=7, nullable=False)
+    is_active = db.Column(db.Boolean, default=True, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    supplier = db.relationship('Supplier', backref='products')
+    product = db.relationship('LoanProduct', backref='suppliers')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'supplierId': self.supplier_id,
+            'productId': self.product_id,
+            'costPrice': str(self.cost_price),
+            'minimumOrder': self.minimum_order,
+            'deliveryDays': self.delivery_days,
+            'isActive': self.is_active,
+            'createdAt': self.created_at.isoformat()
+        }
+
+class StockMovement(db.Model):
+    __tablename__ = 'stock_movements'
+    id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('loan_products.id'), nullable=False)
+    branch_id = db.Column(db.Integer, db.ForeignKey('branches.id'))
+    supplier_id = db.Column(db.Integer, db.ForeignKey('suppliers.id'))
+    movement_type = db.Column(db.Text, nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
+    reference_number = db.Column(db.Text)
+    processed_by = db.Column(db.Integer, db.ForeignKey('users.id'))
+    notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    product = db.relationship('LoanProduct', backref='movements')
+    branch = db.relationship('Branch', backref='stock_movements')
+    supplier = db.relationship('Supplier', backref='stock_movements')
+    processed_by_user = db.relationship('User', backref='stock_movements')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'productId': self.product_id,
+            'branchId': self.branch_id,
+            'supplierId': self.supplier_id,
+            'movementType': self.movement_type,
+            'quantity': self.quantity,
+            'referenceNumber': self.reference_number,
+            'processedBy': self.processed_by,
+            'notes': self.notes,
+            'createdAt': self.created_at.isoformat()
+        }
