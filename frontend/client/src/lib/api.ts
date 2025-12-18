@@ -110,10 +110,15 @@ async function fetchAPI(endpoint: string, options: any = {}, retryCount: number 
       onRefreshed(newToken || '');
       return fetchAPI(endpoint, options, 1);
     } else {
+
       localStorage.removeItem('auth_token');
       localStorage.removeItem('user');
       if (typeof window !== 'undefined') {
-        const currentPath = window.location.pathname; if (currentPath !== '/login') { window.location.pathname = '/login'; }
+        const currentPath = window.location.pathname; 
+        // Fix: Redirect to root path (Login page) instead of /login to avoid 404
+        if (currentPath !== '/') { 
+          window.location.pathname = '/'; 
+        }
       }
       throw new Error('Authentication required');
     }
