@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -18,9 +19,22 @@ import { api } from "@/lib/api";
 import { CreateMemberDialog } from "@/components/ui/CreateMemberDialog";
 
 export default function Members() {
+  const [searchQuery, setSearchQuery] = useState("");
+
   const { data: members = [], isLoading } = useQuery({
     queryKey: ["members"],
     queryFn: api.getMembers,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
+  });
+
+  const filteredMembers = members.filter((member: any) => {
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      member.memberCode?.toLowerCase().includes(searchLower) ||
+      member.id?.toString().includes(searchLower) ||
+      member.groupId?.toString().includes(searchLower)
+    );
   });
 
   return (
@@ -42,7 +56,12 @@ export default function Members() {
           <div className="flex items-center gap-4 bg-card p-4 rounded-lg border border-border/50 shadow-sm">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search by name, phone, or ID..." className="pl-9 bg-background" data-testid="input-search-members" />
+              <Input 
+                placeholder="Search by member code, ID, or group..." 
+                className="pl-9 bg-background" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
             <Button variant="outline" className="gap-2">
               <Filter className="h-4 w-4" /> Filter
@@ -51,13 +70,20 @@ export default function Members() {
 
           {isLoading ? (
             <div className="text-center py-12">Loading members...</div>
-          ) : members.length === 0 ? (
+          ) : filteredMembers.length === 0 ? (
             <Card className="border-dashed">
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <Users className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No members yet</h3>
-                <p className="text-muted-foreground text-center mb-4">Register your first member to get started.</p>
-                <CreateMemberDialog />
+                <h3 className="text-lg font-semibold mb-2">
+                  {searchQuery ? "No members found" : "No members yet"}
+                </h3>
+                <p className="text-muted-foreground text-center mb-4">
+                  {searchQuery 
+                    ? "Try adjusting your search criteria"
+                    : "Register your first member to get started."
+                  }
+                </p>
+                {!searchQuery && <CreateMemberDialog />}
               </CardContent>
             </Card>
           ) : (
@@ -74,7 +100,7 @@ export default function Members() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {members.map((member: any) => (
+                  {filteredMembers.map((member: any) => (
                     <TableRow key={member.id} data-testid={`row-member-${member.id}`}>
                       <TableCell className="font-medium">{member.memberCode}</TableCell>
                       <TableCell>{member.groupId || "None"}</TableCell>

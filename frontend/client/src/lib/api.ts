@@ -2,7 +2,7 @@
 
 
 
-const API_BASE = import.meta.env.VITE_API_URL || "https://imarisha-loans.onrender.com/api";
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 if (typeof window !== 'undefined') {
   console.log('[API] Using API base:', API_BASE);
@@ -224,6 +224,8 @@ export const api = {
     }),
   deleteBranch: (id: number) =>
     fetchAPI(`/branches/${id}`, { method: "DELETE" }),
+  getBranchStaff: (branchId: number) =>
+    fetchAPI(`/branches/${branchId}/staff`),
 
   // Groups
   getGroups: () => fetchAPI("/groups"),

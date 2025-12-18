@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   PieChart, Pie, BarChart, Bar, LineChart, Line,
   Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
-import { Users, TrendingUp, Target } from 'lucide-react';
+import { Users, TrendingUp, Target, RefreshCw, Download } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { api } from '@/lib/api';
 import KPICard from '@/components/dashboards/KPICard';
@@ -39,14 +39,102 @@ interface MemberData {
 }
 
 export default function MemberAnalyticsDashboard() {
-  const { data: dashboard, isLoading } = useQuery<MemberData>({
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const { data: dashboard, isLoading, refetch } = useQuery<MemberData>({
     queryKey: ['memberAnalyticsDashboard'],
     queryFn: () => api.getMemberAnalyticsDashboard(),
     staleTime: 5 * 60 * 1000
   });
 
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await refetch();
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  const handleExport = () => {
+    if (!dashboard) return;
+    
+    const csvContent = [
+      ['Member Analytics Dashboard Export'],
+      ['Generated:', new Date(dashboard.timestamp).toLocaleString()],
+      [''],
+      ['Retention Trends'],
+      ['Metric', 'Value'],
+      ['Active Members', dashboard.retention_trends.active_members],
+      ['Inactive Members', dashboard.retention_trends.inactive_members],
+      ['Retention Rate (%)', dashboard.retention_trends.retention_rate],
+      ['Churn Rate (%)', dashboard.retention_trends.churn_rate],
+      ['Average Lifespan (months)', dashboard.retention_trends.average_lifespan_months],
+      [''],
+      ['Lifecycle Stages'],
+      ['Stage', 'Count', 'Percentage'],
+      ...Object.entries(dashboard.lifecycle_stages.stages).map(([stage, data]) => [
+        stage,
+        data.count,
+        data.percentage
+      ]),
+      [''],
+      ['Member Segmentation'],
+      ['Segment', 'Count', 'Percentage'],
+      ...Object.entries(dashboard.segmentation.segments).map(([segment, data]) => [
+        segment,
+        data.count,
+        data.percentage
+      ]),
+      [''],
+      ['Journey Map'],
+      ['Stage', 'Average Duration', 'Key Action'],
+      ...dashboard.journey_map.stages.map(stage => [
+        stage.stage,
+        stage.average_duration,
+        stage.key_action
+      ]),
+      [''],
+      ['Journey Success Rate (%)', dashboard.journey_map.success_rate],
+    ]
+      .map(row => row.map(val => `"${val}"`).join(','))
+      .join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `member-analytics-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
   if (isLoading) return <div className="flex justify-center items-center h-screen"><div className="animate-spin h-12 w-12 border-b-2 border-blue-600"></div></div>;
-  if (!dashboard) return null;
+  if (!dashboard || !dashboard.lifecycle_stages) {
+    const errorMsg = (dashboard as any)?.error || 'Failed to load dashboard';
+    return (
+      <Layout>
+        <div className="p-6">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <Users className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <h3 className="font-semibold text-red-900">Failed to load dashboard</h3>
+                <p className="text-sm text-red-700 mt-1">{errorMsg}</p>
+                <button
+                  onClick={handleRefresh}
+                  disabled={isRefreshing}
+                  className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition disabled:opacity-50"
+                >
+                  {isRefreshing ? 'Retrying...' : 'Retry'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   const lifecycleData = Object.entries(dashboard.lifecycle_stages.stages).map(([key, value]) => ({
     name: key.replace(/_/g, ' ').toUpperCase(),
@@ -74,8 +162,43 @@ export default function MemberAnalyticsDashboard() {
     <Layout>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
         <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Member Analytics Dashboard</h1>
-        <p className="text-gray-600 mb-8">Understand your member base and growth patterns</p>
+        <div className="flex justify-between items-start mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Member Analytics Dashboard</h1>
+            <p className="text-gray-600 mt-1">Understand your member base and growth patterns</p>
+            {dashboard?.timestamp && (
+              <p className="text-xs text-gray-500 mt-2">
+                Last updated: {new Date(dashboard.timestamp).toLocaleString()}
+              </p>
+            )}
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className={`flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg transition ${
+                isRefreshing 
+                  ? 'opacity-50 cursor-not-allowed' 
+                  : 'hover:bg-gray-50 cursor-pointer'
+              }`}
+            >
+              <RefreshCw 
+                size={18}
+                className={isRefreshing ? 'animate-spin' : ''}
+              />
+              <span className="text-sm font-medium">
+                {isRefreshing ? 'Refreshing...' : 'Refresh'}
+              </span>
+            </button>
+            <button
+              onClick={handleExport}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition cursor-pointer"
+            >
+              <Download size={18} />
+              <span className="text-sm font-medium">Export</span>
+            </button>
+          </div>
+        </div>
 
         {/* Retention Metrics */}
         <div className="mb-8">
@@ -116,7 +239,8 @@ export default function MemberAnalyticsDashboard() {
           {/* Lifecycle Stages */}
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="font-bold text-gray-900 mb-4">Member Lifecycle Stages</h3>
-            <ResponsiveContainer width="100%" height={300}>
+            <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
+            <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={lifecycleData}
@@ -135,12 +259,14 @@ export default function MemberAnalyticsDashboard() {
                 <Tooltip />
               </PieChart>
             </ResponsiveContainer>
+            </div>
           </div>
 
           {/* Member Segments */}
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="font-bold text-gray-900 mb-4">Member Segmentation</h3>
-            <ResponsiveContainer width="100%" height={300}>
+            <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
+            <ResponsiveContainer width="100%" height="100%">
               <BarChart data={segmentData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
@@ -149,13 +275,15 @@ export default function MemberAnalyticsDashboard() {
                 <Bar dataKey="value" fill="#3b82f6" />
               </BarChart>
             </ResponsiveContainer>
+            </div>
           </div>
         </div>
 
         {/* Cohort Analysis */}
         <div className="mb-8 bg-white rounded-lg shadow p-6">
           <h3 className="font-bold text-gray-900 mb-4">Cohort Analysis (Last 6 Months)</h3>
-          <ResponsiveContainer width="100%" height={300}>
+          <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
+            <ResponsiveContainer width="100%" height="100%">
             <LineChart data={cohortData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
@@ -166,6 +294,7 @@ export default function MemberAnalyticsDashboard() {
               <Line type="monotone" dataKey="active" stroke="#10b981" strokeWidth={2} name="Active Members" />
             </LineChart>
           </ResponsiveContainer>
+            </div>
         </div>
 
         {/* Member Journey Map */}

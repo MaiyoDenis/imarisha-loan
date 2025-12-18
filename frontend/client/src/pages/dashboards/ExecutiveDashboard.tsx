@@ -121,6 +121,7 @@ function generateGrowthData(growth?: any) {
 export default function ExecutiveDashboard() {
   const [branchId, setBranchId] = useState<number | null>(null);
   const [dateRange, setDateRange] = useState('mtd');
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const { data: dashboard, isLoading, isError, refetch } = useQuery<DashboardData>({
     queryKey: ['executiveDashboard', branchId, dateRange],
@@ -130,6 +131,57 @@ export default function ExecutiveDashboard() {
     staleTime: 5 * 60 * 1000,
     refetchInterval: 30 * 1000
   });
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await refetch();
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  const handleExport = () => {
+    if (!dashboard) return;
+    
+    const csvContent = [
+      ['Executive Dashboard Export'],
+      ['Generated:', new Date(dashboard.timestamp).toLocaleString()],
+      [''],
+      ['Portfolio Health'],
+      ['Metric', 'Value'],
+      ['Total AUM', dashboard.portfolio_health.total_aum],
+      ['Active Members', dashboard.portfolio_health.active_members],
+      ['Active Loans', dashboard.portfolio_health.active_loans],
+      ['Portfolio at Risk (%)', dashboard.portfolio_health.par_ratio],
+      ['Default Rate (%)', dashboard.portfolio_health.default_rate],
+      [''],
+      ['Revenue Metrics'],
+      ['Metric', 'Value'],
+      ['MTD Interest Income', dashboard.revenue_metrics.mtd_interest_income],
+      ['YTD Interest Income', dashboard.revenue_metrics.ytd_interest_income],
+      ['Processing Fees', dashboard.revenue_metrics.total_processing_fees],
+      ['Total Revenue', dashboard.revenue_metrics.total_revenue],
+      ['Profit Margin (%)', dashboard.revenue_metrics.profit_margin],
+      [''],
+      ['Growth Metrics'],
+      ['Metric', 'Value'],
+      ['New Members (MTD)', dashboard.growth_metrics.new_members_mtd],
+      ['Member Growth Rate (%)', dashboard.growth_metrics.member_growth_rate],
+      ['New Loans (MTD)', dashboard.growth_metrics.new_loans_mtd],
+      ['Repeat Loan Rate (%)', dashboard.growth_metrics.repeat_loan_rate],
+    ]
+      .map(row => row.map(val => `"${val}"`).join(','))
+      .join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `executive-dashboard-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
 
   if (isLoading) {
     return (
@@ -142,17 +194,32 @@ export default function ExecutiveDashboard() {
     );
   }
 
-  if (isError || !dashboard) {
+  if (isError || !dashboard || !dashboard.portfolio_health) {
+    const errorMsg = (dashboard as any)?.error || 'Unknown error occurred';
     return (
-      <div className="p-6">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
-          <div>
-            <h3 className="font-semibold text-red-900">Failed to load dashboard</h3>
-            <p className="text-sm text-red-700 mt-1">There was an error loading your dashboard data.</p>
+      <Layout>
+        <div className="p-6">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <h3 className="font-semibold text-red-900">Failed to load dashboard</h3>
+                <p className="text-sm text-red-700 mt-1">There was an error loading your dashboard data.</p>
+                {(dashboard as any)?.error && (
+                  <p className="text-xs text-red-600 mt-2">Details: {errorMsg}</p>
+                )}
+                <button
+                  onClick={handleRefresh}
+                  disabled={isRefreshing}
+                  className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition disabled:opacity-50"
+                >
+                  {isRefreshing ? 'Retrying...' : 'Retry'}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </Layout>
     );
   }
 
@@ -177,17 +244,34 @@ export default function ExecutiveDashboard() {
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Executive Dashboard</h1>
             <p className="text-gray-600 mt-1">Real-time overview of key metrics and performance indicators</p>
+            {dashboard?.timestamp && (
+              <p className="text-xs text-gray-500 mt-2">
+                Last updated: {new Date(dashboard.timestamp).toLocaleString()}
+              </p>
+            )}
           </div>
           <div className="flex gap-3">
             <button
-              onClick={() => refetch()}
-              className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className={`flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg transition ${
+                isRefreshing 
+                  ? 'opacity-50 cursor-not-allowed' 
+                  : 'hover:bg-gray-50 cursor-pointer'
+              }`}
             >
-
-              <RefreshCw size={18} />
-              <span className="text-sm font-medium">Refresh</span>
+              <RefreshCw 
+                size={18}
+                className={isRefreshing ? 'animate-spin' : ''}
+              />
+              <span className="text-sm font-medium">
+                {isRefreshing ? 'Refreshing...' : 'Refresh'}
+              </span>
             </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+            <button
+              onClick={handleExport}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition cursor-pointer"
+            >
               <Download size={18} />
               <span className="text-sm font-medium">Export</span>
             </button>
@@ -362,7 +446,8 @@ export default function ExecutiveDashboard() {
           {/* PAR Trend */}
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="font-bold text-gray-900 mb-4">Portfolio at Risk Trend</h3>
-            <ResponsiveContainer width="100%" height={300}>
+            <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
+            <ResponsiveContainer width="100%" height="100%">
               <LineChart data={generateTrendData(dashboard?.risk_metrics?.par_ratio || 5)}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
@@ -371,12 +456,14 @@ export default function ExecutiveDashboard() {
                 <Line type="monotone" dataKey="par" stroke="#ef4444" strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>
+            </div>
           </div>
 
           {/* Revenue by Source */}
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="font-bold text-gray-900 mb-4">Revenue by Source</h3>
-            <ResponsiveContainer width="100%" height={300}>
+            <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
+            <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={generateRevenueData(dashboard?.revenue_metrics)}
@@ -395,13 +482,15 @@ export default function ExecutiveDashboard() {
                 <Tooltip />
               </PieChart>
             </ResponsiveContainer>
+            </div>
           </div>
         </div>
 
         {/* Growth Comparison */}
         <div className="bg-white rounded-lg shadow p-6 mb-8">
           <h3 className="font-bold text-gray-900 mb-4">Member & Loan Growth</h3>
-          <ResponsiveContainer width="100%" height={300}>
+          <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
+            <ResponsiveContainer width="100%" height="100%">
             <BarChart data={generateGrowthData(dashboard?.growth_metrics)}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
@@ -412,6 +501,7 @@ export default function ExecutiveDashboard() {
               <Bar dataKey="loans" fill="#10b981" />
             </BarChart>
           </ResponsiveContainer>
+            </div>
         </div>
 
         {/* Last Updated */}

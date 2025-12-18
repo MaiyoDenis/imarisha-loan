@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   LineChart, Line, BarChart, Bar, ComposedChart,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart
 } from 'recharts';
-import { TrendingUp, TrendingDown, DollarSign, AlertTriangle } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, AlertTriangle, RefreshCw, Download } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { api } from '@/lib/api';
 import KPICard from '@/components/dashboards/KPICard';
@@ -41,14 +41,101 @@ interface ForecastData {
 }
 
 export default function ForecastDashboard() {
-  const { data: dashboard, isLoading } = useQuery<ForecastData>({
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const { data: dashboard, isLoading, refetch } = useQuery<ForecastData>({
     queryKey: ['forecastDashboard'],
     queryFn: () => api.getForecastDashboard(),
     staleTime: 5 * 60 * 1000
   });
 
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await refetch();
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  const handleExport = () => {
+    if (!dashboard) return;
+    
+    const csvContent = [
+      ['Forecast Dashboard Export'],
+      ['Generated:', new Date(dashboard.timestamp).toLocaleString()],
+      [''],
+      ['Budget Variance (YTD)'],
+      ['Category', 'Budgeted', 'Actual', 'Variance', 'Variance %'],
+      ['Revenue', dashboard.budget_variance.revenue.budgeted, dashboard.budget_variance.revenue.actual, dashboard.budget_variance.revenue.variance, dashboard.budget_variance.revenue.variance_pct],
+      ['Expenses', dashboard.budget_variance.expenses.budgeted, dashboard.budget_variance.expenses.actual, dashboard.budget_variance.expenses.variance, dashboard.budget_variance.expenses.variance_pct],
+      ['Profit', dashboard.budget_variance.profit.budgeted, dashboard.budget_variance.profit.actual, dashboard.budget_variance.profit.variance, dashboard.budget_variance.profit.variance_pct],
+      [''],
+      ['Revenue Forecast (12 Months)'],
+      ['Month', 'Forecast', 'Lower CI', 'Upper CI'],
+      ...dashboard.revenue_forecast.forecast_months.map((month, idx) => [
+        month,
+        dashboard.revenue_forecast.values[idx],
+        dashboard.revenue_forecast.confidence_interval[0],
+        dashboard.revenue_forecast.confidence_interval[1]
+      ]),
+      [''],
+      ['Loan Volume Forecast (12 Months)'],
+      ['Month', 'Applications', 'Approvals'],
+      ...dashboard.loan_volume_forecast.forecast_months.map((month, idx) => [
+        month,
+        dashboard.loan_volume_forecast.applications[idx],
+        dashboard.loan_volume_forecast.approvals[idx]
+      ]),
+      [''],
+      ['Cash Flow Forecast (12 Months)'],
+      ['Month', 'Inflows', 'Outflows', 'Net Flow'],
+      ...dashboard.cash_flow_forecast.forecast_months.map((month, idx) => [
+        month,
+        dashboard.cash_flow_forecast.inflows[idx],
+        dashboard.cash_flow_forecast.outflows[idx],
+        dashboard.cash_flow_forecast.net_flow[idx]
+      ]),
+      [''],
+      ['Arrears Forecast (12 Months)'],
+      ['Month', 'Predicted Rate (%)'],
+      ...dashboard.arrears_forecast.forecast_months.map((month, idx) => [
+        month,
+        dashboard.arrears_forecast.predicted_rate[idx]
+      ]),
+      [''],
+      ['Loan Volume Trend', dashboard.loan_volume_forecast.trend],
+      ['Arrears Confidence Level (%)', (dashboard.arrears_forecast.confidence_level * 100).toFixed(1)],
+    ]
+      .map(row => row.map(val => `"${val}"`).join(','))
+      .join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `forecast-dashboard-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
   if (isLoading) return <div className="flex justify-center items-center h-screen"><div className="animate-spin h-12 w-12 border-b-2 border-blue-600"></div></div>;
-  if (!dashboard) return null;
+  if (!dashboard || !dashboard.revenue_forecast) {
+    const errorMsg = (dashboard as any)?.error || 'Failed to load dashboard';
+    return (
+      <Layout>
+        <div className="p-6">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-red-900">Failed to load dashboard</h3>
+              <p className="text-sm text-red-700 mt-1">{errorMsg}</p>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   const revenueData = dashboard.revenue_forecast.forecast_months.map((month, idx) => ({
     month,
@@ -83,8 +170,43 @@ export default function ForecastDashboard() {
     <Layout>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
         <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Financial Forecast Dashboard</h1>
-        <p className="text-gray-600 mb-8">12-month projections and scenario planning</p>
+        <div className="flex justify-between items-start mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Financial Forecast Dashboard</h1>
+            <p className="text-gray-600 mt-1">12-month projections and scenario planning</p>
+            {dashboard?.timestamp && (
+              <p className="text-xs text-gray-500 mt-2">
+                Last updated: {new Date(dashboard.timestamp).toLocaleString()}
+              </p>
+            )}
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className={`flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg transition ${
+                isRefreshing 
+                  ? 'opacity-50 cursor-not-allowed' 
+                  : 'hover:bg-gray-50 cursor-pointer'
+              }`}
+            >
+              <RefreshCw 
+                size={18}
+                className={isRefreshing ? 'animate-spin' : ''}
+              />
+              <span className="text-sm font-medium">
+                {isRefreshing ? 'Refreshing...' : 'Refresh'}
+              </span>
+            </button>
+            <button
+              onClick={handleExport}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition cursor-pointer"
+            >
+              <Download size={18} />
+              <span className="text-sm font-medium">Export</span>
+            </button>
+          </div>
+        </div>
 
         {/* Budget Variance Summary */}
         <div className="mb-8">
@@ -176,7 +298,8 @@ export default function ForecastDashboard() {
             <TrendingUp size={20} className="text-green-600" />
             12-Month Revenue Forecast
           </h3>
-          <ResponsiveContainer width="100%" height={300}>
+          <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
+            <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={revenueData}>
               <defs>
                 <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
@@ -191,6 +314,7 @@ export default function ForecastDashboard() {
               <Area type="monotone" dataKey="revenue" stroke="#3b82f6" fillOpacity={1} fill="url(#colorRevenue)" />
             </AreaChart>
           </ResponsiveContainer>
+            </div>
         </div>
 
         {/* Loan Volume & Cash Flow */}
@@ -198,7 +322,8 @@ export default function ForecastDashboard() {
           {/* Loan Volume */}
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="font-bold text-gray-900 mb-4">Loan Volume Forecast</h3>
-            <ResponsiveContainer width="100%" height={300}>
+            <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
+            <ResponsiveContainer width="100%" height="100%">
               <BarChart data={loanData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
@@ -209,12 +334,14 @@ export default function ForecastDashboard() {
                 <Bar dataKey="approvals" fill="#10b981" name="Approvals" />
               </BarChart>
             </ResponsiveContainer>
+            </div>
           </div>
 
           {/* Cash Flow */}
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="font-bold text-gray-900 mb-4">Cash Flow Forecast</h3>
-            <ResponsiveContainer width="100%" height={300}>
+            <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
+            <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={cashFlowData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
@@ -226,6 +353,7 @@ export default function ForecastDashboard() {
                 <Line type="monotone" dataKey="net_flow" stroke="#f59e0b" strokeWidth={2} name="Net Flow" />
               </ComposedChart>
             </ResponsiveContainer>
+            </div>
           </div>
         </div>
 
@@ -235,7 +363,8 @@ export default function ForecastDashboard() {
             <AlertTriangle size={20} className="text-yellow-600" />
             Arrears Rate Forecast (Confidence: {(dashboard.arrears_forecast.confidence_level * 100).toFixed(0)}%)
           </h3>
-          <ResponsiveContainer width="100%" height={300}>
+          <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
+            <ResponsiveContainer width="100%" height="100%">
             <LineChart data={arrearsData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
@@ -251,6 +380,7 @@ export default function ForecastDashboard() {
               />
             </LineChart>
           </ResponsiveContainer>
+            </div>
           <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
             <p className="text-sm text-gray-700">
               <strong>Insight:</strong> Arrears rate is expected to trend {
@@ -268,7 +398,8 @@ export default function ForecastDashboard() {
           <p className="text-sm text-gray-600 mb-4">
             Based on current trends, loan applications are expected to {dashboard.loan_volume_forecast.trend} throughout the forecast period.
           </p>
-          <ResponsiveContainer width="100%" height={250}>
+          <div style={{ width: "100%", height: "250px", minWidth: 0, overflow: "hidden" }}>
+            <ResponsiveContainer width="100%" height="100%">
             <LineChart data={loanData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
@@ -277,6 +408,7 @@ export default function ForecastDashboard() {
               <Line type="monotone" dataKey="applications" stroke="#3b82f6" strokeWidth={2} dot={{ fill: '#3b82f6' }} />
             </LineChart>
           </ResponsiveContainer>
+            </div>
         </div>
       </div>
     </div>

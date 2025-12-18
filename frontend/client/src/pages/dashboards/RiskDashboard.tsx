@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   PieChart, Pie, BarChart, Bar, LineChart, Line,
   Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
-import { AlertTriangle, Shield, TrendingDown } from 'lucide-react';
+import { AlertTriangle, Shield, TrendingDown, RefreshCw, Download } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { api } from '@/lib/api';
 import KPICard from '@/components/dashboards/KPICard';
@@ -43,14 +43,82 @@ interface RiskData {
 }
 
 export default function RiskDashboard() {
-  const { data: dashboard, isLoading } = useQuery<RiskData>({
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const { data: dashboard, isLoading, refetch } = useQuery<RiskData>({
     queryKey: ['riskDashboard'],
     queryFn: () => api.getRiskDashboard(),
     staleTime: 5 * 60 * 1000
   });
 
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await refetch();
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  const handleExport = () => {
+    if (!dashboard) return;
+    
+    const csvContent = [
+      ['Risk Dashboard Export'],
+      ['Generated:', new Date(dashboard.timestamp).toLocaleString()],
+      [''],
+      ['Risk Distribution'],
+      ['Risk Level', 'Count', 'Percentage'],
+      ['Low Risk', dashboard.risk_distribution.low_risk.count, dashboard.risk_distribution.low_risk.percentage],
+      ['Medium Risk', dashboard.risk_distribution.medium_risk.count, dashboard.risk_distribution.medium_risk.percentage],
+      ['High Risk', dashboard.risk_distribution.high_risk.count, dashboard.risk_distribution.high_risk.percentage],
+      ['Critical Risk', dashboard.risk_distribution.critical_risk.count, dashboard.risk_distribution.critical_risk.percentage],
+      [''],
+      ['Fraud Detection'],
+      ['Metric', 'Value'],
+      ['Active Investigations', dashboard.fraud_detection.active_investigations],
+      ['Suspicious Transactions', dashboard.fraud_detection.suspicious_transactions],
+      ['Flagged Members', dashboard.fraud_detection.flagged_members],
+      [''],
+      ['Portfolio Concentration'],
+      ['Concentration Ratio', dashboard.portfolio_concentration.concentration_ratio],
+      [''],
+      ['Stress Testing Scenarios'],
+      ['Scenario', 'NPL Rate'],
+      ['Baseline', dashboard.scenario_analysis.baseline.npl_rate],
+      ['Stress 5%', dashboard.scenario_analysis.stress_5pct.npl_rate],
+      ['Stress 10%', dashboard.scenario_analysis.stress_10pct.npl_rate],
+      ['Stress 20%', dashboard.scenario_analysis.stress_20pct.npl_rate],
+    ]
+      .map(row => row.map(val => `"${val}"`).join(','))
+      .join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `risk-dashboard-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
   if (isLoading) return <div className="flex justify-center items-center h-screen"><div className="animate-spin h-12 w-12 border-b-2 border-blue-600"></div></div>;
-  if (!dashboard) return null;
+  if (!dashboard || !dashboard.risk_distribution) {
+    const errorMsg = (dashboard as any)?.error || 'Failed to load dashboard';
+    return (
+      <Layout>
+        <div className="p-6">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-red-900">Failed to load dashboard</h3>
+              <p className="text-sm text-red-700 mt-1">{errorMsg}</p>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   const riskData = [
     { name: 'Low Risk', value: dashboard.risk_distribution.low_risk.count, color: '#10b981' },
@@ -63,8 +131,43 @@ export default function RiskDashboard() {
     <Layout>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
         <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Risk Management Dashboard</h1>
-        <p className="text-gray-600 mb-8">Monitor portfolio risk and early warning indicators</p>
+        <div className="flex justify-between items-start mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Risk Management Dashboard</h1>
+            <p className="text-gray-600 mt-1">Monitor portfolio risk and early warning indicators</p>
+            {dashboard?.timestamp && (
+              <p className="text-xs text-gray-500 mt-2">
+                Last updated: {new Date(dashboard.timestamp).toLocaleString()}
+              </p>
+            )}
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className={`flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg transition ${
+                isRefreshing 
+                  ? 'opacity-50 cursor-not-allowed' 
+                  : 'hover:bg-gray-50 cursor-pointer'
+              }`}
+            >
+              <RefreshCw 
+                size={18}
+                className={isRefreshing ? 'animate-spin' : ''}
+              />
+              <span className="text-sm font-medium">
+                {isRefreshing ? 'Refreshing...' : 'Refresh'}
+              </span>
+            </button>
+            <button
+              onClick={handleExport}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition cursor-pointer"
+            >
+              <Download size={18} />
+              <span className="text-sm font-medium">Export</span>
+            </button>
+          </div>
+        </div>
 
         {/* Risk Overview */}
         <div className="mb-8">
@@ -124,7 +227,8 @@ export default function RiskDashboard() {
         {/* Risk Distribution Chart */}
         <div className="mb-8 bg-white rounded-lg shadow p-6">
           <h3 className="font-bold text-gray-900 mb-4">Member Risk Distribution</h3>
-          <ResponsiveContainer width="100%" height={300}>
+          <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
+            <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
                 data={riskData}
@@ -146,6 +250,7 @@ export default function RiskDashboard() {
               <Tooltip />
             </PieChart>
           </ResponsiveContainer>
+            </div>
         </div>
 
         {/* Portfolio Concentration */}
@@ -153,7 +258,8 @@ export default function RiskDashboard() {
           {/* By Product */}
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="font-bold text-gray-900 mb-4">Concentration by Product</h3>
-            <ResponsiveContainer width="100%" height={300}>
+            <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
+            <ResponsiveContainer width="100%" height="100%">
               <BarChart data={dashboard.portfolio_concentration.by_product}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="product" />
@@ -164,12 +270,14 @@ export default function RiskDashboard() {
                 <Bar yAxisId="right" dataKey="percentage" fill="#10b981" />
               </BarChart>
             </ResponsiveContainer>
+            </div>
           </div>
 
           {/* By Location */}
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="font-bold text-gray-900 mb-4">Concentration by Location</h3>
-            <ResponsiveContainer width="100%" height={300}>
+            <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
+            <ResponsiveContainer width="100%" height="100%">
               <BarChart data={dashboard.portfolio_concentration.by_location}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="location" />
@@ -180,13 +288,15 @@ export default function RiskDashboard() {
                 <Bar yAxisId="right" dataKey="percentage" fill="#ec4899" />
               </BarChart>
             </ResponsiveContainer>
+            </div>
           </div>
         </div>
 
         {/* Scenario Analysis */}
         <div className="mb-8 bg-white rounded-lg shadow p-6">
           <h3 className="font-bold text-gray-900 mb-4">Stress Testing Scenarios</h3>
-          <ResponsiveContainer width="100%" height={300}>
+          <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
+            <ResponsiveContainer width="100%" height="100%">
             <BarChart data={[
               { scenario: 'Baseline', npl: dashboard.scenario_analysis.baseline.npl_rate },
               { scenario: 'Stress 5%', npl: dashboard.scenario_analysis.stress_5pct.npl_rate },
@@ -200,6 +310,7 @@ export default function RiskDashboard() {
               <Bar dataKey="npl" fill="#ef4444" />
             </BarChart>
           </ResponsiveContainer>
+            </div>
         </div>
 
         {/* Early Warnings */}

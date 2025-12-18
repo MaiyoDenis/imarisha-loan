@@ -11,7 +11,7 @@ interface AtRiskMember {
 }
 
 interface AtRiskMembersTableProps {
-  members: AtRiskMember[];
+  members?: AtRiskMember[];
   totalScanned: number;
   isLoading?: boolean;
 }
@@ -46,6 +46,10 @@ export const AtRiskMembersTable: React.FC<AtRiskMembersTableProps> = ({
         </div>
       </div>
     );
+  }
+
+  if (!members) {
+    return null;
   }
 
   const atRiskPercentage = ((members.length / totalScanned) * 100).toFixed(1);

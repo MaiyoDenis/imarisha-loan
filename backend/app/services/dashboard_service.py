@@ -54,7 +54,7 @@ class DashboardService:
         
         try:
             dashboard_data = {
-                'timestamp': datetime.now(timezone.utc).isoformat(),
+                'timestamp': datetime.utcnow().isoformat(),
                 'portfolio_health': self._get_portfolio_health(branch_id),
                 'revenue_metrics': self._get_revenue_metrics(branch_id),
                 'growth_metrics': self._get_growth_metrics(branch_id),
@@ -96,7 +96,7 @@ class DashboardService:
         overdue_loans = query.filter(
             and_(
                 Loan.status.in_(['approved', 'disbursed']),
-                Loan.due_date < datetime.now(timezone.utc)
+                Loan.due_date < datetime.utcnow()
             )
         ).count()
         
@@ -114,7 +114,7 @@ class DashboardService:
     
     def _get_revenue_metrics(self, branch_id: Optional[int] = None) -> Dict[str, Any]:
         """Get revenue metrics"""
-        now = datetime.now(timezone.utc)
+        now = datetime.utcnow()
         month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         year_start = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
         
@@ -127,12 +127,12 @@ class DashboardService:
         
         mtd_interest = sum(
             float(loan.interest_amount) for loan in completed_loans
-            if loan.disbursed_at and loan.disbursed_at.replace(tzinfo=timezone.utc) >= month_start
+            if loan.disbursement_date and loan.disbursement_date >= month_start
         )
         
         ytd_interest = sum(
             float(loan.interest_amount) for loan in completed_loans
-            if loan.disbursed_at and loan.disbursed_at.replace(tzinfo=timezone.utc) >= year_start
+            if loan.disbursement_date and loan.disbursement_date >= year_start
         )
         
         total_fees = sum(
@@ -152,7 +152,7 @@ class DashboardService:
     
     def _get_growth_metrics(self, branch_id: Optional[int] = None) -> Dict[str, Any]:
         """Get growth metrics"""
-        now = datetime.now(timezone.utc)
+        now = datetime.utcnow()
         month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         last_month = month_start - timedelta(days=1)
         last_month_start = last_month.replace(day=1)
@@ -211,14 +211,14 @@ class DashboardService:
         overdue_loans = query.filter(
             and_(
                 Loan.status.in_(['approved', 'disbursed']),
-                Loan.due_date < datetime.now(timezone.utc)
+                Loan.due_date < datetime.utcnow()
             )
         ).count()
         
         par_ratio = (overdue_loans / total_loans * 100) if total_loans > 0 else 0
         
         # NPL: Non-Performing Loans (90+ days overdue)
-        npl_threshold = datetime.now(timezone.utc) - timedelta(days=90)
+        npl_threshold = datetime.utcnow() - timedelta(days=90)
         npl_loans = query.filter(
             and_(
                 Loan.status.in_(['approved', 'disbursed']),
@@ -289,7 +289,7 @@ class DashboardService:
         overdue_count = query.filter(
             and_(
                 Loan.status.in_(['approved', 'disbursed']),
-                Loan.due_date < datetime.now(timezone.utc)
+                Loan.due_date < datetime.utcnow()
             )
         ).count()
         
@@ -329,7 +329,7 @@ class DashboardService:
         
         try:
             dashboard_data = {
-                'timestamp': datetime.now(timezone.utc).isoformat(),
+                'timestamp': datetime.utcnow().isoformat(),
                 'daily_summary': self._get_daily_summary(branch_id),
                 'member_queue': self._get_member_queue(branch_id),
                 'payment_status': self._get_payment_status(branch_id),
@@ -352,7 +352,7 @@ class DashboardService:
     
     def _get_daily_summary(self, branch_id: Optional[int] = None) -> Dict[str, Any]:
         """Get today's key events summary"""
-        now = datetime.now(timezone.utc)
+        now = datetime.utcnow()
         today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
         
         query = Loan.query
@@ -410,9 +410,9 @@ class DashboardService:
         for loan in oldest:
             pending_loans.append({
                 'loan_id': loan.id,
-                'member_name': (loan.member.first_name + ' ' + loan.member.last_name) if getattr(loan, 'member', None) else 'Unknown',
+                'member_name': (loan.member.user.first_name + ' ' + loan.member.user.last_name) if getattr(loan, 'member', None) else 'Unknown',
                 'amount': float(loan.total_amount or 0),
-                'days_pending': (datetime.now(timezone.utc) - loan.created_at).days if loan.created_at else 0
+                'days_pending': (datetime.utcnow() - loan.created_at).days if loan.created_at else 0
             })
         
         return {
@@ -441,7 +441,7 @@ class DashboardService:
         completed_today = transaction_query.filter(
             and_(
                 Transaction.status == 'completed',
-                Transaction.created_at >= datetime.now(timezone.utc).replace(
+                Transaction.created_at >= datetime.utcnow().replace(
                     hour=0, minute=0, second=0, microsecond=0
                 )
             )
@@ -480,7 +480,7 @@ class DashboardService:
         overdue_count = query.filter(
             and_(
                 Loan.status.in_(['approved', 'disbursed']),
-                Loan.due_date < datetime.now(timezone.utc)
+                Loan.due_date < datetime.utcnow()
             )
         ).count()
         
@@ -511,7 +511,7 @@ class DashboardService:
                 'severity': 'medium',
                 'title': f'{pending_approvals} Loans Awaiting Approval',
                 'description': 'High volume of pending loan applications',
-                'timestamp': datetime.now(timezone.utc).isoformat(),
+                'timestamp': datetime.utcnow().isoformat(),
                 'action_url': '/admin/loans?status=pending'
             })
         
@@ -525,14 +525,14 @@ class DashboardService:
                 'severity': 'high',
                 'title': f'{failed_transactions} Failed Transactions',
                 'description': 'Multiple transaction failures detected',
-                'timestamp': datetime.now(timezone.utc).isoformat(),
+                'timestamp': datetime.utcnow().isoformat(),
                 'action_url': '/admin/transactions?status=failed'
             })
         
         overdue_loans = query.filter(
             and_(
                 Loan.status.in_(['approved', 'disbursed']),
-                Loan.due_date < datetime.now(timezone.utc)
+                Loan.due_date < datetime.utcnow()
             )
         ).count()
         if overdue_loans > 15:
@@ -542,7 +542,7 @@ class DashboardService:
                 'severity': 'high',
                 'title': f'{overdue_loans} Overdue Loans',
                 'description': 'Multiple loans past due date',
-                'timestamp': datetime.now(timezone.utc).isoformat(),
+                'timestamp': datetime.utcnow().isoformat(),
                 'action_url': '/admin/loans?status=overdue'
             })
         
@@ -586,7 +586,7 @@ class DashboardService:
         
         try:
             dashboard_data = {
-                'timestamp': datetime.now(timezone.utc).isoformat(),
+                'timestamp': datetime.utcnow().isoformat(),
                 'risk_distribution': self._get_risk_distribution(branch_id),
                 'portfolio_concentration': self._get_portfolio_concentration(branch_id),
                 'fraud_detection': self._get_fraud_detection(branch_id),
@@ -727,15 +727,15 @@ class DashboardService:
             ).all()
             
             for trans in transactions:
-                if trans.status == 'failed' and trans.attempt_count and trans.attempt_count > 3:
+                if trans.status == 'failed':
                     suspicious_transactions += 1
-                    fraud_score += 15
+                    fraud_score += 10
             
             if fraud_score > 30:
                 active_investigations += 1
                 flagged_members.append({
                     'member_id': member.id,
-                    'member_name': f"{member.first_name} {member.last_name}",
+                    'member_name': f"{member.user.first_name} {member.user.last_name}",
                     'fraud_score': fraud_score,
                     'flags': flags,
                     'status': 'under_review'
@@ -773,7 +773,7 @@ class DashboardService:
                 and_(
                     Loan.member_id == member.id,
                     Loan.status.in_(['approved', 'disbursed']),
-                    Loan.due_date < datetime.now(timezone.utc)
+                    Loan.due_date < datetime.utcnow()
                 )
             ).count()
             
@@ -826,7 +826,7 @@ class DashboardService:
         
         try:
             dashboard_data = {
-                'timestamp': datetime.now(timezone.utc).isoformat(),
+                'timestamp': datetime.utcnow().isoformat(),
                 'cohort_analysis': self._get_cohort_analysis(branch_id),
                 'lifecycle_stages': self._get_lifecycle_stages(branch_id),
                 'segmentation': self._get_segmentation(branch_id),
@@ -883,13 +883,11 @@ class DashboardService:
             'declining': 0
         }
         
-        now = datetime.now(timezone.utc)
+        now = datetime.utcnow()
         
         for member in members:
             if member.created_at:
                 member_created = member.created_at
-                if member_created.tzinfo is None:
-                    member_created = member_created.replace(tzinfo=timezone.utc)
                 age_months = (now - member_created).days / 30
                 loans_count = Loan.query.filter_by(member_id=member.id).count()
                 
@@ -1003,7 +1001,7 @@ class DashboardService:
         
         try:
             dashboard_data = {
-                'timestamp': datetime.now(timezone.utc).isoformat(),
+                'timestamp': datetime.utcnow().isoformat(),
                 'revenue_forecast': self._get_revenue_forecast(branch_id),
                 'loan_volume_forecast': self._get_loan_volume_forecast(branch_id),
                 'cash_flow_forecast': self._get_cash_flow_forecast(branch_id),
@@ -1025,7 +1023,7 @@ class DashboardService:
     
     def _get_revenue_forecast(self, branch_id: Optional[int] = None) -> Dict[str, Any]:
         """Get 12-month revenue forecast based on historical data"""
-        now = datetime.now(timezone.utc)
+        now = datetime.utcnow()
         query = Loan.query
         if branch_id:
             query = query.join(Member).filter(Member.branch_id == branch_id)
@@ -1039,8 +1037,8 @@ class DashboardService:
             monthly_revenue[month_key] = 0
         
         for loan in completed_loans:
-            if loan.disbursed_at:
-                month_key = loan.disbursed_at.strftime('%Y-%m')
+            if loan.disbursement_date:
+                month_key = loan.disbursement_date.strftime('%Y-%m')
                 if month_key in monthly_revenue:
                     interest = float(loan.interest_amount or 0)
                     fees = float(loan.charge_fee or 0)
@@ -1068,7 +1066,7 @@ class DashboardService:
     
     def _get_loan_volume_forecast(self, branch_id: Optional[int] = None) -> Dict[str, Any]:
         """Get loan volume forecast based on historical data"""
-        now = datetime.now(timezone.utc)
+        now = datetime.utcnow()
         query = Loan.query
         if branch_id:
             query = query.join(Member).filter(Member.branch_id == branch_id)
@@ -1116,7 +1114,7 @@ class DashboardService:
     
     def _get_cash_flow_forecast(self, branch_id: Optional[int] = None) -> Dict[str, Any]:
         """Get cash flow forecast based on transaction data"""
-        now = datetime.now(timezone.utc)
+        now = datetime.utcnow()
         
         transaction_query = Transaction.query
         if branch_id:
@@ -1171,7 +1169,7 @@ class DashboardService:
     
     def _get_arrears_forecast(self, branch_id: Optional[int] = None) -> Dict[str, Any]:
         """Get arrears forecast based on historical default rates"""
-        now = datetime.now(timezone.utc)
+        now = datetime.utcnow()
         query = Loan.query
         if branch_id:
             query = query.join(Member).filter(Member.branch_id == branch_id)

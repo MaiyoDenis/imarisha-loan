@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
 export interface User {
   id: number;
   email: string;
@@ -50,18 +52,23 @@ export function useAuth() {
   const login = async (username: string, password: string) => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
+        credentials: 'include',
       });
 
-      if (!response.ok) throw new Error('Login failed');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Login failed' }));
+        throw new Error(errorData.error || 'Login failed');
+      }
 
       const data = await response.json();
       setUser(data.user || { username, email: username });
       setIsAuthenticated(true);
-      localStorage.setItem('auth_token', data.access_token);
+      localStorage.setItem('auth_token', data.access_token || data.tokens?.access_token);
+      localStorage.setItem('refresh_token', data.refresh_token || data.tokens?.refresh_token || '');
       localStorage.setItem('user', JSON.stringify(data.user || { username, email: username }));
     } catch (error) {
       console.error('Login error:', error);
@@ -74,10 +81,11 @@ export function useAuth() {
   const logout = async () => {
     setIsLoading(true);
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
+      await fetch(`${API_BASE}/auth/logout`, { method: 'POST' });
       setUser(null);
       setIsAuthenticated(false);
       localStorage.removeItem('auth_token');
+      localStorage.removeItem('refresh_token');
       localStorage.removeItem('user');
     } catch (error) {
       console.error('Logout error:', error);
@@ -89,18 +97,23 @@ export function useAuth() {
   const register = async (data: any) => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/auth/register', {
+      const response = await fetch(`${API_BASE}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
+        credentials: 'include',
       });
 
-      if (!response.ok) throw new Error('Registration failed');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Registration failed' }));
+        throw new Error(errorData.error || 'Registration failed');
+      }
 
       const result = await response.json();
       setUser(result.user || data);
       setIsAuthenticated(true);
-      localStorage.setItem('auth_token', result.access_token);
+      localStorage.setItem('auth_token', result.access_token || result.tokens?.access_token);
+      localStorage.setItem('refresh_token', result.refresh_token || result.tokens?.refresh_token || '');
       localStorage.setItem('user', JSON.stringify(result.user || data));
     } catch (error) {
       console.error('Registration error:', error);

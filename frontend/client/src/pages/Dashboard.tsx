@@ -124,12 +124,12 @@ export default function Dashboard() {
           </div>
 
           <div className="grid gap-3 md:gap-4 md:grid-cols-7 auto-rows-max">
-            <Card className="md:col-span-4 border-border/50">
+            <Card className="md:col-span-4 border-border/50 w-full overflow-hidden">
               <CardHeader>
                 <CardTitle className="text-sm md:text-base font-heading">Loan Disbursement vs Repayment</CardTitle>
               </CardHeader>
-              <CardContent className="pl-1 md:pl-2">
-                <div className="h-[250px] md:h-[300px] w-full min-w-0">
+              <CardContent className="pl-0 md:pl-0 pr-0 pb-0 w-full overflow-hidden">
+                <div style={{ width: '100%', height: '300px', minWidth: 0, overflow: 'hidden' }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={generateDashboardChartData(stats)} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                       <defs>

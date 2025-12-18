@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Clock, AlertCircle, Check, Users, CreditCard, Zap } from 'lucide-react';
+import { Clock, AlertCircle, Check, Users, CreditCard, Zap, RefreshCw, Download } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { api } from '@/lib/api';
 import KPICard from '@/components/dashboards/KPICard';
@@ -56,22 +56,124 @@ interface OpsData {
 }
 
 export default function OperationsDashboard() {
-  const { data: dashboard, isLoading } = useQuery<OpsData>({
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const { data: dashboard, isLoading, refetch } = useQuery<OpsData>({
     queryKey: ['operationsDashboard'],
     queryFn: () => api.getOperationsDashboard(),
     staleTime: 2 * 60 * 1000,
     refetchInterval: 30 * 1000
   });
 
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await refetch();
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  const handleExport = () => {
+    if (!dashboard) return;
+    
+    const csvContent = [
+      ['Operations Dashboard Export'],
+      ['Generated:', new Date(dashboard.timestamp).toLocaleString()],
+      [''],
+      ['Daily Summary'],
+      ['Metric', 'Value'],
+      ['Applications Today', dashboard.daily_summary.loans_applications_today],
+      ['Approved Today', dashboard.daily_summary.loans_approved_today],
+      ['Transactions Processed', dashboard.daily_summary.transactions_processed],
+      ['Amount Processed', dashboard.daily_summary.amount_processed],
+      ['Members Served', dashboard.daily_summary.members_served_today],
+      [''],
+      ['Member Queue'],
+      ['Metric', 'Value'],
+      ['Total Pending', dashboard.member_queue.total_pending],
+      ['Pending Amount', dashboard.member_queue.pending_amount],
+      ['Average Age (days)', dashboard.member_queue.average_age_days],
+      [''],
+      ['Payment Status'],
+      ['Metric', 'Value'],
+      ['Pending Payments', dashboard.payment_status.pending_payments],
+      ['Failed Payments', dashboard.payment_status.failed_payments],
+      ['Completed Today', dashboard.payment_status.completed_today],
+      ['Overdue Payments', dashboard.payment_status.overdue_payments],
+      ['Success Rate (%)', dashboard.payment_status.success_rate],
+    ]
+      .map(row => row.map(val => `"${val}"`).join(','))
+      .join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `operations-dashboard-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
   if (isLoading) return <div className="flex justify-center items-center h-screen"><div className="animate-spin h-12 w-12 border-b-2 border-blue-600"></div></div>;
-  if (!dashboard) return null;
+  if (!dashboard || !dashboard.daily_summary) {
+    const errorMsg = (dashboard as any)?.error || 'Failed to load dashboard';
+    return (
+      <Layout>
+        <div className="p-6">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-red-900">Failed to load dashboard</h3>
+              <p className="text-sm text-red-700 mt-1">{errorMsg}</p>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
         <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Operations Dashboard</h1>
-        <p className="text-gray-600 mb-8">Daily operations management and task tracking</p>
+        <div className="flex justify-between items-start mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Operations Dashboard</h1>
+            <p className="text-gray-600 mt-1">Daily operations management and task tracking</p>
+            {dashboard?.timestamp && (
+              <p className="text-xs text-gray-500 mt-2">
+                Last updated: {new Date(dashboard.timestamp).toLocaleString()}
+              </p>
+            )}
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className={`flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg transition ${
+                isRefreshing 
+                  ? 'opacity-50 cursor-not-allowed' 
+                  : 'hover:bg-gray-50 cursor-pointer'
+              }`}
+            >
+              <RefreshCw 
+                size={18}
+                className={isRefreshing ? 'animate-spin' : ''}
+              />
+              <span className="text-sm font-medium">
+                {isRefreshing ? 'Refreshing...' : 'Refresh'}
+              </span>
+            </button>
+            <button
+              onClick={handleExport}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition cursor-pointer"
+            >
+              <Download size={18} />
+              <span className="text-sm font-medium">Export</span>
+            </button>
+          </div>
+        </div>
 
         {/* Daily Summary */}
         <div className="mb-8">

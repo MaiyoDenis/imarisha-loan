@@ -13,6 +13,7 @@ import Members from "@/pages/Members";
 import Groups from "@/pages/Groups";
 import Loans from "@/pages/Loans";
 import Branches from "@/pages/Branches";
+import BranchDetail from "@/pages/BranchDetail";
 import Users from "@/pages/Users";
 import Savings from "@/pages/Savings";
 import Reports from "@/pages/Reports";
@@ -45,6 +46,7 @@ function Router() {
       <Route path="/mobile-features" component={MobileFeaturesDashboard} />
       <Route path="/users" component={Users} />
       <Route path="/branches" component={Branches} />
+      <Route path="/branches/:branchId" component={BranchDetail} />
       <Route path="/groups" component={Groups} />
       <Route path="/members" component={Members} />
       <Route path="/loans" component={Loans} />
