@@ -12,7 +12,8 @@ from flask_jwt_extended import (
     jwt_required, 
     get_jwt_identity,
     get_jwt,
-    JWTManager
+    JWTManager,
+    verify_jwt_in_request
 )
 from flask import current_app, request, jsonify
 from flask_limiter import Limiter
@@ -64,7 +65,8 @@ class JWTService:
         self.limiter.init_app(app)
         
         # JWT configuration
-        app.config['JWT_SECRET_KEY'] = app.config.get('JWT_SECRET_KEY', secrets.token_hex(32))
+        if 'JWT_SECRET_KEY' not in app.config:
+            app.config['JWT_SECRET_KEY'] = app.config.get('SECRET_KEY', secrets.token_hex(32))
         app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
         app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
         app.config['JWT_ALGORITHM'] = 'HS256'
@@ -291,8 +293,6 @@ class JWTService:
     def refresh_access_token(self, refresh_token: str) -> Optional[str]:
         """Refresh access token using refresh token"""
         try:
-            from flask_jwt_extended import verify_jwt_in_request
-            
             # Verify refresh token
             verify_jwt_in_request(refresh=True)
             current_user_id = get_jwt_identity()
