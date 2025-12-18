@@ -3,7 +3,7 @@ from app.models import (
     Member, Loan, Transaction, User, Branch, Group
 )
 from datetime import datetime, timedelta
-from sqlalchemy import func, and_, or_
+from sqlalchemy import func, and_, or_, case
 import logging
 try:
     import pandas as pd

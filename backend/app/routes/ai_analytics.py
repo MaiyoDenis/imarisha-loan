@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from datetime import datetime
 from app import db
 from app.services import AIAnalyticsService
 from app.services.audit_service import audit_service, AuditEventType, RiskLevel
@@ -252,6 +253,3 @@ def get_ai_summary():
     except Exception as e:
         logger.error(f"AI summary error: {str(e)}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
-
-
-from datetime import datetime
