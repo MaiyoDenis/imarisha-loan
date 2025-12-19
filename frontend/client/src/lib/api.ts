@@ -339,7 +339,7 @@ export const api = {
   deleteStockItem: (id: number) =>
     fetchAPI(`/stock/${id}`, { method: "DELETE" }),
   getLowStockProducts: () => fetchAPI("/stock/low-stock"),
-  getCriticalStockProducts: () => fetchAPI("/stock/critical"),
+  getCriticalStockProducts: () => fetchAPI("/stock/critical-stock"),
 
   // Reports
   getReports: () => fetchAPI("/reports"),

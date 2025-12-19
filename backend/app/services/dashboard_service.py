@@ -12,7 +12,7 @@ import json
 
 from app.models import (
     Member, Loan, SavingsAccount, Transaction, LoanType,
-    Group, Branch, User
+    Group, Branch, User, Role
 )
 from app import db
 
@@ -75,6 +75,49 @@ class DashboardService:
             logging.error(f"Error generating executive dashboard: {str(e)}")
             return {'error': str(e)}
     
+    def _get_active_members(self, branch_id: Optional[int] = None) -> int:
+        """Get count of active members"""
+        query = Member.query.filter(Member.status == 'active')
+        if branch_id:
+            query = query.filter(Member.branch_id == branch_id)
+        return query.count()
+
+    def _calculate_default_rate(self, branch_id: Optional[int] = None) -> float:
+        """Calculate default rate (loans overdue > 90 days)"""
+        query = Loan.query
+        if branch_id:
+            query = query.join(Member).filter(Member.branch_id == branch_id)
+            
+        total_loans = query.count()
+        if total_loans == 0:
+            return 0.0
+            
+        default_threshold = datetime.utcnow() - timedelta(days=90)
+        defaulted_loans = query.filter(
+            and_(
+                Loan.status.in_(['approved', 'disbursed']),
+                Loan.due_date < default_threshold
+            )
+        ).count()
+        
+        return (defaulted_loans / total_loans) * 100
+
+    def _calculate_repeat_loan_rate(self, branch_id: Optional[int] = None) -> float:
+        """Calculate percentage of members with more than one loan"""
+        query = db.session.query(Loan.member_id, func.count(Loan.id)).group_by(Loan.member_id)
+        
+        if branch_id:
+            query = query.join(Member).filter(Member.branch_id == branch_id)
+            
+        loan_counts = query.all()
+        if not loan_counts:
+            return 0.0
+            
+        repeat_borrowers = sum(1 for _, count in loan_counts if count > 1)
+        total_borrowers = len(loan_counts)
+        
+        return (repeat_borrowers / total_borrowers) * 100
+
     def _get_portfolio_health(self, branch_id: Optional[int] = None) -> Dict[str, Any]:
         """Get portfolio health metrics"""
         query = Loan.query
@@ -88,9 +131,10 @@ class DashboardService:
             Loan.status.in_(['approved', 'disbursed'])
         ).scalar() or Decimal(0)
         
-        active_members = db.session.query(func.count(func.distinct(Member.id))).filter(
-            Member.status == 'active'
-        ).scalar() or 0
+        if branch_id:
+            query = query.join(Member).filter(Member.branch_id == branch_id)
+            
+        active_members = self._get_active_members(branch_id)
         
         # Calculate PAR (Portfolio at Risk) - loans with any overdue payment
         overdue_loans = query.filter(
@@ -102,13 +146,16 @@ class DashboardService:
         
         par_ratio = (overdue_loans / total_loans * 100) if total_loans > 0 else 0
         
+        # Calculate average loan term
+        avg_term = db.session.query(func.avg(LoanType.duration_months)).join(Loan).scalar() or 12
+        
         return {
             'total_aum': float(total_aum),
             'active_members': active_members,
             'active_loans': active_loans,
             'total_loans': total_loans,
             'par_ratio': round(par_ratio, 2),
-            'average_loan_term': 12,  # Default, can be calculated
+            'average_loan_term': round(float(avg_term), 1),
             'default_rate': round(self._calculate_default_rate(branch_id), 2)
         }
     
@@ -141,13 +188,17 @@ class DashboardService:
         
         total_revenue = mtd_interest + total_fees
         
+        # Calculate profit margin (Revenue - Cost of Funds / Revenue)
+        # Assuming cost of funds is roughly 60% of revenue for now as we don't have expense tracking
+        profit_margin = 40.0 if total_revenue > 0 else 0.0
+        
         return {
             'mtd_interest_income': round(float(mtd_interest), 2),
             'ytd_interest_income': round(float(ytd_interest), 2),
             'total_processing_fees': round(float(total_fees), 2),
             'total_revenue': round(float(total_revenue), 2),
             'revenue_per_member': round(float(total_revenue) / max(self._get_active_members(branch_id), 1), 2),
-            'profit_margin': 15.5  # Estimated
+            'profit_margin': profit_margin
         }
     
     def _get_growth_metrics(self, branch_id: Optional[int] = None) -> Dict[str, Any]:
@@ -550,7 +601,7 @@ class DashboardService:
     
     def _get_staff_performance(self, branch_id: Optional[int] = None) -> List[Dict[str, Any]]:
         """Get top staff by performance"""
-        query = User.query.filter(User.role.in_(['loan_officer', 'manager']))
+        query = User.query.join(Role).filter(Role.name.in_(['loan_officer', 'manager']))
         if branch_id:
             query = query.filter(User.branch_id == branch_id)
         

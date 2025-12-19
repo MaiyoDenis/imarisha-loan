@@ -1,5 +1,5 @@
-from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask import Blueprint, request, jsonify, session
+from app.utils.decorators import login_required
 from app.services.field_operations_service import FieldOperationsService
 from app.models import FieldOfficerVisit, MobileLoanApplication, PhotoDocument
 import os
@@ -7,9 +7,9 @@ import os
 bp = Blueprint('field_operations', __name__, url_prefix='/api/field-operations')
 
 @bp.route('/visits', methods=['POST'])
-@jwt_required()
+@login_required
 def create_visit():
-    user_id = get_jwt_identity()
+    user_id = session.get('user_id')
     data = request.get_json()
     
     result = FieldOperationsService.create_visit(
@@ -24,9 +24,9 @@ def create_visit():
     return jsonify(result or {'error': 'Failed to create visit'}), 200 if result else 400
 
 @bp.route('/visits', methods=['GET'])
-@jwt_required()
+@login_required
 def get_visits():
-    user_id = get_jwt_identity()
+    user_id = session.get('user_id')
     days = request.args.get('days', 30, type=int)
     limit = request.args.get('limit', 50, type=int)
     offset = request.args.get('offset', 0, type=int)
@@ -35,13 +35,13 @@ def get_visits():
     return jsonify(visits)
 
 @bp.route('/visits/<int:visit_id>', methods=['GET'])
-@jwt_required()
+@login_required
 def get_visit_detail(visit_id):
     visit = FieldOperationsService.get_visit_details(visit_id)
     return jsonify(visit or {}), 200 if visit else 404
 
 @bp.route('/visits/<int:visit_id>/complete', methods=['PUT'])
-@jwt_required()
+@login_required
 def complete_visit(visit_id):
     data = request.get_json()
     success = FieldOperationsService.complete_visit(
@@ -53,9 +53,9 @@ def complete_visit(visit_id):
     return jsonify({'success': success}), 200 if success else 400
 
 @bp.route('/applications', methods=['POST'])
-@jwt_required()
+@login_required
 def create_application():
-    user_id = get_jwt_identity()
+    user_id = session.get('user_id')
     data = request.get_json()
     
     result = FieldOperationsService.create_mobile_application(
@@ -68,9 +68,9 @@ def create_application():
     return jsonify(result or {'error': 'Failed to create application'}), 200 if result else 400
 
 @bp.route('/applications', methods=['GET'])
-@jwt_required()
+@login_required
 def get_applications():
-    user_id = get_jwt_identity()
+    user_id = session.get('user_id')
     status = request.args.get('status', 'all')
     limit = request.args.get('limit', 50, type=int)
     offset = request.args.get('offset', 0, type=int)
@@ -79,13 +79,13 @@ def get_applications():
     return jsonify(apps)
 
 @bp.route('/applications/<int:app_id>', methods=['GET'])
-@jwt_required()
+@login_required
 def get_application_detail(app_id):
     app = MobileLoanApplication.query.get(app_id)
     return jsonify(app.to_dict() if app else {}), 200 if app else 404
 
 @bp.route('/applications/<int:app_id>/step', methods=['PUT'])
-@jwt_required()
+@login_required
 def update_application_step(app_id):
     data = request.get_json()
     success = FieldOperationsService.update_application_step(
@@ -96,15 +96,15 @@ def update_application_step(app_id):
     return jsonify({'success': success}), 200 if success else 400
 
 @bp.route('/applications/<int:app_id>/submit', methods=['POST'])
-@jwt_required()
+@login_required
 def submit_application(app_id):
     success = FieldOperationsService.submit_application(app_id)
     return jsonify({'success': success}), 200 if success else 400
 
 @bp.route('/photos', methods=['POST'])
-@jwt_required()
+@login_required
 def upload_photo():
-    user_id = get_jwt_identity()
+    user_id = session.get('user_id')
     
     if 'file' not in request.files:
         return jsonify({'error': 'No file provided'}), 400
@@ -145,17 +145,17 @@ def get_photos(entity_type, entity_id):
     return jsonify(photos)
 
 @bp.route('/sync/queue', methods=['GET'])
-@jwt_required()
+@login_required
 def get_sync_queue():
-    user_id = get_jwt_identity()
+    user_id = session.get('user_id')
     status = request.args.get('status', 'pending')
     queue = FieldOperationsService.get_sync_queue(user_id, status)
     return jsonify(queue)
 
 @bp.route('/sync/process', methods=['POST'])
-@jwt_required()
+@login_required
 def process_sync():
-    user_id = get_jwt_identity()
+    user_id = session.get('user_id')
     data = request.get_json()
     items = data.get('items', [])
     
@@ -167,7 +167,7 @@ def process_sync():
     return jsonify({'synced': synced_count, 'failed': len(items) - synced_count})
 
 @bp.route('/sync/conflicts/resolve', methods=['POST'])
-@jwt_required()
+@login_required
 def resolve_conflict():
     data = request.get_json()
     success = FieldOperationsService.handle_sync_conflict(
@@ -177,22 +177,22 @@ def resolve_conflict():
     return jsonify({'success': success}), 200 if success else 400
 
 @bp.route('/sync/status', methods=['GET'])
-@jwt_required()
+@login_required
 def get_sync_status():
-    user_id = get_jwt_identity()
+    user_id = session.get('user_id')
     status = FieldOperationsService.get_sync_status(user_id)
     return jsonify(status)
 
 @bp.route('/performance', methods=['GET'])
-@jwt_required()
+@login_required
 def get_performance():
-    user_id = get_jwt_identity()
+    user_id = session.get('user_id')
     period = request.args.get('period', 'month')
     perf = FieldOperationsService.get_officer_performance(user_id, period)
     return jsonify(perf)
 
 @bp.route('/team-performance', methods=['GET'])
-@jwt_required()
+@login_required
 def get_team_performance():
     data = request.get_json() or {}
     branch_id = data.get('branchId') or request.args.get('branch_id', type=int)
@@ -205,9 +205,9 @@ def get_team_performance():
     return jsonify(team_perf)
 
 @bp.route('/biometric/enroll', methods=['POST'])
-@jwt_required()
+@login_required
 def enroll_biometric():
-    user_id = get_jwt_identity()
+    user_id = session.get('user_id')
     data = request.get_json()
     
     result = FieldOperationsService.enroll_biometric(
@@ -219,8 +219,8 @@ def enroll_biometric():
     return jsonify(result or {'error': 'Failed to enroll'}), 200 if result else 400
 
 @bp.route('/biometric', methods=['GET'])
-@jwt_required()
+@login_required
 def get_biometrics():
-    user_id = get_jwt_identity()
+    user_id = session.get('user_id')
     biometrics = FieldOperationsService.get_user_biometrics(user_id)
     return jsonify(biometrics)

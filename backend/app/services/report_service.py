@@ -6,11 +6,15 @@ from datetime import datetime
 
 class ReportService:
     @staticmethod
-    def generate_loan_portfolio_report():
+    def generate_loan_portfolio_report(branch_id=None):
         """
         Generate a CSV report of the entire loan portfolio
         """
-        loans = Loan.query.all()
+        query = Loan.query
+        if branch_id:
+            query = query.join(Member).filter(Member.branch_id == branch_id)
+            
+        loans = query.all()
         data = []
         for loan in loans:
             member_name = "Unknown"
@@ -39,13 +43,18 @@ class ReportService:
         return output.getvalue()
 
     @staticmethod
-    def generate_transaction_report(start_date, end_date):
+    def generate_transaction_report(start_date, end_date, branch_id=None):
         """
         Generate a CSV report of transactions within a date range
         """
-        transactions = Transaction.query.filter(
+        query = Transaction.query.filter(
             Transaction.created_at.between(start_date, end_date)
-        ).order_by(Transaction.created_at.desc()).all()
+        )
+        
+        if branch_id:
+            query = query.join(Member).filter(Member.branch_id == branch_id)
+            
+        transactions = query.order_by(Transaction.created_at.desc()).all()
         
         data = []
         for txn in transactions:
@@ -76,15 +85,20 @@ class ReportService:
         return output.getvalue()
 
     @staticmethod
-    def generate_arrears_report():
+    def generate_arrears_report(branch_id=None):
         """
         Generate a CSV report of all loans in arrears
         """
         now = datetime.utcnow()
-        overdue_loans = Loan.query.filter(
-            Loan.status == 'active',
+        query = Loan.query.filter(
+            Loan.status == 'disbursed',
             Loan.due_date < now
-        ).all()
+        )
+        
+        if branch_id:
+            query = query.join(Member).filter(Member.branch_id == branch_id)
+            
+        overdue_loans = query.all()
         
         data = []
         for loan in overdue_loans:

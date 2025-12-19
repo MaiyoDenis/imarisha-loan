@@ -34,7 +34,17 @@ def get_member_qr(id):
 
 @bp.route('', methods=['GET'])
 def get_members():
-    members = Member.query.order_by(Member.created_at.desc()).all()
+    from flask import session
+    from app.models import User
+    
+    query = Member.query
+    
+    if 'user_id' in session:
+        user = User.query.get(session['user_id'])
+        if user and user.role.name != 'admin' and user.branch_id:
+            query = query.filter_by(branch_id=user.branch_id)
+            
+    members = query.order_by(Member.created_at.desc()).all()
     return jsonify([member.to_dict() for member in members])
 
 @bp.route('', methods=['POST'])

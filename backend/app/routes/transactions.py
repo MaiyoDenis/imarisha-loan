@@ -10,9 +10,18 @@ bp = Blueprint('transactions', __name__, url_prefix='/api/transactions')
 def get_transactions():
     member_id = request.args.get('memberId')
     
+    from flask import session
+    from app.models import User
+    
     query = Transaction.query
+    
     if member_id:
         query = query.filter_by(member_id=member_id)
+        
+    if 'user_id' in session:
+        user = User.query.get(session['user_id'])
+        if user and user.role.name != 'admin' and user.branch_id:
+            query = query.join(Member).filter(Member.branch_id == user.branch_id)
         
     transactions = query.order_by(Transaction.created_at.desc()).limit(100).all()
     return jsonify([t.to_dict() for t in transactions])

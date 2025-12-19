@@ -102,18 +102,20 @@ export const CohortAnalysisChart: React.FC<CohortAnalysisChartProps> = ({
         ))}
       </div>
 
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={chartData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="cohort_month" />
-          <YAxis label={{ value: 'Percentage (%)', angle: -90, position: 'insideLeft' }} />
-          <Tooltip formatter={(value: number) => `${value.toFixed(1)}%`} />
-          <Legend />
-          <Bar dataKey="active_rate" fill="#10b981" name="Active Rate" radius={[4, 4, 0, 0]} />
-          <Bar dataKey="completion_rate" fill="#3b82f6" name="Completion Rate" radius={[4, 4, 0, 0]} />
-          <Bar dataKey="default_rate" fill="#ef4444" name="Default Rate" radius={[4, 4, 0, 0]} />
-        </BarChart>
-      </ResponsiveContainer>
+      <div style={{ width: '100%', height: 300, minWidth: 0 }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={chartData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="cohort_month" />
+            <YAxis label={{ value: 'Percentage (%)', angle: -90, position: 'insideLeft' }} />
+            <Tooltip formatter={(value: number) => `${value.toFixed(1)}%`} />
+            <Legend />
+            <Bar dataKey="active_rate" fill="#10b981" name="Active Rate" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="completion_rate" fill="#3b82f6" name="Completion Rate" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="default_rate" fill="#ef4444" name="Default Rate" radius={[4, 4, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
 
       <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-green-50 border border-green-200 rounded-lg p-4">

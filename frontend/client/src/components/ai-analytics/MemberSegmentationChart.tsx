@@ -70,26 +70,28 @@ export const MemberSegmentationChart: React.FC<MemberSegmentationChartProps> = (
         </p>
       </div>
 
-      <ResponsiveContainer width="100%" height={300}>
-        <PieChart>
-          <Pie
-            data={chartData as any}
-            cx="50%"
-            cy="50%"
-            labelLine={false}
-            label={(entry: any) => `${entry.percentage.toFixed(1)}%`}
-            outerRadius={80}
-            fill="#8884d8"
-            dataKey="count"
-          >
-            {chartData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-            ))}
-          </Pie>
-          <Tooltip formatter={(value: number) => `${value} members`} />
-          <Legend />
-        </PieChart>
-      </ResponsiveContainer>
+      <div style={{ width: '100%', height: 300, minWidth: 0 }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={chartData as any}
+              cx="50%"
+              cy="50%"
+              labelLine={false}
+              label={(entry: any) => `${entry.percentage.toFixed(1)}%`}
+              outerRadius={80}
+              fill="#8884d8"
+              dataKey="count"
+            >
+              {chartData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              ))}
+            </Pie>
+            <Tooltip formatter={(value: number) => `${value} members`} />
+            <Legend />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
 
       <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         {chartData.map((segment, index) => (

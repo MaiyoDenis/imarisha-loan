@@ -1,5 +1,5 @@
-from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt
+from flask import Blueprint, request, jsonify, session
+from app.utils.decorators import login_required
 from app.models import Supplier, SupplierProduct, LoanProduct, StockMovement, User
 from app import db
 from app.services import audit_service, AuditEventType, RiskLevel
@@ -8,12 +8,16 @@ bp = Blueprint('suppliers', __name__, url_prefix='/api/suppliers')
 
 def check_admin_permission():
     """Check if current user is admin or procurement_officer"""
-    claims = get_jwt()
-    role = claims.get('role')
-    return role in ['admin', 'procurement_officer']
+    user_id = session.get('user_id')
+    if not user_id:
+        return False
+    user = User.query.get(user_id)
+    if not user:
+        return False
+    return user.role.name in ['admin', 'procurement_officer']
 
 @bp.route('', methods=['GET'])
-@jwt_required()
+@login_required
 def get_suppliers():
     """Get all suppliers"""
     page = request.args.get('page', 1, type=int)
@@ -38,7 +42,7 @@ def get_suppliers():
     })
 
 @bp.route('/<int:id>', methods=['GET'])
-@jwt_required()
+@login_required
 def get_supplier(id):
     """Get a specific supplier with products"""
     supplier = Supplier.query.get(id)
@@ -51,7 +55,7 @@ def get_supplier(id):
     return jsonify(supplier_dict)
 
 @bp.route('', methods=['POST'])
-@jwt_required()
+@login_required
 def create_supplier():
     """Create a new supplier (admin/procurement officer only)"""
     if not check_admin_permission():
@@ -82,7 +86,7 @@ def create_supplier():
         
         audit_service.log_event(
             event_type=AuditEventType.DATA_CREATED,
-            user_id=get_jwt()['sub'],
+            user_id=session.get('user_id'),
             resource="supplier",
             action="create",
             entity_id=supplier.id,
@@ -103,7 +107,7 @@ def create_supplier():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/<int:id>', methods=['PUT'])
-@jwt_required()
+@login_required
 def update_supplier(id):
     """Update a supplier"""
     if not check_admin_permission():
@@ -143,7 +147,7 @@ def update_supplier(id):
         
         audit_service.log_event(
             event_type=AuditEventType.DATA_UPDATED,
-            user_id=get_jwt()['sub'],
+            user_id=session.get('user_id'),
             resource="supplier",
             action="update",
             entity_id=id,
@@ -161,7 +165,7 @@ def update_supplier(id):
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/<int:id>', methods=['DELETE'])
-@jwt_required()
+@login_required
 def delete_supplier(id):
     """Delete a supplier"""
     if not check_admin_permission():
@@ -177,7 +181,7 @@ def delete_supplier(id):
         
         audit_service.log_event(
             event_type=AuditEventType.DATA_DELETED,
-            user_id=get_jwt()['sub'],
+            user_id=session.get('user_id'),
             resource="supplier",
             action="delete",
             entity_id=id,
@@ -192,7 +196,7 @@ def delete_supplier(id):
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/<int:id>/products', methods=['GET'])
-@jwt_required()
+@login_required
 def get_supplier_products(id):
     """Get all products for a supplier"""
     supplier = Supplier.query.get(id)
@@ -204,7 +208,7 @@ def get_supplier_products(id):
     return jsonify([product.to_dict() for product in products])
 
 @bp.route('/<int:supplier_id>/products', methods=['POST'])
-@jwt_required()
+@login_required
 def add_supplier_product(supplier_id):
     """Add a product to a supplier"""
     if not check_admin_permission():
@@ -249,7 +253,7 @@ def add_supplier_product(supplier_id):
         
         audit_service.log_event(
             event_type=AuditEventType.DATA_CREATED,
-            user_id=get_jwt()['sub'],
+            user_id=session.get('user_id'),
             resource="supplier_product",
             action="create",
             entity_id=supplier_product.id,
@@ -270,7 +274,7 @@ def add_supplier_product(supplier_id):
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/products/<int:product_id>', methods=['DELETE'])
-@jwt_required()
+@login_required
 def remove_supplier_product(product_id):
     """Remove a product from a supplier"""
     if not check_admin_permission():
@@ -288,7 +292,7 @@ def remove_supplier_product(product_id):
         
         audit_service.log_event(
             event_type=AuditEventType.DATA_DELETED,
-            user_id=get_jwt()['sub'],
+            user_id=session.get('user_id'),
             resource="supplier_product",
             action="delete",
             entity_id=product_id,
@@ -306,7 +310,7 @@ def remove_supplier_product(product_id):
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/<int:supplier_id>/rating', methods=['PUT'])
-@jwt_required()
+@login_required
 def rate_supplier(supplier_id):
     """Rate a supplier"""
     if not check_admin_permission():
@@ -331,7 +335,7 @@ def rate_supplier(supplier_id):
         
         audit_service.log_event(
             event_type=AuditEventType.DATA_UPDATED,
-            user_id=get_jwt()['sub'],
+            user_id=session.get('user_id'),
             resource="supplier",
             action="rate",
             entity_id=supplier_id,

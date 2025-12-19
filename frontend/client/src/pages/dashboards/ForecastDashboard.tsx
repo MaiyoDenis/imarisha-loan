@@ -119,7 +119,15 @@ export default function ForecastDashboard() {
     window.URL.revokeObjectURL(url);
   };
 
-  if (isLoading) return <div className="flex justify-center items-center h-screen"><div className="animate-spin h-12 w-12 border-b-2 border-blue-600"></div></div>;
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="flex justify-center items-center h-screen">
+          <div className="animate-spin h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      </Layout>
+    );
+  }
   if (!dashboard || !dashboard.revenue_forecast) {
     const errorMsg = (dashboard as any)?.error || 'Failed to load dashboard';
     return (

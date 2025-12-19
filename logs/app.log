@@ -1,0 +1,168 @@
+2025-12-19 18:41:49,924 - root - INFO - MFA Service initialized successfully
+2025-12-19 18:41:49,930 - root - INFO - Audit Service initialized successfully
+2025-12-19 18:41:49,938 - root - INFO - Notification Service: Redis connection established
+2025-12-19 18:41:49,939 - root - INFO - Initialized 15 notification templates
+2025-12-19 18:41:49,940 - root - INFO - Notification Service initialized successfully
+2025-12-19 18:41:49,943 - root - INFO - Payment Service initialized in sandbox mode
+2025-12-19 18:41:49,945 - root - INFO - Risk Service initialized successfully
+2025-12-19 18:41:49,947 - root - INFO - Dashboard Service initialized successfully
+2025-12-19 18:41:49,953 - root - INFO - Currency Service: Redis connection established
+2025-12-19 18:41:49,954 - root - INFO - Currency Service initialized successfully
+2025-12-19 18:41:49,957 - root - INFO - USSD Service initialized with code: *123#
+2025-12-19 18:41:49,960 - root - INFO - BI Integration Service initialized
+2025-12-19 18:41:49,963 - root - INFO - KYC Service initialized
+2025-12-19 18:41:49,965 - root - INFO - AML Service initialized
+2025-12-19 18:41:49,969 - root - INFO - GDPR Service initialized
+2025-12-19 18:41:49,973 - root - INFO - Voice Assistant initialized
+2025-12-19 18:41:49,976 - root - INFO - Voice Analytics initialized
+2025-12-19 18:41:49,980 - root - INFO - Demand Forecasting initialized
+2025-12-19 18:41:49,985 - root - INFO - Inventory Optimization initialized
+2025-12-19 18:41:49,989 - root - INFO - ETL Service initialized
+2025-12-19 18:41:52,014 - app - INFO - Application initialized successfully
+2025-12-19 18:44:11,219 - root - INFO - MFA Service initialized successfully
+2025-12-19 18:44:11,233 - root - INFO - Audit Service initialized successfully
+2025-12-19 18:44:11,241 - root - INFO - Notification Service: Redis connection established
+2025-12-19 18:44:11,242 - root - INFO - Initialized 15 notification templates
+2025-12-19 18:44:11,243 - root - INFO - Notification Service initialized successfully
+2025-12-19 18:44:11,245 - root - INFO - Payment Service initialized in sandbox mode
+2025-12-19 18:44:11,249 - root - INFO - Risk Service initialized successfully
+2025-12-19 18:44:11,251 - root - INFO - Dashboard Service initialized successfully
+2025-12-19 18:44:11,260 - root - INFO - Currency Service: Redis connection established
+2025-12-19 18:44:11,261 - root - INFO - Currency Service initialized successfully
+2025-12-19 18:44:11,263 - root - INFO - USSD Service initialized with code: *123#
+2025-12-19 18:44:11,267 - root - INFO - BI Integration Service initialized
+2025-12-19 18:44:11,269 - root - INFO - KYC Service initialized
+2025-12-19 18:44:11,272 - root - INFO - AML Service initialized
+2025-12-19 18:44:11,276 - root - INFO - GDPR Service initialized
+2025-12-19 18:44:11,279 - root - INFO - Voice Assistant initialized
+2025-12-19 18:44:11,282 - root - INFO - Voice Analytics initialized
+2025-12-19 18:44:11,284 - root - INFO - Demand Forecasting initialized
+2025-12-19 18:44:11,286 - root - INFO - Inventory Optimization initialized
+2025-12-19 18:44:11,290 - root - INFO - ETL Service initialized
+2025-12-19 18:44:15,019 - app - INFO - Application initialized successfully
+2025-12-19 18:46:05,654 - root - INFO - MFA Service initialized successfully
+2025-12-19 18:46:05,655 - root - INFO - Audit Service initialized successfully
+2025-12-19 18:46:05,656 - root - INFO - Notification Service: Redis connection established
+2025-12-19 18:46:05,657 - root - INFO - Initialized 15 notification templates
+2025-12-19 18:46:05,657 - root - INFO - Notification Service initialized successfully
+2025-12-19 18:46:05,657 - root - INFO - Payment Service initialized in sandbox mode
+2025-12-19 18:46:05,658 - root - INFO - Risk Service initialized successfully
+2025-12-19 18:46:05,659 - root - INFO - Dashboard Service initialized successfully
+2025-12-19 18:46:05,661 - root - INFO - Currency Service: Redis connection established
+2025-12-19 18:46:05,661 - root - INFO - Currency Service initialized successfully
+2025-12-19 18:46:05,662 - root - INFO - USSD Service initialized with code: *123#
+2025-12-19 18:46:05,662 - root - INFO - BI Integration Service initialized
+2025-12-19 18:46:05,663 - root - INFO - KYC Service initialized
+2025-12-19 18:46:05,663 - root - INFO - AML Service initialized
+2025-12-19 18:46:05,664 - root - INFO - GDPR Service initialized
+2025-12-19 18:46:05,664 - root - INFO - Voice Assistant initialized
+2025-12-19 18:46:05,665 - root - INFO - Voice Analytics initialized
+2025-12-19 18:46:05,665 - root - INFO - Demand Forecasting initialized
+2025-12-19 18:46:05,666 - root - INFO - Inventory Optimization initialized
+2025-12-19 18:46:05,666 - root - INFO - ETL Service initialized
+2025-12-19 18:46:06,367 - app - INFO - Application initialized successfully
+2025-12-19 18:46:41,533 - root - INFO - MFA Service initialized successfully
+2025-12-19 18:46:41,534 - root - INFO - Audit Service initialized successfully
+2025-12-19 18:46:41,537 - root - INFO - Notification Service: Redis connection established
+2025-12-19 18:46:41,537 - root - INFO - Initialized 15 notification templates
+2025-12-19 18:46:41,538 - root - INFO - Notification Service initialized successfully
+2025-12-19 18:46:41,538 - root - INFO - Payment Service initialized in sandbox mode
+2025-12-19 18:46:41,539 - root - INFO - Risk Service initialized successfully
+2025-12-19 18:46:41,540 - root - INFO - Dashboard Service initialized successfully
+2025-12-19 18:46:41,543 - root - INFO - Currency Service: Redis connection established
+2025-12-19 18:46:41,543 - root - INFO - Currency Service initialized successfully
+2025-12-19 18:46:41,544 - root - INFO - USSD Service initialized with code: *123#
+2025-12-19 18:46:41,545 - root - INFO - BI Integration Service initialized
+2025-12-19 18:46:41,546 - root - INFO - KYC Service initialized
+2025-12-19 18:46:41,546 - root - INFO - AML Service initialized
+2025-12-19 18:46:41,547 - root - INFO - GDPR Service initialized
+2025-12-19 18:46:41,547 - root - INFO - Voice Assistant initialized
+2025-12-19 18:46:41,548 - root - INFO - Voice Analytics initialized
+2025-12-19 18:46:41,549 - root - INFO - Demand Forecasting initialized
+2025-12-19 18:46:41,549 - root - INFO - Inventory Optimization initialized
+2025-12-19 18:46:41,550 - root - INFO - ETL Service initialized
+2025-12-19 18:46:42,484 - app - INFO - Application initialized successfully
+2025-12-19 18:47:50,705 - root - INFO - MFA Service initialized successfully
+2025-12-19 18:47:50,706 - root - INFO - Audit Service initialized successfully
+2025-12-19 18:47:50,708 - root - INFO - Notification Service: Redis connection established
+2025-12-19 18:47:50,708 - root - INFO - Initialized 15 notification templates
+2025-12-19 18:47:50,709 - root - INFO - Notification Service initialized successfully
+2025-12-19 18:47:50,709 - root - INFO - Payment Service initialized in sandbox mode
+2025-12-19 18:47:50,710 - root - INFO - Risk Service initialized successfully
+2025-12-19 18:47:50,710 - root - INFO - Dashboard Service initialized successfully
+2025-12-19 18:47:50,712 - root - INFO - Currency Service: Redis connection established
+2025-12-19 18:47:50,712 - root - INFO - Currency Service initialized successfully
+2025-12-19 18:47:50,712 - root - INFO - USSD Service initialized with code: *123#
+2025-12-19 18:47:50,713 - root - INFO - BI Integration Service initialized
+2025-12-19 18:47:50,714 - root - INFO - KYC Service initialized
+2025-12-19 18:47:50,715 - root - INFO - AML Service initialized
+2025-12-19 18:47:50,716 - root - INFO - GDPR Service initialized
+2025-12-19 18:47:50,718 - root - INFO - Voice Assistant initialized
+2025-12-19 18:47:50,719 - root - INFO - Voice Analytics initialized
+2025-12-19 18:47:50,720 - root - INFO - Demand Forecasting initialized
+2025-12-19 18:47:50,721 - root - INFO - Inventory Optimization initialized
+2025-12-19 18:47:50,722 - root - INFO - ETL Service initialized
+2025-12-19 18:47:51,703 - app - INFO - Application initialized successfully
+2025-12-19 18:57:39,221 - root - INFO - MFA Service initialized successfully
+2025-12-19 18:57:39,232 - root - INFO - Audit Service initialized successfully
+2025-12-19 18:57:39,250 - root - INFO - Notification Service: Redis connection established
+2025-12-19 18:57:39,251 - root - INFO - Initialized 15 notification templates
+2025-12-19 18:57:39,252 - root - INFO - Notification Service initialized successfully
+2025-12-19 18:57:39,254 - root - INFO - Payment Service initialized in sandbox mode
+2025-12-19 18:57:39,256 - root - INFO - Risk Service initialized successfully
+2025-12-19 18:57:39,259 - root - INFO - Dashboard Service initialized successfully
+2025-12-19 18:57:39,265 - root - INFO - Currency Service: Redis connection established
+2025-12-19 18:57:39,265 - root - INFO - Currency Service initialized successfully
+2025-12-19 18:57:39,268 - root - INFO - USSD Service initialized with code: *123#
+2025-12-19 18:57:39,271 - root - INFO - BI Integration Service initialized
+2025-12-19 18:57:39,274 - root - INFO - KYC Service initialized
+2025-12-19 18:57:39,276 - root - INFO - AML Service initialized
+2025-12-19 18:57:39,278 - root - INFO - GDPR Service initialized
+2025-12-19 18:57:39,281 - root - INFO - Voice Assistant initialized
+2025-12-19 18:57:39,283 - root - INFO - Voice Analytics initialized
+2025-12-19 18:57:39,285 - root - INFO - Demand Forecasting initialized
+2025-12-19 18:57:39,288 - root - INFO - Inventory Optimization initialized
+2025-12-19 18:57:39,290 - root - INFO - ETL Service initialized
+2025-12-19 18:57:42,212 - app - INFO - Application initialized successfully
+2025-12-19 19:09:08,779 - root - INFO - MFA Service initialized successfully
+2025-12-19 19:09:08,786 - root - INFO - Audit Service initialized successfully
+2025-12-19 19:09:08,789 - root - INFO - Notification Service: Redis connection established
+2025-12-19 19:09:08,789 - root - INFO - Initialized 15 notification templates
+2025-12-19 19:09:08,790 - root - INFO - Notification Service initialized successfully
+2025-12-19 19:09:08,791 - root - INFO - Payment Service initialized in sandbox mode
+2025-12-19 19:09:08,792 - root - INFO - Risk Service initialized successfully
+2025-12-19 19:09:08,792 - root - INFO - Dashboard Service initialized successfully
+2025-12-19 19:09:08,795 - root - INFO - Currency Service: Redis connection established
+2025-12-19 19:09:08,796 - root - INFO - Currency Service initialized successfully
+2025-12-19 19:09:08,797 - root - INFO - USSD Service initialized with code: *123#
+2025-12-19 19:09:08,799 - root - INFO - BI Integration Service initialized
+2025-12-19 19:09:08,800 - root - INFO - KYC Service initialized
+2025-12-19 19:09:08,801 - root - INFO - AML Service initialized
+2025-12-19 19:09:08,802 - root - INFO - GDPR Service initialized
+2025-12-19 19:09:08,803 - root - INFO - Voice Assistant initialized
+2025-12-19 19:09:08,804 - root - INFO - Voice Analytics initialized
+2025-12-19 19:09:08,805 - root - INFO - Demand Forecasting initialized
+2025-12-19 19:09:08,807 - root - INFO - Inventory Optimization initialized
+2025-12-19 19:09:08,808 - root - INFO - ETL Service initialized
+2025-12-19 19:09:12,119 - app - INFO - Application initialized successfully
+2025-12-19 19:16:01,133 - root - INFO - MFA Service initialized successfully
+2025-12-19 19:16:01,134 - root - INFO - Audit Service initialized successfully
+2025-12-19 19:16:01,135 - root - INFO - Notification Service: Redis connection established
+2025-12-19 19:16:01,135 - root - INFO - Initialized 15 notification templates
+2025-12-19 19:16:01,136 - root - INFO - Notification Service initialized successfully
+2025-12-19 19:16:01,136 - root - INFO - Payment Service initialized in sandbox mode
+2025-12-19 19:16:01,137 - root - INFO - Risk Service initialized successfully
+2025-12-19 19:16:01,138 - root - INFO - Dashboard Service initialized successfully
+2025-12-19 19:16:01,140 - root - INFO - Currency Service: Redis connection established
+2025-12-19 19:16:01,140 - root - INFO - Currency Service initialized successfully
+2025-12-19 19:16:01,141 - root - INFO - USSD Service initialized with code: *123#
+2025-12-19 19:16:01,142 - root - INFO - BI Integration Service initialized
+2025-12-19 19:16:01,143 - root - INFO - KYC Service initialized
+2025-12-19 19:16:01,143 - root - INFO - AML Service initialized
+2025-12-19 19:16:01,144 - root - INFO - GDPR Service initialized
+2025-12-19 19:16:01,145 - root - INFO - Voice Assistant initialized
+2025-12-19 19:16:01,145 - root - INFO - Voice Analytics initialized
+2025-12-19 19:16:01,146 - root - INFO - Demand Forecasting initialized
+2025-12-19 19:16:01,146 - root - INFO - Inventory Optimization initialized
+2025-12-19 19:16:01,147 - root - INFO - ETL Service initialized
+2025-12-19 19:16:01,619 - app - INFO - Application initialized successfully

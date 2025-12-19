@@ -5,7 +5,7 @@ from app.utils.decorators import admin_required
 
 bp = Blueprint('permissions', __name__, url_prefix='/api/permissions')
 
-@bp.route('/', methods=['GET'])
+@bp.route('', methods=['GET'])
 @admin_required
 def get_permissions():
     """Retrieves all permissions."""

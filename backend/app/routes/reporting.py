@@ -1,5 +1,5 @@
-from flask import Blueprint, request, jsonify, send_file
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask import Blueprint, request, jsonify, send_file, session
+from app.utils.decorators import login_required
 from app import db
 from app.services.reporting_service import ReportingService
 from app.services.audit_service import audit_service, AuditEventType, RiskLevel
@@ -11,11 +11,11 @@ reporting_bp = Blueprint('reporting', __name__, url_prefix='/api/reports')
 
 
 @reporting_bp.route('/templates', methods=['GET'])
-@jwt_required()
+@login_required
 def get_report_templates():
     """Get all available report templates"""
     try:
-        user_id = get_jwt_identity()
+        user_id = session.get('user_id')
         
         result = ReportingService.get_available_templates()
         
@@ -35,11 +35,11 @@ def get_report_templates():
 
 
 @reporting_bp.route('/generate/compliance', methods=['GET'])
-@jwt_required()
+@login_required
 def generate_compliance_report():
     """Generate compliance report"""
     try:
-        user_id = get_jwt_identity()
+        user_id = session.get('user_id')
         branch_id = request.args.get('branch_id', type=int)
         
         report_data = ReportingService.generate_compliance_report(branch_id=branch_id)
@@ -60,11 +60,11 @@ def generate_compliance_report():
 
 
 @reporting_bp.route('/generate/operations', methods=['GET'])
-@jwt_required()
+@login_required
 def generate_operations_report():
     """Generate operations report"""
     try:
-        user_id = get_jwt_identity()
+        user_id = session.get('user_id')
         branch_id = request.args.get('branch_id', type=int)
         days_back = request.args.get('days_back', 1, type=int)
         
@@ -86,11 +86,11 @@ def generate_operations_report():
 
 
 @reporting_bp.route('/generate/financial', methods=['GET'])
-@jwt_required()
+@login_required
 def generate_financial_report():
     """Generate financial report"""
     try:
-        user_id = get_jwt_identity()
+        user_id = session.get('user_id')
         branch_id = request.args.get('branch_id', type=int)
         month = request.args.get('month', type=int)
         
@@ -112,11 +112,11 @@ def generate_financial_report():
 
 
 @reporting_bp.route('/generate/members', methods=['GET'])
-@jwt_required()
+@login_required
 def generate_member_report():
     """Generate member analytics report"""
     try:
-        user_id = get_jwt_identity()
+        user_id = session.get('user_id')
         branch_id = request.args.get('branch_id', type=int)
         
         report_data = ReportingService.generate_member_report(branch_id=branch_id)
@@ -137,11 +137,11 @@ def generate_member_report():
 
 
 @reporting_bp.route('/generate/risk', methods=['GET'])
-@jwt_required()
+@login_required
 def generate_risk_report():
     """Generate risk management report"""
     try:
-        user_id = get_jwt_identity()
+        user_id = session.get('user_id')
         branch_id = request.args.get('branch_id', type=int)
         
         report_data = ReportingService.generate_risk_report(branch_id=branch_id)
@@ -162,11 +162,11 @@ def generate_risk_report():
 
 
 @reporting_bp.route('/export/<report_type>/pdf', methods=['POST'])
-@jwt_required()
+@login_required
 def export_report_pdf(report_type):
     """Export report to PDF"""
     try:
-        user_id = get_jwt_identity()
+        user_id = session.get('user_id')
         data = request.get_json()
         
         report_data = data.get('report_data', {})
@@ -197,11 +197,11 @@ def export_report_pdf(report_type):
 
 
 @reporting_bp.route('/export/<report_type>/excel', methods=['POST'])
-@jwt_required()
+@login_required
 def export_report_excel(report_type):
     """Export report to Excel"""
     try:
-        user_id = get_jwt_identity()
+        user_id = session.get('user_id')
         data = request.get_json()
         
         report_data = data.get('report_data', {})
@@ -232,11 +232,11 @@ def export_report_excel(report_type):
 
 
 @reporting_bp.route('/email-report', methods=['POST'])
-@jwt_required()
+@login_required
 def email_report():
     """Send report via email"""
     try:
-        user_id = get_jwt_identity()
+        user_id = session.get('user_id')
         data = request.get_json()
         
         recipients = data.get('recipients', [])

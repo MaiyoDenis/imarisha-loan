@@ -6,7 +6,17 @@ bp = Blueprint('groups', __name__, url_prefix='/api/groups')
 
 @bp.route('', methods=['GET'])
 def get_groups():
-    groups = Group.query.order_by(Group.created_at.desc()).all()
+    from flask import session
+    from app.models import User
+    
+    query = Group.query
+    
+    if 'user_id' in session:
+        user = User.query.get(session['user_id'])
+        if user and user.role.name != 'admin' and user.branch_id:
+            query = query.filter_by(branch_id=user.branch_id)
+            
+    groups = query.order_by(Group.created_at.desc()).all()
     return jsonify([group.to_dict() for group in groups])
 
 @bp.route('', methods=['POST'])

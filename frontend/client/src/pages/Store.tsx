@@ -78,10 +78,12 @@ export default function Store() {
     contactPerson: "",
   });
 
-  const { data: suppliers = [], isLoading: suppliersLoading } = useQuery({
+  const { data: suppliersData, isLoading: suppliersLoading } = useQuery({
     queryKey: ["suppliers"],
     queryFn: () => api.getSuppliers(),
   });
+
+  const suppliers = suppliersData?.suppliers || [];
 
   const { data: lowStockProducts = [] } = useQuery<LowStockProduct[]>({
     queryKey: ["low-stock-products"],

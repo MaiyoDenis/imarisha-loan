@@ -1,6 +1,6 @@
 from app.models import (
     FieldOfficerVisit, MobileLoanApplication, PhotoDocument, SyncQueue,
-    FieldOfficerPerformance, BiometricAuth, User, Member, LoanType, Loan
+    FieldOfficerPerformance, BiometricAuth, User, Member, LoanType, Loan, Role
 )
 from app import db
 from sqlalchemy import func, desc, and_
@@ -307,9 +307,9 @@ class FieldOperationsService:
         try:
             from app.models import User, Branch
             
-            officers = User.query.join(User.branch).filter(
+            officers = User.query.join(User.branch).join(Role).filter(
                 User.branch_id == branch_id,
-                User.role == 'field_officer'
+                Role.name == 'field_officer'
             ).all()
             
             team_data = []

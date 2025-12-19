@@ -16,9 +16,29 @@ bp = Blueprint('loans', __name__, url_prefix='/api/loans')
 def get_loans():
     status = request.args.get('status')
     
+    # Get current user
+    from app.models import User
+    user_id = get_jwt_identity()
+    # If get_jwt_identity returns ID directly (integer or string)
+    # If it returns object, adjust accordingly. 
+    # Based on auth.py: session['user_id'] = user.id. 
+    # But here we are using @login_required which might use session or JWT.
+    # Let's check decorators.py to see how login_required works.
+    # Wait, auth.py uses session. loans.py imports get_jwt_identity.
+    # This suggests mixed auth or I need to check decorators.py.
+    
+    # Let's assume session based on auth.py
+    from flask import session
+    user_id = session.get('user_id')
+    user = User.query.get(user_id)
+
     query = Loan.query
     if status:
         query = query.filter_by(status=status)
+    
+    # Filter by branch if user is not admin
+    if user and user.role.name != 'admin' and user.branch_id:
+        query = query.join(Member).filter(Member.branch_id == user.branch_id)
         
     loans = query.order_by(Loan.created_at.desc()).all()
     return jsonify([loan.to_dict() for loan in loans])

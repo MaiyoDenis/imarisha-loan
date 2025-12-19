@@ -56,6 +56,14 @@ const sidebarItems = [
 export function AppSidebar() {
   const [location, navigate] = useLocation();
   const { toast } = useToast();
+  
+  // Get user from local storage
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : null;
+  
+  const userInitials = user ? `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase() : 'U';
+  const userName = user ? `${user.firstName} ${user.lastName}` : 'User';
+  const userRole = user?.role ? user.role.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'User';
 
   const handleLogout = async () => {
     try {
@@ -114,11 +122,11 @@ export function AppSidebar() {
         <div className="p-2 group-data-[collapsible=icon]:hidden">
           <div className="flex items-center gap-3 px-2 py-3 mb-2 rounded-md bg-sidebar-accent/50">
             <div className="h-8 w-8 rounded-full bg-sidebar-primary flex items-center justify-center text-sidebar-primary-foreground font-bold text-xs flex-shrink-0">
-              AD
+              {userInitials}
             </div>
             <div className="flex-1 overflow-hidden min-w-0">
-              <p className="text-xs md:text-sm font-medium truncate">Admin User</p>
-              <p className="text-xs text-sidebar-foreground/50 truncate">Super Admin</p>
+              <p className="text-xs md:text-sm font-medium truncate">{userName}</p>
+              <p className="text-xs text-sidebar-foreground/50 truncate">{userRole}</p>
             </div>
           </div>
           <Button 

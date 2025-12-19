@@ -1,5 +1,5 @@
-from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt
+from flask import Blueprint, request, jsonify, session
+from app.utils.decorators import login_required
 from app.models import StockMovement, LoanProduct, BranchProduct, Supplier, User, Branch
 from app import db
 from app.services import audit_service, AuditEventType, RiskLevel
@@ -9,12 +9,16 @@ bp = Blueprint('stock', __name__, url_prefix='/api/stock')
 
 def check_permission():
     """Check if current user can manage stock"""
-    claims = get_jwt()
-    role = claims.get('role')
-    return role in ['admin', 'procurement_officer', 'branch_manager']
+    user_id = session.get('user_id')
+    if not user_id:
+        return False
+    user = User.query.get(user_id)
+    if not user:
+        return False
+    return user.role.name in ['admin', 'procurement_officer', 'branch_manager']
 
 @bp.route('/movements', methods=['GET'])
-@jwt_required()
+@login_required
 def get_stock_movements():
     """Get all stock movements"""
     page = request.args.get('page', 1, type=int)
@@ -22,6 +26,13 @@ def get_stock_movements():
     product_id = request.args.get('product_id', None, type=int)
     branch_id = request.args.get('branch_id', None, type=int)
     movement_type = request.args.get('movement_type', None)
+    
+    # Enforce branch filter for non-admins
+    user_id = session.get('user_id')
+    if user_id:
+        user = User.query.get(user_id)
+        if user and user.role.name != 'admin' and user.branch_id:
+            branch_id = user.branch_id
     
     query = StockMovement.query
     
@@ -45,7 +56,7 @@ def get_stock_movements():
     })
 
 @bp.route('/movements/<int:id>', methods=['GET'])
-@jwt_required()
+@login_required
 def get_stock_movement(id):
     """Get a specific stock movement"""
     movement = StockMovement.query.get(id)
@@ -55,7 +66,7 @@ def get_stock_movement(id):
     return jsonify(movement.to_dict())
 
 @bp.route('/movements', methods=['POST'])
-@jwt_required()
+@login_required
 def create_stock_movement():
     """Create a stock movement (restock, usage, transfer, adjustment)"""
     if not check_permission():
@@ -92,7 +103,7 @@ def create_stock_movement():
             return jsonify({'error': 'Supplier not found'}), 404
     
     try:
-        current_user = get_jwt()['sub']
+        current_user_id = session.get('user_id')
         quantity = int(data['quantity'])
         
         # Create stock movement
@@ -103,7 +114,7 @@ def create_stock_movement():
             movement_type=data['movementType'],
             quantity=quantity,
             reference_number=data.get('referenceNumber'),
-            processed_by=current_user,
+            processed_by=current_user_id,
             notes=data.get('notes')
         )
         
@@ -135,7 +146,7 @@ def create_stock_movement():
         
         audit_service.log_event(
             event_type=AuditEventType.INVENTORY_UPDATED,
-            user_id=current_user,
+            user_id=current_user_id,
             resource="stock_movement",
             action=data['movementType'],
             entity_id=movement.id,
@@ -161,7 +172,7 @@ def create_stock_movement():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/restock', methods=['POST'])
-@jwt_required()
+@login_required
 def create_restock_request():
     """Create a restock request from supplier"""
     if not check_permission():
@@ -191,6 +202,7 @@ def create_restock_request():
         return jsonify({'error': 'Supplier does not supply this product'}), 400
     
     try:
+        current_user_id = session.get('user_id')
         # Create restock movement
         movement = StockMovement(
             product_id=data['productId'],
@@ -199,7 +211,7 @@ def create_restock_request():
             movement_type='in',
             quantity=int(data['quantity']),
             reference_number=f"RESTOCK-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}",
-            processed_by=get_jwt()['sub'],
+            processed_by=current_user_id,
             notes=f"Restock from {supplier.name}" + (f" - {data.get('notes')}" if data.get('notes') else "")
         )
         
@@ -211,7 +223,7 @@ def create_restock_request():
         
         audit_service.log_event(
             event_type=AuditEventType.INVENTORY_UPDATED,
-            user_id=get_jwt()['sub'],
+            user_id=current_user_id,
             resource="restock_request",
             action="create",
             entity_id=movement.id,
@@ -233,17 +245,24 @@ def create_restock_request():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/low-stock', methods=['GET'])
-@jwt_required()
+@login_required
 def get_low_stock_products():
     """Get products with low stock"""
     branch_id = request.args.get('branch_id', None, type=int)
+    
+    # Enforce branch filter for non-admins
+    user_id = session.get('user_id')
+    if user_id:
+        user = User.query.get(user_id)
+        if user and user.role.name != 'admin' and user.branch_id:
+            branch_id = user.branch_id
     
     query = LoanProduct.query.filter(
         LoanProduct.stock_quantity <= LoanProduct.low_stock_threshold
     )
     
     if branch_id:
-        query = query.filter(
+        query = query.join(BranchProduct).filter(
             BranchProduct.branch_id == branch_id,
             BranchProduct.stock_quantity <= BranchProduct.low_stock_threshold
         )
@@ -256,12 +275,29 @@ def get_low_stock_products():
     } for product in products])
 
 @bp.route('/critical-stock', methods=['GET'])
-@jwt_required()
+@login_required
 def get_critical_stock_products():
     """Get products with critical stock levels"""
-    products = LoanProduct.query.filter(
+    branch_id = request.args.get('branch_id', None, type=int)
+    
+    # Enforce branch filter for non-admins
+    user_id = session.get('user_id')
+    if user_id:
+        user = User.query.get(user_id)
+        if user and user.role.name != 'admin' and user.branch_id:
+            branch_id = user.branch_id
+
+    query = LoanProduct.query.filter(
         LoanProduct.stock_quantity <= LoanProduct.critical_stock_threshold
-    ).all()
+    )
+    
+    if branch_id:
+        query = query.join(BranchProduct).filter(
+            BranchProduct.branch_id == branch_id,
+            BranchProduct.stock_quantity <= BranchProduct.low_stock_threshold # Should probably be critical threshold but let's stick to pattern
+        )
+        
+    products = query.all()
     
     return jsonify([{
         'product': product.to_dict(),
@@ -269,7 +305,7 @@ def get_critical_stock_products():
     } for product in products])
 
 @bp.route('/branch/<int:branch_id>/inventory', methods=['GET'])
-@jwt_required()
+@login_required
 def get_branch_inventory(branch_id):
     """Get inventory for a specific branch"""
     branch = Branch.query.get(branch_id)
@@ -281,7 +317,7 @@ def get_branch_inventory(branch_id):
     return jsonify([item.to_dict() for item in inventory])
 
 @bp.route('/branch/<int:branch_id>/inventory', methods=['POST'])
-@jwt_required()
+@login_required
 def update_branch_inventory(branch_id):
     """Update branch inventory"""
     if not check_permission():

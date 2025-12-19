@@ -1,30 +1,42 @@
-from flask import Blueprint, jsonify
-from app.models import Loan, SavingsAccount, Member
+from flask import Blueprint, jsonify, session
+from app.models import Loan, SavingsAccount, Member, User
 from app import db
 from sqlalchemy import func
 from datetime import datetime, timedelta
 from app.services.analytics_service import AnalyticsService
+from app.utils.decorators import login_required
 
 bp = Blueprint('dashboard', __name__, url_prefix='/api/dashboard')
 
 @bp.route('/stats', methods=['GET'])
+@login_required
 def get_dashboard_stats():
-    # Total Active Loans
-    active_loans_sum = db.session.query(func.sum(Loan.outstanding_balance))\
-        .filter(Loan.status == 'active').scalar() or 0
-        
-    # Total Savings
-    savings_sum = db.session.query(func.sum(SavingsAccount.balance)).scalar() or 0
+    user_id = session.get('user_id')
+    user = User.query.get(user_id)
     
-    # Active Members
-    active_members_count = Member.query.filter_by(status='active').count()
+    # Base queries
+    loans_query = db.session.query(func.sum(Loan.outstanding_balance)).filter(Loan.status == 'disbursed')
+    savings_query = db.session.query(func.sum(SavingsAccount.balance))
+    members_query = Member.query.filter_by(status='active')
     
-    # Arrears Count (Active loans overdue by 7 days)
     seven_days_ago = datetime.utcnow() - timedelta(days=7)
-    arrears_count = Loan.query.filter(
-        Loan.status == 'active',
+    arrears_query = Loan.query.filter(
+        Loan.status == 'disbursed',
         Loan.due_date < seven_days_ago
-    ).count()
+    )
+    
+    # Filter by branch if user is not admin
+    if user.role.name != 'admin' and user.branch_id:
+        loans_query = loans_query.join(Member).filter(Member.branch_id == user.branch_id)
+        savings_query = savings_query.join(Member).filter(Member.branch_id == user.branch_id)
+        members_query = members_query.filter(Member.branch_id == user.branch_id)
+        arrears_query = arrears_query.join(Member).filter(Member.branch_id == user.branch_id)
+
+    # Execute queries
+    active_loans_sum = loans_query.scalar() or 0
+    savings_sum = savings_query.scalar() or 0
+    active_members_count = members_query.count()
+    arrears_count = arrears_query.count()
     
     return jsonify({
         'totalActiveLoans': str(active_loans_sum),
@@ -34,11 +46,16 @@ def get_dashboard_stats():
     })
 
 @bp.route('/analytics', methods=['GET'])
+@login_required
 def get_analytics():
     try:
-        portfolio_metrics = AnalyticsService.get_portfolio_metrics()
-        repayment_forecast = AnalyticsService.get_repayment_forecast()
-        customer_segments = AnalyticsService.get_customer_segments()
+        user_id = session.get('user_id')
+        user = User.query.get(user_id)
+        branch_id = user.branch_id if user.role.name != 'admin' else None
+
+        portfolio_metrics = AnalyticsService.get_portfolio_metrics(branch_id=branch_id)
+        repayment_forecast = AnalyticsService.get_repayment_forecast(branch_id=branch_id)
+        customer_segments = AnalyticsService.get_customer_segments(branch_id=branch_id)
         
         return jsonify({
             'portfolio': portfolio_metrics,

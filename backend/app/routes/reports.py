@@ -11,7 +11,16 @@ bp = Blueprint('reports', __name__, url_prefix='/api/reports')
 @staff_required
 def export_portfolio():
     try:
-        csv_content = ReportService.generate_loan_portfolio_report()
+        from flask import session
+        from app.models import User
+        
+        branch_id = None
+        if 'user_id' in session:
+            user = User.query.get(session['user_id'])
+            if user and user.role.name != 'admin':
+                branch_id = user.branch_id
+                
+        csv_content = ReportService.generate_loan_portfolio_report(branch_id=branch_id)
         
         return Response(
             csv_content,
@@ -26,6 +35,15 @@ def export_portfolio():
 @staff_required
 def export_transactions():
     try:
+        from flask import session
+        from app.models import User
+        
+        branch_id = None
+        if 'user_id' in session:
+            user = User.query.get(session['user_id'])
+            if user and user.role.name != 'admin':
+                branch_id = user.branch_id
+                
         start_date_str = request.args.get('startDate')
         end_date_str = request.args.get('endDate')
         
@@ -37,7 +55,7 @@ def export_transactions():
             end_date = datetime.utcnow()
             start_date = end_date - timedelta(days=30)
             
-        csv_content = ReportService.generate_transaction_report(start_date, end_date)
+        csv_content = ReportService.generate_transaction_report(start_date, end_date, branch_id=branch_id)
         
         filename = f"transactions_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}.csv"
         
@@ -54,7 +72,16 @@ def export_transactions():
 @staff_required
 def export_arrears():
     try:
-        csv_content = ReportService.generate_arrears_report()
+        from flask import session
+        from app.models import User
+        
+        branch_id = None
+        if 'user_id' in session:
+            user = User.query.get(session['user_id'])
+            if user and user.role.name != 'admin':
+                branch_id = user.branch_id
+                
+        csv_content = ReportService.generate_arrears_report(branch_id=branch_id)
         
         return Response(
             csv_content,
