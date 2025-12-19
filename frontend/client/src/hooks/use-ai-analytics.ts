@@ -98,14 +98,7 @@ interface CohortResponse {
 export const useArrearsForcast = (branchId?: number, monthsAhead = 12) => {
   return useQuery<ArrearsForcast>({
     queryKey: ['arrears-forecast', branchId, monthsAhead],
-    queryFn: async () => {
-      const params = new URLSearchParams({
-        months_ahead: monthsAhead.toString(),
-        ...(branchId && { branch_id: branchId.toString() }),
-      });
-
-      return api.get(`/ai-analytics/arrears-forecast?${params}`);
-    },
+    queryFn: () => api.getArrearsForcast(monthsAhead, branchId),
     staleTime: 5 * 60 * 1000,
     retry: 1,
     gcTime: 10 * 60 * 1000,
@@ -115,13 +108,7 @@ export const useArrearsForcast = (branchId?: number, monthsAhead = 12) => {
 export const useMemberBehavior = (branchId?: number) => {
   return useQuery<MemberBehavior>({
     queryKey: ['member-behavior', branchId],
-    queryFn: async () => {
-      const params = new URLSearchParams(
-        branchId ? { branch_id: branchId.toString() } : {}
-      );
-
-      return api.get(`/ai-analytics/member-behavior?${params}`);
-    },
+    queryFn: () => api.getMemberBehavior(branchId),
     staleTime: 5 * 60 * 1000,
     retry: 1,
     gcTime: 10 * 60 * 1000,
@@ -131,8 +118,11 @@ export const useMemberBehavior = (branchId?: number) => {
 export const useClvPrediction = (memberId: number) => {
   return useQuery<CLVPrediction>({
     queryKey: ['clv-prediction', memberId],
-
-    queryFn: () => api.get(`/ai-analytics/clv-prediction/${memberId}`),
+    queryFn: async () => {
+      const response = await fetch(`/api/ai-analytics/clv-prediction/${memberId}`);
+      if (!response.ok) throw new Error('Failed to fetch CLV prediction');
+      return response.json();
+    },
     enabled: !!memberId,
     staleTime: 5 * 60 * 1000,
     retry: 1,
@@ -150,7 +140,9 @@ export const useSeasonalDemand = (productId?: number, monthsAhead = 12, branchId
         ...(branchId && { branch_id: branchId.toString() }),
       });
 
-      return api.get(`/ai-analytics/seasonal-demand?${params}`);
+      const response = await fetch(`/api/ai-analytics/seasonal-demand?${params}`);
+      if (!response.ok) throw new Error('Failed to fetch seasonal demand');
+      return response.json();
     },
     staleTime: 5 * 60 * 1000,
     retry: 1,
@@ -161,14 +153,7 @@ export const useSeasonalDemand = (productId?: number, monthsAhead = 12, branchId
 export const useAtRiskMembers = (branchId?: number, threshold = 0.6) => {
   return useQuery<AtRiskResponse>({
     queryKey: ['at-risk-members', branchId, threshold],
-    queryFn: async () => {
-      const params = new URLSearchParams({
-        threshold: threshold.toString(),
-        ...(branchId && { branch_id: branchId.toString() }),
-      });
-
-      return api.get(`/ai-analytics/at-risk-members?${params}`);
-    },
+    queryFn: () => api.getAtRiskMembers(threshold, branchId),
     staleTime: 5 * 60 * 1000,
     retry: 1,
     gcTime: 10 * 60 * 1000,
@@ -178,13 +163,7 @@ export const useAtRiskMembers = (branchId?: number, threshold = 0.6) => {
 export const useCohortAnalysis = (branchId?: number) => {
   return useQuery<CohortResponse>({
     queryKey: ['cohort-analysis', branchId],
-    queryFn: async () => {
-      const params = new URLSearchParams(
-        branchId ? { branch_id: branchId.toString() } : {}
-      );
-
-      return api.get(`/ai-analytics/cohort-analysis?${params}`);
-    },
+    queryFn: () => api.getCohortAnalysis(branchId),
     staleTime: 5 * 60 * 1000,
     retry: 1,
     gcTime: 10 * 60 * 1000,
@@ -194,13 +173,7 @@ export const useCohortAnalysis = (branchId?: number) => {
 export const useAISummary = (branchId?: number) => {
   return useQuery({
     queryKey: ['ai-summary', branchId],
-    queryFn: async () => {
-      const params = new URLSearchParams(
-        branchId ? { branch_id: branchId.toString() } : {}
-      );
-
-      return api.get(`/ai-analytics/summary?${params}`);
-    },
+    queryFn: () => api.getAIAnalytics(),
     staleTime: 5 * 60 * 1000,
     retry: 1,
     gcTime: 10 * 60 * 1000,

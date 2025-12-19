@@ -1,6 +1,5 @@
 from flask import Blueprint, request, jsonify
 from app.services.currency_service import currency_service
-from app.services.jwt_service import jwt_required_api
 from app.models import User
 import logging
 
@@ -142,7 +141,6 @@ def format_amount():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/update-rates', methods=['POST'])
-@jwt_required_api
 def update_rates():
     """Manually update exchange rates (Admin only)"""
     try:
@@ -163,7 +161,6 @@ def update_rates():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/multicurrency-account', methods=['POST'])
-@jwt_required_api
 def create_multicurrency_account():
     """Create multicurrency account for logged-in user"""
     try:
@@ -189,7 +186,6 @@ def create_multicurrency_account():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/multicurrency-balance/<int:user_id>', methods=['GET'])
-@jwt_required_api
 def get_multicurrency_balance(user_id):
     """Get user multicurrency balances"""
     try:

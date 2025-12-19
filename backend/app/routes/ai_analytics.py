@@ -1,5 +1,4 @@
 from flask import Blueprint, request, jsonify
-from app.services.jwt_service import jwt_required_api
 from datetime import datetime
 from app import db
 from app.services import AIAnalyticsService
@@ -11,7 +10,6 @@ ai_analytics_bp = Blueprint('ai_analytics', __name__, url_prefix='/api/ai-analyt
 
 
 @ai_analytics_bp.route('/arrears-forecast', methods=['GET'])
-@jwt_required_api
 def forecast_arrears():
     """
     Forecast arrears rate using Prophet time series model.
@@ -41,7 +39,6 @@ def forecast_arrears():
 
 
 @ai_analytics_bp.route('/member-behavior', methods=['GET'])
-@jwt_required_api
 def analyze_member_behavior():
     """
     Analyze member behavior and segment them using clustering.
@@ -67,7 +64,6 @@ def analyze_member_behavior():
 
 
 @ai_analytics_bp.route('/clv-prediction/<int:member_id>', methods=['GET'])
-@jwt_required_api
 def predict_clv(member_id):
     """
     Predict Customer Lifetime Value (CLV) for a specific member.
@@ -90,7 +86,6 @@ def predict_clv(member_id):
 
 
 @ai_analytics_bp.route('/seasonal-demand', methods=['GET'])
-@jwt_required_api
 def forecast_seasonal_demand():
     """
     Forecast seasonal demand patterns for products.
@@ -122,7 +117,6 @@ def forecast_seasonal_demand():
 
 
 @ai_analytics_bp.route('/lifecycle-stage/<int:member_id>', methods=['GET'])
-@jwt_required_api
 def get_lifecycle_stage(member_id):
     """
     Get member lifecycle stage (onboarding, active, mature, vip, at_risk, inactive).
@@ -145,7 +139,6 @@ def get_lifecycle_stage(member_id):
 
 
 @ai_analytics_bp.route('/at-risk-members', methods=['GET'])
-@jwt_required_api
 def identify_at_risk_members():
     """
     Identify members at risk of defaulting.
@@ -175,7 +168,6 @@ def identify_at_risk_members():
 
 
 @ai_analytics_bp.route('/cohort-analysis', methods=['GET'])
-@jwt_required_api
 def get_cohort_analysis():
     """
     Get cohort analysis for member retention and activity patterns.
@@ -201,7 +193,6 @@ def get_cohort_analysis():
 
 
 @ai_analytics_bp.route('/summary', methods=['GET'])
-@jwt_required_api
 def get_ai_summary():
     """
     Get comprehensive AI analytics summary combining multiple insights.

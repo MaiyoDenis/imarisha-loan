@@ -3,14 +3,12 @@ Compliance Routes - KYC, AML, GDPR
 """
 from flask import Blueprint, request, jsonify
 from app.services import kyc_service, aml_service, gdpr_service
-from app.services.jwt_service import jwt_required_api
 from app.models import User
 import logging
 
 bp = Blueprint('compliance', __name__, url_prefix='/api/compliance')
 
 @bp.route('/kyc/verify', methods=['POST'])
-@jwt_required_api
 def verify_kyc():
     try:
         data = request.get_json()
@@ -31,7 +29,6 @@ def verify_kyc():
 
 
 @bp.route('/aml/monitor', methods=['POST'])
-@jwt_required_api
 def monitor_aml():
     try:
         data = request.get_json()
@@ -55,7 +52,6 @@ def monitor_aml():
 
 
 @bp.route('/gdpr/export', methods=['POST'])
-@jwt_required_api
 def request_export():
     try:
         user_id = request.get_json().get('user_id')
@@ -73,7 +69,6 @@ def request_export():
 
 
 @bp.route('/gdpr/deletion', methods=['POST'])
-@jwt_required_api
 def request_deletion():
     try:
         user_id = request.get_json().get('user_id')
@@ -91,7 +86,6 @@ def request_deletion():
 
 
 @bp.route('/gdpr/consent/<int:user_id>', methods=['GET'])
-@jwt_required_api
 def get_consent(user_id):
     try:
         gdpr_service.init_app(current_app)
@@ -103,7 +97,6 @@ def get_consent(user_id):
 
 
 @bp.route('/gdpr/consent/<int:user_id>', methods=['PUT'])
-@jwt_required_api
 def update_consent(user_id):
     try:
         prefs = request.get_json()

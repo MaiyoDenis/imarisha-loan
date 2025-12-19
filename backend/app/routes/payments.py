@@ -1,12 +1,10 @@
 from flask import Blueprint, request, jsonify
 from app.services.payment_service import payment_service
-from app.services.jwt_service import jwt_required_api
 from app.services import audit_service, AuditEventType, RiskLevel
 
 bp = Blueprint('payments', __name__, url_prefix='/api/payments')
 
 @bp.route('/stk-push', methods=['POST'])
-@jwt_required_api
 def stk_push():
     data = request.get_json()
     phone_number = data.get('phoneNumber')
@@ -52,7 +50,6 @@ def callback():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/register-c2b', methods=['POST'])
-@jwt_required_api
 def register_c2b():
     data = request.get_json()
     validation_url = data.get('validationUrl')
@@ -76,7 +73,6 @@ def register_c2b():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/transaction-status/<transaction_id>', methods=['GET'])
-@jwt_required_api
 def transaction_status(transaction_id):
     phone_number = request.args.get('phoneNumber')
     
@@ -106,7 +102,6 @@ def reconcile():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/retry/<transaction_id>', methods=['POST'])
-@jwt_required_api
 def retry_payment(transaction_id):
     try:
         result = payment_service.retry_failed_payment(transaction_id)
@@ -125,7 +120,6 @@ def retry_payment(transaction_id):
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/analytics', methods=['GET'])
-@jwt_required_api
 def analytics():
     days = request.args.get('days', 30, type=int)
     

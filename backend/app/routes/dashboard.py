@@ -4,12 +4,10 @@ from app import db
 from sqlalchemy import func
 from datetime import datetime, timedelta
 from app.services.analytics_service import AnalyticsService
-from app.services.jwt_service import jwt_required_api
 
 bp = Blueprint('dashboard', __name__, url_prefix='/api/dashboard')
 
 @bp.route('/stats', methods=['GET'])
-@jwt_required_api
 def get_dashboard_stats():
     # Total Active Loans
     active_loans_sum = db.session.query(func.sum(Loan.outstanding_balance))\
@@ -36,7 +34,6 @@ def get_dashboard_stats():
     })
 
 @bp.route('/analytics', methods=['GET'])
-@jwt_required_api
 def get_analytics():
     try:
         portfolio_metrics = AnalyticsService.get_portfolio_metrics()

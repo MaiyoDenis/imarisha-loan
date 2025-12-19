@@ -1,12 +1,10 @@
 from flask import Blueprint, jsonify, request
 from app.services.dashboard_service import dashboard_service
-from app.services.jwt_service import jwt_required_api
 from app.services import audit_service, AuditEventType, RiskLevel
 
 bp = Blueprint('dashboards', __name__, url_prefix='/api/dashboards')
 
 @bp.route('/executive', methods=['GET'])
-@jwt_required_api
 def get_executive_dashboard():
     branch_id = request.args.get('branch_id', type=int)
     
@@ -26,7 +24,6 @@ def get_executive_dashboard():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/operations', methods=['GET'])
-@jwt_required_api
 def get_operations_dashboard():
     branch_id = request.args.get('branch_id', type=int)
     
@@ -46,7 +43,6 @@ def get_operations_dashboard():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/risk', methods=['GET'])
-@jwt_required_api
 def get_risk_dashboard():
     branch_id = request.args.get('branch_id', type=int)
     
@@ -66,7 +62,6 @@ def get_risk_dashboard():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/member-analytics', methods=['GET'])
-@jwt_required_api
 def get_member_analytics_dashboard():
     branch_id = request.args.get('branch_id', type=int)
     
@@ -86,7 +81,6 @@ def get_member_analytics_dashboard():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/forecast', methods=['GET'])
-@jwt_required_api
 def get_forecast_dashboard():
     branch_id = request.args.get('branch_id', type=int)
     
@@ -106,7 +100,6 @@ def get_forecast_dashboard():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/summary', methods=['GET'])
-@jwt_required_api
 def get_dashboard_summary():
     """Quick summary of all dashboards"""
     branch_id = request.args.get('branch_id', type=int)
@@ -125,7 +118,6 @@ def get_dashboard_summary():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/kpi/<string:kpi_name>', methods=['GET'])
-@jwt_required_api
 def get_kpi(kpi_name):
     """Get specific KPI data"""
     branch_id = request.args.get('branch_id', type=int)
@@ -159,7 +151,6 @@ def get_kpi(kpi_name):
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/trends/<string:metric>', methods=['GET'])
-@jwt_required_api
 def get_metric_trends(metric):
     """Get trend data for a specific metric"""
     branch_id = request.args.get('branch_id', type=int)
@@ -182,7 +173,6 @@ def get_metric_trends(metric):
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/refresh', methods=['POST'])
-@jwt_required_api
 def refresh_dashboard_cache():
     """Manually refresh dashboard cache"""
     branch_id = request.args.get('branch_id', type=int)

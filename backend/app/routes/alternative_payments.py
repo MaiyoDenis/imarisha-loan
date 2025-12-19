@@ -1,6 +1,5 @@
 from flask import Blueprint, request, jsonify
 from app.services.alternative_payment_service import airtel_service, flutterwave_service, payment_router
-from app.services.jwt_service import jwt_required_api
 from app.models import User, Transaction
 from app import db
 import logging
@@ -25,7 +24,6 @@ def get_providers():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/airtel/initiate', methods=['POST'])
-@jwt_required_api
 def initiate_airtel_payment():
     """Initiate Airtel Money payment"""
     try:
@@ -78,7 +76,6 @@ def initiate_airtel_payment():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/airtel/status/<transaction_id>', methods=['GET'])
-@jwt_required_api
 def check_airtel_status(transaction_id):
     """Check Airtel Money transaction status"""
     try:
@@ -93,7 +90,6 @@ def check_airtel_status(transaction_id):
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/flutterwave/initiate', methods=['POST'])
-@jwt_required_api
 def initiate_flutterwave_payment():
     """Initiate Flutterwave payment"""
     try:
@@ -149,7 +145,6 @@ def initiate_flutterwave_payment():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/flutterwave/verify/<transaction_id>', methods=['GET'])
-@jwt_required_api
 def verify_flutterwave_payment(transaction_id):
     """Verify Flutterwave transaction"""
     try:
@@ -173,7 +168,6 @@ def verify_flutterwave_payment(transaction_id):
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/generic/initiate', methods=['POST'])
-@jwt_required_api
 def initiate_generic_payment():
     """Initiate payment with any provider (routing)"""
     try:
@@ -228,7 +222,6 @@ def initiate_generic_payment():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/transaction/<reference>', methods=['GET'])
-@jwt_required_api
 def get_transaction_status(reference):
     """Get transaction status by reference"""
     try:

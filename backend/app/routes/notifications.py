@@ -1,6 +1,5 @@
 from flask import Blueprint, request, jsonify
 from app.services.notification_service import notification_service, NotificationChannel, NotificationPriority
-from app.services.jwt_service import jwt_required_api
 from app.models import User
 from app import db
 import json
@@ -8,7 +7,6 @@ import json
 bp = Blueprint('notifications', __name__, url_prefix='/api/notifications')
 
 @bp.route('/send', methods=['POST'])
-@jwt_required_api
 def send_notification():
     data = request.get_json()
     
@@ -53,7 +51,6 @@ def send_notification():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/templates', methods=['GET'])
-@jwt_required_api
 def get_templates():
     templates = []
     
@@ -73,7 +70,6 @@ def get_templates():
     })
 
 @bp.route('/whatsapp/send', methods=['POST'])
-@jwt_required_api
 def send_whatsapp():
     data = request.get_json()
     
@@ -131,7 +127,6 @@ def whatsapp_delivery_callback():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/preferences/<int:user_id>', methods=['GET'])
-@jwt_required_api
 def get_notification_preferences(user_id):
     user = User.query.get(user_id)
     if not user:
@@ -151,7 +146,6 @@ def get_notification_preferences(user_id):
     })
 
 @bp.route('/preferences/<int:user_id>', methods=['PUT'])
-@jwt_required_api
 def update_notification_preferences(user_id):
     user = User.query.get(user_id)
     if not user:
@@ -192,7 +186,6 @@ def sms_delivery_callback():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/stats', methods=['GET'])
-@jwt_required_api
 def get_notification_stats():
     days = request.args.get('days', 30, type=int)
     
@@ -203,7 +196,6 @@ def get_notification_stats():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/history/<int:user_id>', methods=['GET'])
-@jwt_required_api
 def get_user_notification_history(user_id):
     user = User.query.get(user_id)
     if not user:
@@ -231,7 +223,6 @@ def get_user_notification_history(user_id):
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/<notification_id>/status', methods=['GET'])
-@jwt_required_api
 def get_notification_status(notification_id):
     try:
         notification = notification_service._get_notification(notification_id)

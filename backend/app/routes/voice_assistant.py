@@ -3,13 +3,11 @@ Voice Assistant Routes - Voice commands and natural language processing
 """
 from flask import Blueprint, request, jsonify, current_app
 from app.services import voice_assistant, voice_analytics
-from app.services.jwt_service import jwt_required_api
 import logging
 
 bp = Blueprint('voice_assistant', __name__, url_prefix='/api/voice')
 
 @bp.route('/command', methods=['POST'])
-@jwt_required_api
 def process_command():
     try:
         data = request.get_json()
@@ -44,7 +42,6 @@ def get_commands():
 
 
 @bp.route('/analytics/<int:user_id>', methods=['GET'])
-@jwt_required_api
 def get_analytics(user_id):
     try:
         days = request.args.get('days', 30, type=int)

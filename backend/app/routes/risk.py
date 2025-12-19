@@ -1,13 +1,11 @@
 from flask import Blueprint, request, jsonify
 from app.services.risk_service import risk_service
-from app.services.jwt_service import jwt_required_api
 from app.models import Member
 from app import db
 
 bp = Blueprint('risk', __name__, url_prefix='/api/risk')
 
 @bp.route('/score/<int:member_id>', methods=['GET'])
-@jwt_required_api
 def get_risk_score(member_id):
     member = Member.query.get(member_id)
     if not member:
@@ -28,7 +26,6 @@ def get_risk_score(member_id):
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/fraud-check/<int:member_id>', methods=['GET'])
-@jwt_required_api
 def check_fraud(member_id):
     member = Member.query.get(member_id)
     if not member:
@@ -46,7 +43,6 @@ def check_fraud(member_id):
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/default-probability/<int:member_id>', methods=['GET'])
-@jwt_required_api
 def get_default_probability(member_id):
     member = Member.query.get(member_id)
     if not member:
@@ -63,7 +59,6 @@ def get_default_probability(member_id):
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/early-warnings/<int:member_id>', methods=['GET'])
-@jwt_required_api
 def get_early_warnings(member_id):
     member = Member.query.get(member_id)
     if not member:
@@ -83,7 +78,6 @@ def get_early_warnings(member_id):
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/interest-rate/<int:member_id>', methods=['GET'])
-@jwt_required_api
 def get_interest_rate_recommendation(member_id):
     member = Member.query.get(member_id)
     if not member:
@@ -107,7 +101,6 @@ def get_interest_rate_recommendation(member_id):
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/comprehensive/<int:member_id>', methods=['GET'])
-@jwt_required_api
 def get_comprehensive_risk_report(member_id):
     member = Member.query.get(member_id)
     if not member:

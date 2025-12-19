@@ -1,7 +1,3 @@
-
-
-
-
 const API_BASE = import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_URL || "https://imarisha-loans.onrender.com/api";
 
 if (typeof window !== 'undefined') {
@@ -14,127 +10,17 @@ if (typeof window !== 'undefined') {
   });
 }
 
-function getAuthToken(): string | null {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('auth_token');
-  }
-  return null;
-}
-
-function setAuthToken(token: string): void {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('auth_token', token);
-  }
-}
-
-async function refreshAccessToken(): Promise<boolean> {
-  try {
-    const refreshToken = localStorage.getItem('refresh_token');
-    if (!refreshToken) return false;
-
-    const response = await fetch(`${API_BASE}/auth/refresh`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${refreshToken}`,
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('refresh_token');
-      localStorage.removeItem('user');
-      return false;
-    }
-
-    const data = await response.json();
-    if (data.access_token) {
-      setAuthToken(data.access_token);
-      return true;
-    }
-    return false;
-  } catch (error) {
-    console.error('Token refresh failed:', error);
-    return false;
-  }
-}
-
-let isRefreshing = false;
-let refreshSubscribers: ((token: string) => void)[] = [];
-
-function subscribeTokenRefresh(callback: (token: string) => void) {
-  refreshSubscribers.push(callback);
-}
-
-function onRefreshed(token: string) {
-  refreshSubscribers.forEach(callback => callback(token));
-  refreshSubscribers = [];
-}
-
-async function fetchAPI(endpoint: string, options: any = {}, retryCount: number = 0) {
-  const token = getAuthToken();
+async function fetchAPI(endpoint: string, options: any = {}) {
   const headers: any = {
     "Content-Type": "application/json",
     ...options?.headers,
   };
 
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
   const response = await fetch(`${API_BASE}${endpoint}`, {
     ...options,
     headers,
     credentials: "include",
   });
-
-  if (response.status === 401 && retryCount === 0) {
-    if (isRefreshing) {
-      return new Promise((resolve, reject) => {
-        subscribeTokenRefresh(async (newToken) => {
-          headers["Authorization"] = `Bearer ${newToken}`;
-          const retryResponse = await fetch(`${API_BASE}${endpoint}`, {
-            ...options,
-            headers,
-            credentials: "include",
-          });
-          if (!retryResponse.ok) {
-            reject(new Error("Request failed after token refresh"));
-          } else {
-            resolve(retryResponse.json());
-          }
-        });
-      });
-    }
-
-    isRefreshing = true;
-    const refreshed = await refreshAccessToken();
-    isRefreshing = false;
-
-    if (refreshed) {
-      const newToken = getAuthToken();
-      onRefreshed(newToken || '');
-      return fetchAPI(endpoint, options, 1);
-    } else {
-
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('refresh_token');
-      localStorage.removeItem('user');
-      if (typeof window !== 'undefined') {
-        const currentPath = window.location.pathname;
-        console.warn('[API] Auth failed - clearing tokens. Current path:', currentPath);
-        // Avoid redirect loop - only redirect from non-auth pages
-        if (currentPath !== '/' && !currentPath.includes('login') && !currentPath.includes('register')) {
-          console.log('[API] Redirecting to login with return URL:', currentPath);
-          window.location.href = '/?return=' + encodeURIComponent(currentPath);
-        } else if (currentPath !== '/') {
-          // If already on login/register, just redirect home
-          window.location.href = '/';
-        }
-      }
-      throw new Error('Authentication required');
-    }
-  }
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: "Request failed" }));
@@ -144,6 +30,8 @@ async function fetchAPI(endpoint: string, options: any = {}, retryCount: number 
   return response.json();
 }
 
+export const apiCall = fetchAPI;
+
 export const api = {
   // Auth
   login: async (username: string, password: string) => {
@@ -152,13 +40,7 @@ export const api = {
       body: JSON.stringify({ username, password }),
     });
 
-    // Persist tokens and user for subsequent authorized requests
-    const access = data?.access_token || data?.tokens?.access_token;
-    const refresh = data?.refresh_token || data?.tokens?.refresh_token;
-    if (access) setAuthToken(access);
-    if (refresh) localStorage.setItem('refresh_token', refresh);
     if (data?.user) localStorage.setItem('user', JSON.stringify(data.user));
-
     return data;
   },
   
@@ -168,14 +50,10 @@ export const api = {
       body: JSON.stringify(data),
     }),
 
-  refresh: async () => {
-    const data = await fetchAPI("/auth/refresh", { method: "POST" });
-    const access = data?.access_token;
-    if (access) setAuthToken(access);
-    return data;
+  logout: () => {
+    localStorage.removeItem('user');
+    return Promise.resolve({ status: 'success' });
   },
-
-  logout: () => fetchAPI("/auth/logout", { method: "POST" }),
   
   me: () => fetchAPI("/auth/me"),
 
@@ -225,6 +103,26 @@ export const api = {
   getAIAnalytics: () => fetchAPI("/ai-analytics/summary"),
   getAIInsights: () => fetchAPI("/ai-analytics/insights"),
   getAIForecasts: () => fetchAPI("/ai-analytics/forecasts"),
+  getArrearsForcast: (monthsAhead = 12, branchId?: number) => {
+    const params = new URLSearchParams();
+    params.append("months_ahead", monthsAhead.toString());
+    if (branchId) params.append("branch_id", branchId.toString());
+    return fetchAPI(`/ai-analytics/arrears-forecast?${params}`);
+  },
+  getMemberBehavior: (branchId?: number) => {
+    const params = branchId ? `?branch_id=${branchId}` : "";
+    return fetchAPI(`/ai-analytics/member-behavior${params}`);
+  },
+  getAtRiskMembers: (threshold = 0.6, branchId?: number) => {
+    const params = new URLSearchParams();
+    params.append("threshold", threshold.toString());
+    if (branchId) params.append("branch_id", branchId.toString());
+    return fetchAPI(`/ai-analytics/at-risk-members?${params}`);
+  },
+  getCohortAnalysis: (branchId?: number) => {
+    const params = branchId ? `?branch_id=${branchId}` : "";
+    return fetchAPI(`/ai-analytics/cohort-analysis${params}`);
+  },
 
   // Branches
   getBranches: () => fetchAPI("/branches"),
@@ -407,102 +305,34 @@ export const api = {
     }),
   deleteSupplier: (id: number) =>
     fetchAPI(`/suppliers/${id}`, { method: "DELETE" }),
-  getSupplierProducts: (supplierId: number) =>
-    fetchAPI(`/suppliers/${supplierId}/products`),
-  addSupplierProduct: (supplierId: number, data: any) =>
-    fetchAPI(`/suppliers/${supplierId}/products`, {
-      method: "POST",
-      body: JSON.stringify(data),
-    }),
-  removeSupplierProduct: (productId: number) =>
-    fetchAPI(`/suppliers/products/${productId}`, { method: "DELETE" }),
-  rateSupplier: (supplierId: number, rating: number) =>
-    fetchAPI(`/suppliers/${supplierId}/rating`, {
-      method: "PUT",
-      body: JSON.stringify({ rating }),
-    }),
 
-  // Stock Management
-  getStockMovements: (page?: number, perPage?: number, productId?: number, branchId?: number, movementType?: string) => {
+  // Stock/Inventory
+  getStock: (page?: number, perPage?: number) => {
     const params = new URLSearchParams();
     if (page) params.append("page", page.toString());
     if (perPage) params.append("per_page", perPage.toString());
-    if (productId) params.append("product_id", productId.toString());
-    if (branchId) params.append("branch_id", branchId.toString());
-    if (movementType) params.append("movement_type", movementType);
-    return fetchAPI(`/stock/movements?${params}`);
+    return fetchAPI(`/stock?${params}`);
   },
-  getStockMovement: (id: number) => fetchAPI(`/stock/movements/${id}`),
-  createStockMovement: (data: any) =>
-    fetchAPI("/stock/movements", {
+  getStockItem: (id: number) => fetchAPI(`/stock/${id}`),
+  createStockItem: (data: any) =>
+    fetchAPI("/stock", {
       method: "POST",
       body: JSON.stringify(data),
     }),
-  createRestockRequest: (data: any) =>
-    fetchAPI("/stock/restock", {
-      method: "POST",
-      body: JSON.stringify(data),
-    }),
-  getLowStockProducts: (branchId?: number) => {
-    const params = branchId ? `?branch_id=${branchId}` : "";
-    return fetchAPI(`/stock/low-stock${params}`);
-  },
-  getCriticalStockProducts: () =>
-    fetchAPI("/stock/critical-stock"),
-  getBranchInventory: (branchId: number) =>
-    fetchAPI(`/stock/branch/${branchId}/inventory`),
-  updateBranchInventory: (branchId: number, data: any) =>
-    fetchAPI(`/stock/branch/${branchId}/inventory`, {
-      method: "POST",
-      body: JSON.stringify(data),
-    }),
-
-  // Generic methods for API calls
-  get: (endpoint: string) => fetchAPI(endpoint),
-  post: (endpoint: string, data?: any) => 
-    fetchAPI(endpoint, {
-      method: "POST",
-      body: data ? JSON.stringify(data) : undefined,
-    }),
-  put: (endpoint: string, data?: any) =>
-    fetchAPI(endpoint, {
+  updateStockItem: (id: number, data: any) =>
+    fetchAPI(`/stock/${id}`, {
       method: "PUT",
-      body: data ? JSON.stringify(data) : undefined,
+      body: JSON.stringify(data),
     }),
-  patch: (endpoint: string, data?: any) =>
-    fetchAPI(endpoint, {
-      method: "PATCH",
-      body: data ? JSON.stringify(data) : undefined,
+  deleteStockItem: (id: number) =>
+    fetchAPI(`/stock/${id}`, { method: "DELETE" }),
+
+  // Reports
+  getReports: () => fetchAPI("/reports"),
+  getReport: (id: number) => fetchAPI(`/reports/${id}`),
+  generateReport: (type: string, data: any) =>
+    fetchAPI("/reports", {
+      method: "POST",
+      body: JSON.stringify({ type, ...data }),
     }),
-
-  delete: (endpoint: string) =>
-    fetchAPI(endpoint, { method: "DELETE" }),
 };
-
-// Flexible API call function for complex requests
-export const apiCall = async (endpoint: string, options: any = {}) => {
-  const {
-    method = "GET",
-    body,
-    headers = {},
-    ...otherOptions
-  } = options;
-
-  const requestOptions: any = {
-    method,
-    headers: {
-      "Content-Type": body instanceof FormData ? undefined : "application/json",
-      ...headers,
-    },
-    ...otherOptions,
-  };
-
-  if (body && !(body instanceof FormData)) {
-    requestOptions.body = body;
-  } else if (body instanceof FormData) {
-    requestOptions.body = body;
-  }
-
-  return fetchAPI(endpoint, requestOptions);
-};
-

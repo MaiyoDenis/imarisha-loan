@@ -46,29 +46,34 @@ export const ArrearsForcastChart: React.FC<ArrearsForcastChartProps> = ({
     );
   }
 
-  if (!data || !data.predictions || data.predictions.length === 0) {
-    return (
-      <div className="bg-white rounded-lg shadow p-6">
-        <p className="text-gray-500 text-center py-12">No forecast data available</p>
-      </div>
-    );
-  }
-
-  const chartData = data.predictions.map(pred => ({
-    date: new Date(pred.date).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
-    rate: parseFloat(pred.forecasted_rate.toFixed(2)),
-    upper: parseFloat(pred.upper_bound.toFixed(2)),
-    lower: parseFloat(pred.lower_bound.toFixed(2)),
+  const mockChartData = Array.from({ length: 12 }, (_, i) => ({
+    date: new Date(new Date().getFullYear(), new Date().getMonth() + i + 1, 1).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
+    rate: 5.0 + (i * 0.3),
+    upper: 5.0 + (i * 0.3) + 1.5,
+    lower: Math.max(0, 5.0 + (i * 0.3) - 1.5),
   }));
 
-  const trend = data.predictions[data.predictions.length - 1]?.forecasted_rate > data.current_rate;
+  const chartData = !data || !data.predictions || data.predictions.length === 0 
+    ? mockChartData
+    : data.predictions.map(pred => ({
+        date: new Date(pred.date).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
+        rate: parseFloat(pred.forecasted_rate.toFixed(2)),
+        upper: parseFloat(pred.upper_bound.toFixed(2)),
+        lower: parseFloat(pred.lower_bound.toFixed(2)),
+      }));
+
+  const currentRate = data?.current_rate || 5.0;
+  const averageRate = data?.average_rate || 5.0;
+  const confidenceLevel = data?.confidence_level || 50;
+  const trend = chartData[chartData.length - 1]?.rate > currentRate;
+  const isDemo = !data || !data.predictions || data.predictions.length === 0;
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex justify-between items-start mb-6">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">Arrears Rate Forecast</h3>
-          <p className="text-sm text-gray-500 mt-1">12-month prediction with confidence intervals</p>
+          <p className="text-sm text-gray-500 mt-1">{isDemo ? 'Sample forecast' : '12-month prediction with confidence intervals'}</p>
         </div>
         <div className="flex items-center gap-2">
           {trend ? (
@@ -88,15 +93,15 @@ export const ArrearsForcastChart: React.FC<ArrearsForcastChartProps> = ({
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="bg-blue-50 rounded-lg p-4">
           <p className="text-sm text-gray-600">Current Rate</p>
-          <p className="text-2xl font-bold text-blue-600">{data.current_rate.toFixed(2)}%</p>
+          <p className="text-2xl font-bold text-blue-600">{currentRate.toFixed(2)}%</p>
         </div>
         <div className="bg-purple-50 rounded-lg p-4">
           <p className="text-sm text-gray-600">Average Rate</p>
-          <p className="text-2xl font-bold text-purple-600">{data.average_rate.toFixed(2)}%</p>
+          <p className="text-2xl font-bold text-purple-600">{averageRate.toFixed(2)}%</p>
         </div>
         <div className="bg-green-50 rounded-lg p-4">
           <p className="text-sm text-gray-600">Confidence Level</p>
-          <p className="text-2xl font-bold text-green-600">{data.confidence_level}%</p>
+          <p className="text-2xl font-bold text-green-600">{confidenceLevel}%</p>
         </div>
       </div>
 
@@ -154,10 +159,12 @@ export const ArrearsForcastChart: React.FC<ArrearsForcastChartProps> = ({
         </AreaChart>
       </ResponsiveContainer>
 
-      <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <p className="text-sm text-blue-900">
-          <strong>Insight:</strong> The forecast suggests {trend ? 'an increasing' : 'a decreasing'} trend in arrears rate over the next 12 months. 
-          {trend ? ' Consider implementing preventive measures.' : ' Current strategies appear effective.'}
+      <div className={`mt-6 border rounded-lg p-4 ${isDemo ? 'bg-yellow-50 border-yellow-200' : 'bg-blue-50 border-blue-200'}`}>
+        <p className={`text-sm ${isDemo ? 'text-yellow-900' : 'text-blue-900'}`}>
+          <strong>{isDemo ? 'Note:' : 'Insight:'}</strong> {isDemo 
+            ? 'This is a sample forecast. To get accurate predictions, more historical loan data is needed.' 
+            : `The forecast suggests ${trend ? 'an increasing' : 'a decreasing'} trend in arrears rate over the next 12 months. ${trend ? 'Consider implementing preventive measures.' : 'Current strategies appear effective.'}`
+          }
         </p>
       </div>
     </div>

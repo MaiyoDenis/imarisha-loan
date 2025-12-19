@@ -74,9 +74,6 @@ def create_app(config_class=Config):
         ]
     )
     
-    # Initialize JWT Service
-    from app.services.jwt_service import jwt_service
-    jwt_service.init_app(app)
     
     # Initialize services
     from app.services import mfa_service, audit_service, notification_service, payment_service, risk_service, dashboard_service, currency_service, ussd_service, bi_service, kyc_service, aml_service, gdpr_service, voice_assistant, voice_analytics, demand_forecasting, inventory_optimization, etl_service

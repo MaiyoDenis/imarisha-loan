@@ -1,6 +1,5 @@
 from flask import Blueprint, request, jsonify, send_file
 from app.services.bi_integration_service import bi_service
-from app.services.jwt_service import jwt_required_api
 import logging
 
 bp = Blueprint('bi_integration', __name__, url_prefix='/api/bi-integration')
@@ -19,7 +18,6 @@ def get_available_tools():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/export/members', methods=['GET'])
-@jwt_required_api
 def export_members():
     """Export member data in specified format"""
     try:
@@ -51,7 +49,6 @@ def export_members():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/export/loans', methods=['GET'])
-@jwt_required_api
 def export_loans():
     """Export loan data in specified format"""
     try:
@@ -86,7 +83,6 @@ def export_loans():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/powerbi/config', methods=['GET'])
-@jwt_required_api
 def get_powerbi_config():
     """Get Power BI configuration"""
     try:
@@ -97,7 +93,6 @@ def get_powerbi_config():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/powerbi/embed-token', methods=['GET'])
-@jwt_required_api
 def get_powerbi_embed_token():
     """Get Power BI embed token"""
     try:
@@ -117,7 +112,6 @@ def get_powerbi_embed_token():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/tableau/config', methods=['GET'])
-@jwt_required_api
 def get_tableau_config():
     """Get Tableau configuration"""
     try:

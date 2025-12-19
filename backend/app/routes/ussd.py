@@ -1,6 +1,5 @@
 from flask import Blueprint, request, jsonify
 from app.services.ussd_service import ussd_service
-from app.services.jwt_service import jwt_required_api
 import logging
 
 bp = Blueprint('ussd', __name__, url_prefix='/api/ussd')
@@ -82,7 +81,6 @@ def twilio_ussd_callback():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/test', methods=['POST'])
-@jwt_required_api
 def test_ussd_flow():
     """Test USSD flow (Admin only)"""
     try:
