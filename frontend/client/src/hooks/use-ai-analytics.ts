@@ -107,6 +107,8 @@ export const useArrearsForcast = (branchId?: number, monthsAhead = 12) => {
       return api.get(`/ai-analytics/arrears-forecast?${params}`);
     },
     staleTime: 5 * 60 * 1000,
+    retry: 1,
+    gcTime: 10 * 60 * 1000,
   });
 };
 
@@ -121,6 +123,8 @@ export const useMemberBehavior = (branchId?: number) => {
       return api.get(`/ai-analytics/member-behavior?${params}`);
     },
     staleTime: 5 * 60 * 1000,
+    retry: 1,
+    gcTime: 10 * 60 * 1000,
   });
 };
 
@@ -131,6 +135,8 @@ export const useClvPrediction = (memberId: number) => {
     queryFn: () => api.get(`/ai-analytics/clv-prediction/${memberId}`),
     enabled: !!memberId,
     staleTime: 5 * 60 * 1000,
+    retry: 1,
+    gcTime: 10 * 60 * 1000,
   });
 };
 
@@ -147,6 +153,8 @@ export const useSeasonalDemand = (productId?: number, monthsAhead = 12, branchId
       return api.get(`/ai-analytics/seasonal-demand?${params}`);
     },
     staleTime: 5 * 60 * 1000,
+    retry: 1,
+    gcTime: 10 * 60 * 1000,
   });
 };
 
@@ -162,6 +170,8 @@ export const useAtRiskMembers = (branchId?: number, threshold = 0.6) => {
       return api.get(`/ai-analytics/at-risk-members?${params}`);
     },
     staleTime: 5 * 60 * 1000,
+    retry: 1,
+    gcTime: 10 * 60 * 1000,
   });
 };
 
@@ -176,6 +186,8 @@ export const useCohortAnalysis = (branchId?: number) => {
       return api.get(`/ai-analytics/cohort-analysis?${params}`);
     },
     staleTime: 5 * 60 * 1000,
+    retry: 1,
+    gcTime: 10 * 60 * 1000,
   });
 };
 
@@ -190,5 +202,7 @@ export const useAISummary = (branchId?: number) => {
       return api.get(`/ai-analytics/summary?${params}`);
     },
     staleTime: 5 * 60 * 1000,
+    retry: 1,
+    gcTime: 10 * 60 * 1000,
   });
 };

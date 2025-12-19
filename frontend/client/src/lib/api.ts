@@ -2,10 +2,16 @@
 
 
 
-const API_BASE = import.meta.env.VITE_API_URL || "https://imarisha-loans.onrender.com/api";
+const API_BASE = import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_URL || "https://imarisha-loans.onrender.com/api";
 
 if (typeof window !== 'undefined') {
-  console.log('[API] Using API base:', API_BASE);
+  console.log('[API] Configuration:', {
+    'API Base': API_BASE,
+    'VITE_API_URL': import.meta.env.VITE_API_URL,
+    'VITE_BACKEND_URL': import.meta.env.VITE_BACKEND_URL,
+    'Mode': import.meta.env.MODE,
+    'Dev': import.meta.env.DEV
+  });
 }
 
 function getAuthToken(): string | null {
@@ -112,12 +118,18 @@ async function fetchAPI(endpoint: string, options: any = {}, retryCount: number 
     } else {
 
       localStorage.removeItem('auth_token');
+      localStorage.removeItem('refresh_token');
       localStorage.removeItem('user');
       if (typeof window !== 'undefined') {
-        const currentPath = window.location.pathname; 
-        // Fix: Redirect to root path (Login page) instead of /login to avoid 404
-        if (currentPath !== '/') { 
-          window.location.pathname = '/'; 
+        const currentPath = window.location.pathname;
+        console.warn('[API] Auth failed - clearing tokens. Current path:', currentPath);
+        // Avoid redirect loop - only redirect from non-auth pages
+        if (currentPath !== '/' && !currentPath.includes('login') && !currentPath.includes('register')) {
+          console.log('[API] Redirecting to login with return URL:', currentPath);
+          window.location.href = '/?return=' + encodeURIComponent(currentPath);
+        } else if (currentPath !== '/') {
+          // If already on login/register, just redirect home
+          window.location.href = '/';
         }
       }
       throw new Error('Authentication required');
