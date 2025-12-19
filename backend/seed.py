@@ -2,7 +2,8 @@ import os
 import random
 from faker import Faker
 from app import create_app, db, bcrypt
-from app.models import User, Branch, Role, Group, Member
+from app.models import User, Branch, Role, Group, Member, LoanType
+from decimal import Decimal
 
 fake = Faker()
 
@@ -15,7 +16,7 @@ def seed_data():
     print("Seeding database...")
 
     # 1. Roles
-    roles = ['admin', 'branch_manager', 'loan_officer', 'procurement_officer', 'customer']
+    roles = ['admin', 'branch_manager', 'loan_officer', 'field_officer', 'procurement_officer', 'customer']
     role_objects = {}
     for role_name in roles:
         role = Role.query.filter_by(name=role_name).first()
@@ -30,7 +31,29 @@ def seed_data():
     for role_name in roles:
         role_objects[role_name] = Role.query.filter_by(name=role_name).first()
 
-    # 2. Branches
+    # 2. Create Loan Types if not exist
+    loan_types = [
+        {'name': 'Basic Loan', 'interest_rate': 2.5, 'min_amount': 5000, 'max_amount': 50000, 'duration_months': 6, 'charge_fee_percentage': 3},
+        {'name': 'Standard Loan', 'interest_rate': 3.0, 'min_amount': 10000, 'max_amount': 100000, 'duration_months': 12, 'charge_fee_percentage': 4},
+        {'name': 'Premium Loan', 'interest_rate': 2.0, 'min_amount': 50000, 'max_amount': 500000, 'duration_months': 24, 'charge_fee_percentage': 2},
+    ]
+    
+    for loan_type_data in loan_types:
+        existing = LoanType.query.filter_by(name=loan_type_data['name']).first()
+        if not existing:
+            loan_type = LoanType(
+                name=loan_type_data['name'],
+                interest_rate=Decimal(str(loan_type_data['interest_rate'])),
+                min_amount=Decimal(str(loan_type_data['min_amount'])),
+                max_amount=Decimal(str(loan_type_data['max_amount'])),
+                duration_months=loan_type_data['duration_months'],
+                charge_fee_percentage=Decimal(str(loan_type_data['charge_fee_percentage']))
+            )
+            db.session.add(loan_type)
+            db.session.commit()
+            print(f"Created loan type: {loan_type_data['name']}")
+
+    # 3. Branches
     branches_data = ['Nairobi HQ', 'Mombasa Branch', 'Kisumu Branch', 'Nakuru Branch', 'Eldoret Branch']
     created_users = []
 
@@ -102,6 +125,36 @@ def seed_data():
 
         # Create Loan Officer (Needed for Groups)
         lo = create_staff_user('loan_officer', 'lo', 'Loan Officer')
+
+        # Create Field Officers (multiple per branch)
+        field_officers = []
+        for i in range(2):
+            username = f"fo_{branch.name.split()[0].lower()}_{i}"
+            user = User.query.filter_by(username=username).first()
+            if not user:
+                password = "password123"
+                hashed = bcrypt.generate_password_hash(password).decode('utf-8')
+                phone = f"07{random.randint(10000000, 99999999)}"
+                while User.query.filter_by(phone=phone).first():
+                    phone = f"07{random.randint(10000000, 99999999)}"
+
+                user = User(
+                    username=username,
+                    phone=phone,
+                    password=hashed,
+                    role_id=role_objects['field_officer'].id,
+                    first_name=fake.first_name(),
+                    last_name=fake.last_name(),
+                    branch_id=branch.id,
+                    is_active=True
+                )
+                db.session.add(user)
+                db.session.commit()
+                field_officers.append(user)
+                created_users.append({'role': 'Field Officer', 'username': username, 'password': password, 'branch': branch.name})
+                print(f"Created Field Officer: {username}")
+            else:
+                field_officers.append(user)
 
         # Create Groups
         for i in range(3): # 3 groups per branch

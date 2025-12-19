@@ -61,5 +61,5 @@ def role_required(roles):
     return decorator
 
 def staff_required(f):
-    """Decorator for staff access (admin, branch_manager, loan_officer, staff)."""
-    return role_required(['admin', 'branch_manager', 'loan_officer', 'staff'])(f)
+    """Decorator for staff access (admin, branch_manager, loan_officer, field_officer, staff)."""
+    return role_required(['admin', 'branch_manager', 'loan_officer', 'field_officer', 'staff'])(f)

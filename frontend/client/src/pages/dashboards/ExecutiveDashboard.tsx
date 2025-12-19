@@ -8,6 +8,7 @@ import Layout from '@/components/layout/Layout';
 import { AlertCircle, Download, RefreshCw, Filter, Users, DollarSign, TrendingUp, Activity } from 'lucide-react';
 import { api } from '@/lib/api';
 import KPICard from '@/components/dashboards/KPICard';
+import { useRoleRedirect } from '@/hooks/use-role-redirect';
 
 interface DashboardData {
   timestamp: string;
@@ -119,6 +120,11 @@ function generateGrowthData(growth?: any) {
 }
 
 export default function ExecutiveDashboard() {
+  useRoleRedirect({
+    allowedRoles: ['admin', 'branch_manager'],
+    fallbackPath: '/dashboard'
+  });
+
   const [branchId, setBranchId] = useState<number | null>(null);
   const [dateRange, setDateRange] = useState('mtd');
   const [isRefreshing, setIsRefreshing] = useState(false);

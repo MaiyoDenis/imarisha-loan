@@ -96,7 +96,7 @@ def create_app(config_class=Config):
     etl_service.init_app(app)
     
     # Register blueprints
-    from app.routes import auth, branches, groups, members, loans, products, transactions, dashboard, payments, jobs, reports, field, gamification, notifications, risk, dashboards, ai_analytics, reporting, field_operations, currency, alternative_payments, ussd, bi_integration, compliance, voice_assistant as voice_assistant_routes, inventory_intelligence, etl_pipeline, users, suppliers, stock, permissions
+    from app.routes import auth, branches, groups, members, loans, products, transactions, dashboard, payments, jobs, reports, field, gamification, notifications, risk, dashboards, ai_analytics, reporting, field_operations, currency, alternative_payments, ussd, bi_integration, compliance, voice_assistant as voice_assistant_routes, inventory_intelligence, etl_pipeline, users, suppliers, stock, permissions, field_officer
     app.register_blueprint(auth.bp)
     app.register_blueprint(users.bp)
     app.register_blueprint(branches.bp)
@@ -128,6 +128,7 @@ def create_app(config_class=Config):
     app.register_blueprint(voice_assistant_routes.bp)
     app.register_blueprint(inventory_intelligence.bp)
     app.register_blueprint(etl_pipeline.bp)
+    app.register_blueprint(field_officer.bp)
     
 
     # Health check endpoint

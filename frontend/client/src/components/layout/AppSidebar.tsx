@@ -31,25 +31,35 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 
-const sidebarItems = [
-  { icon: LayoutDashboard, label: "Main Dashboard", href: "/dashboard" },
-  { icon: Brain, label: "AI Analytics", href: "/dashboards/ai-analytics" },
-  { icon: BarChart3, label: "Executive Dashboard", href: "/dashboards/executive" },
-  { icon: Zap, label: "Operations Dashboard", href: "/dashboards/operations" },
-  { icon: TrendingUp, label: "Risk Assessment", href: "/dashboards/risk" },
-  { icon: Users2, label: "Member Analytics", href: "/dashboards/member-analytics" },
-  { icon: TrendingUp, label: "Demand Forecast", href: "/dashboards/forecast" },
-  { icon: Gamepad2, label: "Gamification", href: "/gamification" },
-  { icon: MapPin, label: "Field Operations", href: "/field-operations" },
-  { icon: Building2, label: "Branches", href: "/branches" },
-  { icon: Users, label: "Staff & Users", href: "/users" },
-  { icon: Users, label: "Groups", href: "/groups" },
-  { icon: Users, label: "Members", href: "/members" },
-  { icon: CreditCard, label: "Loans", href: "/loans" },
-  { icon: Package, label: "Loan Products", href: "/products" },
-  { icon: Store, label: "Store & Inventory", href: "/store" },
-  { icon: Wallet, label: "Savings", href: "/savings" },
-  { icon: BarChart3, label: "Reports", href: "/reports" },
+interface MenuItem {
+  icon: typeof LayoutDashboard;
+  label: string;
+  href: string;
+  roles?: string[];
+}
+
+const allSidebarItems: MenuItem[] = [
+  { icon: LayoutDashboard, label: "Main Dashboard", href: "/dashboard", roles: ["admin", "executive", "operations_manager", "risk_manager", "field_officer", "loan_officer", "customer"] },
+  { icon: Building2, label: "Branch Dashboard", href: "/dashboards/branch-manager", roles: ["branch_manager"] },
+  { icon: Users, label: "Staff", href: "/users", roles: ["branch_manager"] },
+  { icon: CreditCard, label: "Loans", href: "/loans", roles: ["branch_manager", "admin", "executive", "operations_manager", "procurement_officer"] },
+  { icon: Package, label: "Products", href: "/products", roles: ["branch_manager", "admin"] },
+  { icon: Store, label: "Store", href: "/store", roles: ["branch_manager", "admin", "procurement_officer"] },
+  { icon: BarChart3, label: "Procurement Dashboard", href: "/procurement", roles: ["procurement_officer"] },
+  { icon: Brain, label: "AI Analytics", href: "/dashboards/ai-analytics", roles: ["admin", "executive"] },
+  { icon: BarChart3, label: "Executive Dashboard", href: "/dashboards/executive", roles: ["admin", "executive"] },
+  { icon: Zap, label: "Operations Dashboard", href: "/dashboards/operations", roles: ["admin", "operations_manager"] },
+  { icon: TrendingUp, label: "Risk Assessment", href: "/dashboards/risk", roles: ["admin", "risk_manager"] },
+  { icon: Users2, label: "Member Analytics", href: "/dashboards/member-analytics", roles: ["admin", "executive", "operations_manager"] },
+  { icon: TrendingUp, label: "Demand Forecast", href: "/dashboards/forecast", roles: ["admin", "executive"] },
+  { icon: Gamepad2, label: "Gamification", href: "/gamification", roles: ["admin", "executive"] },
+  { icon: MapPin, label: "Field Operations", href: "/field-operations", roles: ["admin", "field_officer"] },
+  { icon: Building2, label: "Branches", href: "/branches", roles: ["admin"] },
+  { icon: Users, label: "Staff & Users", href: "/users", roles: ["admin"] },
+  { icon: Users, label: "Groups", href: "/groups", roles: ["admin", "executive", "operations_manager"] },
+  { icon: Users, label: "Members", href: "/members", roles: ["admin", "executive", "operations_manager"] },
+  { icon: Wallet, label: "Savings", href: "/savings", roles: ["admin", "executive", "operations_manager"] },
+  { icon: BarChart3, label: "Reports", href: "/reports", roles: ["admin", "executive", "operations_manager"] },
   { icon: Settings, label: "Settings", href: "/settings" },
 ];
 
@@ -57,13 +67,17 @@ export function AppSidebar() {
   const [location, navigate] = useLocation();
   const { toast } = useToast();
   
-  // Get user from local storage
   const userStr = localStorage.getItem('user');
   const user = userStr ? JSON.parse(userStr) : null;
   
   const userInitials = user ? `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase() : 'U';
   const userName = user ? `${user.firstName} ${user.lastName}` : 'User';
-  const userRole = user?.role ? user.role.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'User';
+  const userRole = user?.role ? user.role.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()) : 'User';
+
+  const filteredItems = allSidebarItems.filter((item) => {
+    if (!item.roles) return true;
+    return item.roles.includes(user?.role);
+  });
 
   const handleLogout = async () => {
     try {
@@ -98,7 +112,7 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu role="navigation" aria-label="Main menu">
-          {sidebarItems.map((item) => {
+          {filteredItems.map((item) => {
             const isActive = location === item.href;
             return (
               <SidebarMenuItem key={item.href}>

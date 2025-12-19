@@ -1,10 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { Sparkles, TrendingDown, AlertCircle, RefreshCw } from "lucide-react";
+import { useEffect } from "react";
+import { useLocation } from "wouter";
 import Layout from "@/components/layout/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, CreditCard, TrendingUp, AlertTriangle, ArrowUpRight, ArrowDownRight, Activity } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { api } from "@/lib/api";
+import { useRoleRedirect } from "@/hooks/use-role-redirect";
 
 function generateDashboardChartData(stats?: any) {
   if (!stats) {
@@ -34,6 +37,29 @@ function generateDashboardChartData(stats?: any) {
 }
 
 export default function Dashboard() {
+  const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        if (user.role === 'procurement_officer') {
+          setLocation('/procurement');
+        } else if (user.role === 'branch_manager') {
+          setLocation('/dashboards/branch-manager');
+        }
+      } catch (e) {
+        console.error('Failed to parse user from localStorage', e);
+      }
+    }
+  }, [setLocation]);
+
+  useRoleRedirect({
+    allowedRoles: ['admin', 'branch_manager', 'loan_officer', 'procurement_officer', 'customer'],
+    fallbackPath: '/field-officer'
+  });
+
   const { data: stats, refetch, isRefetching } = useQuery({
     queryKey: ["dashboard-stats"],
     queryFn: api.getDashboardStats,

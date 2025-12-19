@@ -26,15 +26,15 @@ import { Plus } from "lucide-react";
 export function CreateLoanDialog() {
   const [open, setOpen] = useState(false);
   const [memberId, setMemberId] = useState("");
-  const [loanTypeId, setLoanTypeId] = useState("");
+  const [productId, setProductId] = useState("");
   const [amount, setAmount] = useState("");
   
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data: loanTypes = [] } = useQuery({
-    queryKey: ["loanTypes"],
-    queryFn: api.getLoanTypes,
+  const { data: products = [] } = useQuery({
+    queryKey: ["loan-products"],
+    queryFn: api.getLoanProducts,
   });
 
   const createLoanMutation = useMutation({
@@ -43,7 +43,7 @@ export function CreateLoanDialog() {
       queryClient.invalidateQueries({ queryKey: ["loans"] });
       setOpen(false);
       setMemberId("");
-      setLoanTypeId("");
+      setProductId("");
       setAmount("");
       toast({
         title: "Success",
@@ -63,7 +63,7 @@ export function CreateLoanDialog() {
     e.preventDefault();
     createLoanMutation.mutate({
       memberId: parseInt(memberId),
-      loanTypeId: parseInt(loanTypeId),
+      productId: parseInt(productId),
       amount: parseFloat(amount),
     });
   };
@@ -98,17 +98,17 @@ export function CreateLoanDialog() {
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="loanType" className="text-right">
-                Loan Type
+              <Label htmlFor="product" className="text-right">
+                Loan Product
               </Label>
-              <Select onValueChange={setLoanTypeId} value={loanTypeId}>
+              <Select onValueChange={setProductId} value={productId}>
                 <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select loan type" />
+                  <SelectValue placeholder="Select loan product" />
                 </SelectTrigger>
                 <SelectContent>
-                  {loanTypes.map((type: any) => (
-                    <SelectItem key={type.id} value={type.id.toString()}>
-                      {type.name} ({type.interestRate}% interest)
+                  {products.map((product: any) => (
+                    <SelectItem key={product.id} value={product.id.toString()}>
+                      {product.name} - {product.stockQuantity} in stock
                     </SelectItem>
                   ))}
                 </SelectContent>

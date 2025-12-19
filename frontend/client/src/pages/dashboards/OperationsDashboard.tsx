@@ -4,6 +4,7 @@ import { Clock, AlertCircle, Check, Users, CreditCard, Zap, RefreshCw, Download 
 import Layout from '@/components/layout/Layout';
 import { api } from '@/lib/api';
 import KPICard from '@/components/dashboards/KPICard';
+import { useRoleRedirect } from '@/hooks/use-role-redirect';
 
 interface DailyTask {
   id: string;
@@ -56,6 +57,11 @@ interface OpsData {
 }
 
 export default function OperationsDashboard() {
+  useRoleRedirect({
+    allowedRoles: ['admin', 'branch_manager', 'loan_officer'],
+    fallbackPath: '/dashboard'
+  });
+
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const { data: dashboard, isLoading, isError, refetch } = useQuery<OpsData>({

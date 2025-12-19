@@ -11,6 +11,7 @@ import {
   useAtRiskMembers,
   useCohortAnalysis,
 } from '../../hooks/use-ai-analytics';
+import { useRoleRedirect } from '@/hooks/use-role-redirect';
 
 interface FilterState {
   branchId?: number;

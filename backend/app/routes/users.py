@@ -6,9 +6,13 @@ from app.utils.decorators import admin_required
 bp = Blueprint('users', __name__, url_prefix='/api/users')
 
 @bp.route('', methods=['GET'])
-@admin_required
 def get_users():
-    """Retrieves all users with optional filtering."""
+    """Retrieves users with branch filtering for branch_managers and admins."""
+    from flask import session
+    
+    user_id = session.get('user_id')
+    current_user = User.query.get(user_id) if user_id else None
+    
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 20, type=int)
     role_filter = request.args.get('role')
@@ -16,11 +20,20 @@ def get_users():
     
     query = User.query
     
+    # Branch managers can only see their branch's users
+    if current_user and current_user.role.name == 'branch_manager':
+        if current_user.branch_id:
+            query = query.filter(User.branch_id == current_user.branch_id)
+    elif current_user and current_user.role.name != 'admin':
+        # Non-admin, non-branch-manager roles cannot access user list
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    # Admin can filter by branch if specified
+    if branch_filter and (not current_user or current_user.role.name == 'admin'):
+        query = query.filter(User.branch_id == branch_filter)
+    
     if role_filter and role_filter != 'all':
         query = query.join(Role).filter(Role.name == role_filter)
-        
-    if branch_filter:
-        query = query.filter(User.branch_id == branch_filter)
         
     users = query.paginate(page=page, per_page=per_page, error_out=False)
     

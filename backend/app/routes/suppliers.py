@@ -19,15 +19,23 @@ def check_admin_permission():
 @bp.route('', methods=['GET'])
 @login_required
 def get_suppliers():
-    """Get all suppliers"""
+    """Get all suppliers, optionally filtered by branch"""
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 20, type=int)
     is_active = request.args.get('is_active', None)
+    
+    # Get current user
+    user_id = session.get('user_id')
+    user = User.query.get(user_id)
     
     query = Supplier.query
     
     if is_active is not None:
         query = query.filter_by(is_active=is_active == 'true')
+    
+    # If user is procurement officer, they can only see suppliers 
+    # (suppliers are global but we might filter by usage in their branch in the future)
+    # For now, all users see all suppliers
     
     suppliers = query.order_by(Supplier.created_at.desc()).paginate(page=page, per_page=per_page)
     

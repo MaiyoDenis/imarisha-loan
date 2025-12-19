@@ -1,3 +1,4 @@
+import { useRoleRedirect } from '@/hooks/use-role-redirect';
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -43,6 +44,11 @@ interface RiskData {
 }
 
 export default function RiskDashboard() {
+  useRoleRedirect({
+    allowedRoles: ['admin', 'branch_manager', 'loan_officer'],
+    fallbackPath: '/dashboard'
+  });
+
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const { data: dashboard, isLoading, isError, refetch } = useQuery<RiskData>({

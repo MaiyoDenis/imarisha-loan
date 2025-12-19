@@ -168,6 +168,22 @@ def get_loan(id):
         return jsonify({'error': 'Loan not found'}), 404
     return jsonify(loan.to_dict())
 
+@bp.route('/<int:id>/under-review', methods=['POST'])
+@role_required(['admin', 'branch_manager', 'procurement_officer'])
+def mark_loan_under_review(id):
+    loan = Loan.query.get(id)
+    if not loan:
+        return jsonify({'error': 'Loan not found'}), 404
+        
+    if loan.status != 'pending':
+        return jsonify({'error': 'Loan must be in pending status'}), 400
+        
+    loan.status = 'under_review'
+    
+    db.session.commit()
+    
+    return jsonify(loan.to_dict())
+
 @bp.route('/<int:id>/approve', methods=['POST'])
 @role_required(['admin', 'branch_manager', 'procurement_officer'])
 def approve_loan(id):
@@ -175,8 +191,8 @@ def approve_loan(id):
     if not loan:
         return jsonify({'error': 'Loan not found'}), 404
         
-    if loan.status != 'pending':
-        return jsonify({'error': 'Loan is not pending approval'}), 400
+    if loan.status not in ['pending', 'under_review']:
+        return jsonify({'error': 'Loan is not pending or under review'}), 400
         
     loan.status = 'approved'
     loan.approval_date = datetime.utcnow()
@@ -242,6 +258,22 @@ def disburse_loan(id):
         return datetime(year, month, day)
         
     loan.due_date = add_months(datetime.utcnow(), loan.loan_type.duration_months)
+    
+    db.session.commit()
+    
+    return jsonify(loan.to_dict())
+
+@bp.route('/<int:id>/release', methods=['POST'])
+@role_required(['admin', 'branch_manager', 'procurement_officer'])
+def release_loan(id):
+    loan = Loan.query.get(id)
+    if not loan:
+        return jsonify({'error': 'Loan not found'}), 404
+        
+    if loan.status != 'disbursed':
+        return jsonify({'error': 'Loan must be disbursed before release'}), 400
+        
+    loan.status = 'released'
     
     db.session.commit()
     

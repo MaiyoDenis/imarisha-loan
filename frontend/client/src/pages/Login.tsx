@@ -10,6 +10,19 @@ import { api } from "@/lib/api";
 
 import logo from "/minimalist_fintech_logo_with_geometric_shapes_in_blue_and_teal..png";
 
+function getRoleRedirectPath(role: string): string {
+  const roleRedirects: Record<string, string> = {
+    'field_officer': '/field-officer',
+    'loan_officer': '/dashboard',
+    'branch_manager': '/dashboards/branch-manager',
+    'admin': '/dashboards/executive',
+    'procurement_officer': '/store',
+    'customer': '/dashboard',
+  };
+  
+  return roleRedirects[role] || '/dashboard';
+}
+
 export default function Login() {
   const [, setLocation] = useLocation();
   const [loading, setLoading] = useState(false);
@@ -31,13 +44,17 @@ export default function Login() {
       
       if (response.user) {
         localStorage.setItem('user', JSON.stringify(response.user));
+        
+        const redirectPath = getRoleRedirectPath(response.user.role);
+        setLocation(redirectPath);
+      } else {
+        setLocation("/dashboard");
       }
       
       toast({
         title: "Success",
         description: "Logged in successfully",
       });
-      setLocation("/dashboard");
     } catch (error) {
       toast({
         title: "Login failed",

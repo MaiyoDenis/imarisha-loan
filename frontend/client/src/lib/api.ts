@@ -229,6 +229,10 @@ export const api = {
     }),
   deleteLoan: (id: number) =>
     fetchAPI(`/loans/${id}`, { method: "DELETE" }),
+  markLoanUnderReview: (id: number) =>
+    fetchAPI(`/loans/${id}/under-review`, {
+      method: "POST",
+    }),
   approveLoan: (id: number, data?: any) =>
     fetchAPI(`/loans/${id}/approve`, {
       method: "POST",
@@ -243,6 +247,10 @@ export const api = {
     fetchAPI(`/loans/${id}/disburse`, {
       method: "POST",
       body: data ? JSON.stringify(data) : undefined,
+    }),
+  releaseLoan: (id: number) =>
+    fetchAPI(`/loans/${id}/release`, {
+      method: "POST",
     }),
 
   // Transactions
@@ -348,5 +356,43 @@ export const api = {
     fetchAPI("/reports", {
       method: "POST",
       body: JSON.stringify({ type, ...data }),
+    }),
+
+  // Field Officer
+  getFieldOfficerGroups: () => fetchAPI("/field-officer/groups"),
+  getGroupMembers: (groupId: number) => fetchAPI(`/field-officer/groups/${groupId}/members`),
+  getGroupStats: (groupId: number) => fetchAPI(`/field-officer/groups/${groupId}/stats`),
+  getMemberDashboard: (memberId: number) => fetchAPI(`/field-officer/members/${memberId}/dashboard`),
+  applyLoanForMember: (memberId: number, data: any) =>
+    fetchAPI(`/field-officer/members/${memberId}/apply-loan`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  transferFunds: (memberId: number, data: any) =>
+    fetchAPI(`/field-officer/members/${memberId}/transfer`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  createFieldOfficerGroup: (data: {
+    name: string;
+    location?: string;
+    description?: string;
+  }) =>
+    fetchAPI("/field-officer/groups", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  addMemberToGroup: (data: {
+    firstName: string;
+    lastName: string;
+    phone: string;
+    email?: string;
+    idNumber?: string;
+    memberCode?: string;
+    groupId: number;
+  }) =>
+    fetchAPI("/field-officer/members", {
+      method: "POST",
+      body: JSON.stringify(data),
     }),
 };

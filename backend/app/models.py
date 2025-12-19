@@ -84,6 +84,8 @@ class Group(db.Model):
     name = db.Column(db.Text, unique=True, nullable=False)
     branch_id = db.Column(db.Integer, db.ForeignKey('branches.id'), nullable=False)
     loan_officer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    location = db.Column(db.Text, nullable=True)
+    description = db.Column(db.Text, nullable=True)
     max_members = db.Column(db.Integer, default=8, nullable=False)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
@@ -97,6 +99,8 @@ class Group(db.Model):
             'name': self.name,
             'branchId': self.branch_id,
             'loanOfficerId': self.loan_officer_id,
+            'location': self.location,
+            'description': self.description,
             'maxMembers': self.max_members,
             'isActive': self.is_active,
             'createdAt': self.created_at.isoformat()
@@ -142,8 +146,8 @@ class SavingsAccount(db.Model):
     balance = db.Column(db.Numeric(12, 2), default=0, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
-    member = db.relationship('Member', backref='savings_account')
-
+    member = db.relationship('Member', backref=db.backref('savings_account', uselist=False))
+ 
     def to_dict(self):
         return {
             'id': self.id,
@@ -161,8 +165,8 @@ class DrawdownAccount(db.Model):
     balance = db.Column(db.Numeric(12, 2), default=0, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
-    member = db.relationship('Member', backref='drawdown_account')
-
+    member = db.relationship('Member', backref=db.backref('drawdown_account', uselist=False))
+ 
     def to_dict(self):
         return {
             'id': self.id,
