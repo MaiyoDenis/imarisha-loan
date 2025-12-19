@@ -1,28 +1,42 @@
 from functools import wraps
-from flask import jsonify
-from app.services.jwt_service import jwt_required_api, role_required as jwt_role_required
+from flask import session, jsonify
+from app.models import User, Role
 
 def login_required(f):
-    return jwt_required_api(f)
+    """Decorator to ensure a user is logged in."""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return jsonify({'message': 'Authentication required'}), 401
+        return f(*args, **kwargs)
+    return decorated_function
 
-def role_required(roles):
-    """
-    Decorator for role-based access control.
-    Supports passing a list of roles or a single role.
-    """
-    if isinstance(roles, list):
-        return jwt_role_required(*roles)
-    return jwt_role_required(roles)
+def permission_required(permission):
+    """Decorator for permission-based access control."""
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if 'user_id' not in session:
+                return jsonify({'message': 'Authentication required'}), 401
+
+            user = User.query.get(session['user_id'])
+            if not user or not any(p.permission.name == permission for p in user.role.permissions):
+                return jsonify({'message': 'Unauthorized access'}), 403
+
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
 
 def admin_required(f):
-    """
-    Decorator for admin-only endpoints.
-    """
-    return jwt_role_required('admin')(f)
+    """Decorator for admin-only endpoints."""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return jsonify({'message': 'Authentication required'}), 401
 
-def staff_required(f):
-    """
-    Decorator for staff-only endpoints.
-    Allows both admin and staff roles.
-    """
-    return jwt_role_required('admin', 'staff', 'loan_officer', 'branch_manager')(f)
+        user = User.query.get(session['user_id'])
+        if not user or user.role.name != 'admin':
+            return jsonify({'message': 'Admin access required'}), 403
+
+        return f(*args, **kwargs)
+    return decorated_function

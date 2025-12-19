@@ -29,6 +29,11 @@ import { AIAnalyticsDashboard } from "@/pages/dashboards/AIAnalyticsDashboard";
 import { GamificationDashboard } from "@/pages/gamification/GamificationDashboard";
 import { FieldOperationsPage } from "@/pages/field-operations/FieldOperationsPage";
 import { MobileFeaturesDashboard } from "@/pages/mobile-features/MobileFeaturesDashboard";
+import UserList from "@/pages/Admin/Users/UserList";
+import BranchList from "@/pages/Admin/Branches/BranchList";
+import LoanProductList from "@/pages/Admin/LoanProductList";
+import PermissionsManager from "@/pages/Admin/PermissionsManager";
+import BranchManagerDashboard from "@/pages/Dashboards/BranchManagerDashboard";
 
 function Router() {
   return (
@@ -36,6 +41,11 @@ function Router() {
       <Route path="/" component={Login} />
       <Route path="/register" component={Register} />
       <Route path="/dashboard" component={Dashboard} />
+      <Route path="/admin/users" component={UserList} />
+      <Route path="/admin/branches" component={BranchList} />
+      <Route path="/admin/products" component={LoanProductList} />
+      <Route path="/admin/permissions" component={PermissionsManager} />
+      <Route path="/dashboards/branch-manager" component={BranchManagerDashboard} />
       <Route path="/dashboards/executive" component={ExecutiveDashboard} />
       <Route path="/dashboards/operations" component={OperationsDashboard} />
       <Route path="/dashboards/risk" component={RiskDashboard} />

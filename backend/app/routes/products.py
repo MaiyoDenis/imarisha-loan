@@ -29,7 +29,10 @@ def get_loan_product(id):
         return jsonify({'error': 'Product not found'}), 404
     return jsonify(product.to_dict())
 
+from app.utils.decorators import admin_required
+
 @bp.route('/loan-products', methods=['POST'])
+@admin_required
 def create_loan_product():
     data = request.get_json()
     
@@ -57,6 +60,7 @@ def create_loan_product():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/loan-products/<int:id>', methods=['PATCH'])
+@admin_required
 def update_loan_product(id):
     product = LoanProduct.query.get(id)
     if not product:
@@ -87,6 +91,7 @@ def get_loan_types():
     return jsonify([lt.to_dict() for lt in loan_types])
 
 @bp.route('/loan-types', methods=['POST'])
+@admin_required
 def create_loan_type():
     data = request.get_json()
     
@@ -108,6 +113,31 @@ def create_loan_type():
         db.session.add(loan_type)
         db.session.commit()
         return jsonify(loan_type.to_dict()), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+@bp.route('/loan-types/<int:id>', methods=['PATCH'])
+@admin_required
+def update_loan_type(id):
+    loan_type = LoanType.query.get(id)
+    if not loan_type:
+        return jsonify({'error': 'Loan type not found'}), 404
+
+    data = request.get_json()
+
+    if 'name' in data: loan_type.name = data['name']
+    if 'interestRate' in data: loan_type.interest_rate = data['interestRate']
+    if 'interestType' in data: loan_type.interest_type = data['interestType']
+    if 'chargeFeePercentage' in data: loan_type.charge_fee_percentage = data['chargeFeePercentage']
+    if 'minAmount' in data: loan_type.min_amount = data['minAmount']
+    if 'maxAmount' in data: loan_type.max_amount = data['maxAmount']
+    if 'durationMonths' in data: loan_type.duration_months = data['durationMonths']
+    if 'isActive' in data: loan_type.is_active = data['isActive']
+
+    try:
+        db.session.commit()
+        return jsonify(loan_type.to_dict())
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500

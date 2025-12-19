@@ -7,7 +7,7 @@ class User(db.Model):
     username = db.Column(db.String(100), unique=True, nullable=False)
     phone = db.Column(db.String(20), unique=True, nullable=False)
     password = db.Column(db.Text, nullable=False)
-    role = db.Column(db.Text, nullable=False) # admin, branch_manager, loan_officer, procurement_officer, customer
+    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=False)
     first_name = db.Column(db.Text, nullable=False)
     last_name = db.Column(db.Text, nullable=False)
     branch_id = db.Column(db.Integer, db.ForeignKey('branches.id'))
@@ -16,13 +16,14 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     branch = db.relationship('Branch', backref='users')
+    role = db.relationship('Role', backref='users')
 
     def to_dict(self):
         return {
             'id': self.id,
             'username': self.username,
             'phone': self.phone,
-            'role': self.role,
+            'role': self.role.name if self.role else None,
             'firstName': self.first_name,
             'lastName': self.last_name,
             'branchId': self.branch_id,
@@ -30,6 +31,33 @@ class User(db.Model):
             'communicationPreferences': self.communication_preferences,
             'createdAt': self.created_at.isoformat()
         }
+
+class Role(db.Model):
+    __tablename__ = 'roles'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False)
+    permissions = db.relationship('RolePermission', back_populates='role', cascade='all, delete-orphan')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'permissions': [p.permission.name for p in self.permissions]
+        }
+
+class Permission(db.Model):
+    __tablename__ = 'permissions'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True, nullable=False)
+
+class RolePermission(db.Model):
+    __tablename__ = 'role_permissions'
+    id = db.Column(db.Integer, primary_key=True)
+    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=False)
+    permission_id = db.Column(db.Integer, db.ForeignKey('permissions.id'), nullable=False)
+
+    role = db.relationship('Role', back_populates='permissions')
+    permission = db.relationship('Permission')
 
 class Branch(db.Model):
     __tablename__ = 'branches'
