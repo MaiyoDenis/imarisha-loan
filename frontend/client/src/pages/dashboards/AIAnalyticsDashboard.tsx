@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Brain, RefreshCw, Download } from 'lucide-react';
+import { Brain, RefreshCw, Download, AlertCircle } from 'lucide-react';
 import Layout from '../../components/layout/Layout';
 import { ArrearsForcastChart } from '../../components/ai-analytics/ArrearsForcastChart';
 import { MemberSegmentationChart } from '../../components/ai-analytics/MemberSegmentationChart';
@@ -28,10 +28,16 @@ export const AIAnalyticsDashboard: React.FC = () => {
   const cohortAnalysis = useCohortAnalysis(filters.branchId);
 
   const isLoading =
-    arrearsForcast.isLoading ||
-    memberBehavior.isLoading ||
-    atRiskMembers.isLoading ||
-    cohortAnalysis.isLoading;
+    (arrearsForcast.isLoading && !arrearsForcast.isError) ||
+    (memberBehavior.isLoading && !memberBehavior.isError) ||
+    (atRiskMembers.isLoading && !atRiskMembers.isError) ||
+    (cohortAnalysis.isLoading && !cohortAnalysis.isError);
+
+  const hasErrors =
+    arrearsForcast.isError ||
+    memberBehavior.isError ||
+    atRiskMembers.isError ||
+    cohortAnalysis.isError;
 
   const handleRefresh = () => {
     arrearsForcast.refetch();
@@ -57,6 +63,43 @@ export const AIAnalyticsDashboard: React.FC = () => {
     link.download = `ai-analytics-${new Date().toISOString().split('T')[0]}.json`;
     link.click();
   };
+
+  if (hasErrors && !arrearsForcast.data && !memberBehavior.data && !atRiskMembers.data && !cohortAnalysis.data) {
+    return (
+      <Layout>
+        <div className="p-6">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+            <div className="flex items-start gap-4">
+              <AlertCircle className="w-6 h-6 text-red-600 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-red-900">Failed to load AI Analytics</h3>
+                <p className="text-sm text-red-700 mt-2">
+                  There was an error loading the AI analytics data. Please try again.
+                </p>
+                <button
+                  onClick={handleRefresh}
+                  className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                >
+                  Retry
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (isLoading && !arrearsForcast.data && !memberBehavior.data && !atRiskMembers.data && !cohortAnalysis.data) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading AI analytics...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Layout>
@@ -106,6 +149,20 @@ export const AIAnalyticsDashboard: React.FC = () => {
         </div>
       </div>
 
+      {hasErrors && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <h3 className="font-semibold text-yellow-900">Some data failed to load</h3>
+              <p className="text-sm text-yellow-700 mt-1">
+                Some AI analytics sections may not be available. Showing cached data where available.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -117,6 +174,11 @@ export const AIAnalyticsDashboard: React.FC = () => {
                   isLoading={arrearsForcast.isLoading}
                 />
               )}
+              {arrearsForcast.isError && !arrearsForcast.data && (
+                <div className="h-96 flex items-center justify-center text-gray-500">
+                  Failed to load arrears forecast
+                </div>
+              )}
             </div>
 
             <div className="glass-card gradient-border hover-tilt relative overflow-hidden p-4 md:p-6">
@@ -126,17 +188,28 @@ export const AIAnalyticsDashboard: React.FC = () => {
                 totalMembers={memberBehavior.data?.total_members || 0}
                 isLoading={memberBehavior.isLoading}
               />
+              {memberBehavior.isError && !memberBehavior.data && (
+                <div className="h-96 flex items-center justify-center text-gray-500">
+                  Failed to load member behavior analysis
+                </div>
+              )}
             </div>
           </div>
 
-          {atRiskMembers.data && (
+          {(atRiskMembers.data || !atRiskMembers.isError) && (
             <div className="glass-card gradient-border hover-tilt relative overflow-hidden p-4 md:p-6">
               <span className="aura"></span>
-              <AtRiskMembersTable
-                members={atRiskMembers.data.members}
-                totalScanned={atRiskMembers.data.total_members_scanned}
-                isLoading={atRiskMembers.isLoading}
-              />
+              {atRiskMembers.data ? (
+                <AtRiskMembersTable
+                  members={atRiskMembers.data.members}
+                  totalScanned={atRiskMembers.data.total_members_scanned}
+                  isLoading={atRiskMembers.isLoading}
+                />
+              ) : (
+                <div className="h-96 flex items-center justify-center text-gray-500">
+                  Failed to load at-risk members
+                </div>
+              )}
             </div>
           )}
 
@@ -147,6 +220,11 @@ export const AIAnalyticsDashboard: React.FC = () => {
               insights={cohortAnalysis.data?.insights || { best_performing_cohort: null, average_active_rate: 0, average_default_rate: 0 }}
               isLoading={cohortAnalysis.isLoading}
             />
+            {cohortAnalysis.isError && !cohortAnalysis.data && (
+              <div className="h-96 flex items-center justify-center text-gray-500">
+                Failed to load cohort analysis
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
