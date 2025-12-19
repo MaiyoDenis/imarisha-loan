@@ -58,7 +58,7 @@ interface OpsData {
 export default function OperationsDashboard() {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const { data: dashboard, isLoading, refetch } = useQuery<OpsData>({
+  const { data: dashboard, isLoading, isError, refetch } = useQuery<OpsData>({
     queryKey: ['operationsDashboard'],
     queryFn: () => api.getOperationsDashboard(),
     staleTime: 2 * 60 * 1000,
@@ -116,16 +116,25 @@ export default function OperationsDashboard() {
   };
 
   if (isLoading) return <div className="flex justify-center items-center h-screen"><div className="animate-spin h-12 w-12 border-b-2 border-blue-600"></div></div>;
-  if (!dashboard || !dashboard.daily_summary) {
+  if (isError || !dashboard || !dashboard.daily_summary) {
     const errorMsg = (dashboard as any)?.error || 'Failed to load dashboard';
     return (
       <Layout>
         <div className="p-6">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
-            <div>
-              <h3 className="font-semibold text-red-900">Failed to load dashboard</h3>
-              <p className="text-sm text-red-700 mt-1">{errorMsg}</p>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <h3 className="font-semibold text-red-900">Failed to load dashboard</h3>
+                <p className="text-sm text-red-700 mt-1">{errorMsg}</p>
+                <button
+                  onClick={handleRefresh}
+                  disabled={isRefreshing}
+                  className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition disabled:opacity-50"
+                >
+                  {isRefreshing ? 'Retrying...' : 'Retry'}
+                </button>
+              </div>
             </div>
           </div>
         </div>

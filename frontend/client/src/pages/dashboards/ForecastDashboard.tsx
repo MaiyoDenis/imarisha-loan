@@ -43,7 +43,7 @@ interface ForecastData {
 export default function ForecastDashboard() {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const { data: dashboard, isLoading, refetch } = useQuery<ForecastData>({
+  const { data: dashboard, isLoading, isError, refetch } = useQuery<ForecastData>({
     queryKey: ['forecastDashboard'],
     queryFn: () => api.getForecastDashboard(),
     staleTime: 5 * 60 * 1000
@@ -299,7 +299,7 @@ export default function ForecastDashboard() {
             12-Month Revenue Forecast
           </h3>
           <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" debounce={100}>
             <AreaChart data={revenueData}>
               <defs>
                 <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
@@ -324,7 +324,7 @@ export default function ForecastDashboard() {
             <span className="aura"></span>
             <h3 className="font-heading font-semibold text-foreground mb-4">Loan Volume Forecast</h3>
             <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" debounce={100}>
               <BarChart data={loanData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
@@ -343,7 +343,7 @@ export default function ForecastDashboard() {
             <span className="aura"></span>
             <h3 className="font-heading font-semibold text-foreground mb-4">Cash Flow Forecast</h3>
             <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" debounce={100}>
               <ComposedChart data={cashFlowData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
@@ -367,7 +367,7 @@ export default function ForecastDashboard() {
             Arrears Rate Forecast (Confidence: {(dashboard.arrears_forecast.confidence_level * 100).toFixed(0)}%)
           </h3>
           <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" debounce={100}>
             <LineChart data={arrearsData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
@@ -403,7 +403,7 @@ export default function ForecastDashboard() {
             Based on current trends, loan applications are expected to {dashboard.loan_volume_forecast.trend} throughout the forecast period.
           </p>
           <div style={{ width: "100%", height: "250px", minWidth: 0, overflow: "hidden" }}>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" debounce={100}>
             <LineChart data={loanData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />

@@ -45,7 +45,7 @@ interface RiskData {
 export default function RiskDashboard() {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const { data: dashboard, isLoading, refetch } = useQuery<RiskData>({
+  const { data: dashboard, isLoading, isError, refetch } = useQuery<RiskData>({
     queryKey: ['riskDashboard'],
     queryFn: () => api.getRiskDashboard(),
     staleTime: 5 * 60 * 1000
@@ -103,7 +103,7 @@ export default function RiskDashboard() {
   };
 
   if (isLoading) return <div className="flex justify-center items-center h-screen"><div className="animate-spin h-12 w-12 border-b-2 border-blue-600"></div></div>;
-  if (!dashboard || !dashboard.risk_distribution) {
+  if (isError || !dashboard || !dashboard.risk_distribution) {
     const errorMsg = (dashboard as any)?.error || 'Failed to load dashboard';
     return (
       <Layout>
@@ -225,7 +225,7 @@ export default function RiskDashboard() {
           <span className="aura"></span>
           <h3 className="font-heading font-semibold text-foreground mb-4">Member Risk Distribution</h3>
           <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" debounce={100}>
             <PieChart>
               <Pie
                 data={riskData}
@@ -257,7 +257,7 @@ export default function RiskDashboard() {
             <span className="aura"></span>
             <h3 className="font-heading font-semibold text-foreground mb-4">Concentration by Product</h3>
             <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" debounce={100}>
               <BarChart data={dashboard.portfolio_concentration.by_product}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="product" />
@@ -276,7 +276,7 @@ export default function RiskDashboard() {
             <span className="aura"></span>
             <h3 className="font-heading font-semibold text-foreground mb-4">Concentration by Location</h3>
             <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" debounce={100}>
               <BarChart data={dashboard.portfolio_concentration.by_location}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="location" />
@@ -296,7 +296,7 @@ export default function RiskDashboard() {
           <span className="aura"></span>
           <h3 className="font-heading font-semibold text-foreground mb-4">Stress Testing Scenarios</h3>
           <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" debounce={100}>
             <BarChart data={[
               { scenario: 'Baseline', npl: dashboard.scenario_analysis.baseline.npl_rate },
               { scenario: 'Stress 5%', npl: dashboard.scenario_analysis.stress_5pct.npl_rate },

@@ -441,7 +441,7 @@ export default function ExecutiveDashboard() {
             <span className="aura"></span>
             <h3 className="font-heading font-semibold text-foreground mb-4">Portfolio at Risk Trend</h3>
             <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" debounce={100}>
               <LineChart data={generateTrendData(dashboard?.risk_metrics?.par_ratio || 5)}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
@@ -458,7 +458,7 @@ export default function ExecutiveDashboard() {
             <span className="aura"></span>
             <h3 className="font-heading font-semibold text-foreground mb-4">Revenue by Source</h3>
             <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" debounce={100}>
               <PieChart>
                 <Pie
                   data={generateRevenueData(dashboard?.revenue_metrics)}
@@ -486,7 +486,7 @@ export default function ExecutiveDashboard() {
           <span className="aura"></span>
           <h3 className="font-heading font-semibold text-foreground mb-4">Member & Loan Growth</h3>
           <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" debounce={100}>
             <BarChart data={generateGrowthData(dashboard?.growth_metrics)}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />

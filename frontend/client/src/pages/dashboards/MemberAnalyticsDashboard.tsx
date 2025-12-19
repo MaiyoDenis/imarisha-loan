@@ -237,7 +237,7 @@ export default function MemberAnalyticsDashboard() {
             <span className="aura"></span>
             <h3 className="font-heading font-semibold text-foreground mb-4">Member Lifecycle Stages</h3>
             <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" debounce={100}>
               <PieChart>
                 <Pie
                   data={lifecycleData}
@@ -264,7 +264,7 @@ export default function MemberAnalyticsDashboard() {
             <span className="aura"></span>
             <h3 className="font-heading font-semibold text-foreground mb-4">Member Segmentation</h3>
             <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" debounce={100}>
               <BarChart data={segmentData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
@@ -282,7 +282,7 @@ export default function MemberAnalyticsDashboard() {
           <span className="aura"></span>
           <h3 className="font-heading font-semibold text-foreground mb-4">Cohort Analysis (Last 6 Months)</h3>
           <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" debounce={100}>
             <LineChart data={cohortData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
