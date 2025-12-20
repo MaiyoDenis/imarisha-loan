@@ -16,11 +16,20 @@ depends_on = None
 
 
 def upgrade():
-    try:
-        op.drop_column('users', 'role')
-        print("Dropped role column")
-    except Exception as e:
-        print(f"Column drop info: {e}")
+    conn = op.get_bind()
+    inspector = sa.inspect(conn)
+    
+    users_columns = [col['name'] for col in inspector.get_columns('users')]
+    
+    if 'role' in users_columns:
+        print("Dropping remaining 'role' column...")
+        try:
+            op.drop_column('users', 'role')
+            print("Dropped role column")
+        except Exception as e:
+            print(f"Error: {e}")
+    else:
+        print("'role' column already gone, nothing to do")
 
 
 def downgrade():
