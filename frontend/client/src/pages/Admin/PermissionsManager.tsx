@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import { api } from '@/lib/api';
 
 const PermissionsManager: React.FC = () => {
     const [roles, setRoles] = useState<any[]>([]);
@@ -11,11 +11,11 @@ const PermissionsManager: React.FC = () => {
         const fetchData = async () => {
             try {
                 const [rolesRes, permissionsRes] = await Promise.all([
-                    axios.get('/api/permissions/roles'),
-                    axios.get('/api/permissions')
+                    api.get('/permissions/roles'),
+                    api.get('/permissions')
                 ]);
-                setRoles(rolesRes.data);
-                setPermissions(permissionsRes.data);
+                setRoles(rolesRes);
+                setPermissions(permissionsRes);
             } catch (err) {
                 setError('Failed to fetch data');
             } finally {
@@ -28,7 +28,7 @@ const PermissionsManager: React.FC = () => {
 
     const handleAssignPermission = async (roleId: number, permissionId: number) => {
         try {
-            await axios.post(`/api/permissions/roles/${roleId}/permissions`, { permission_id: permissionId });
+            await api.post(`/permissions/roles/${roleId}/permissions`, { permission_id: permissionId });
             alert('Permission assigned successfully');
         } catch (err) {
             alert('Failed to assign permission');

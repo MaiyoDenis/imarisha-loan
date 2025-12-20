@@ -34,8 +34,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import { api } from '@/lib/api';
 var LoanProductList = function () {
     var _a = useState([]), products = _a[0], setProducts = _a[1];
     var _b = useState(true), loading = _b[0], setLoading = _b[1];
@@ -47,10 +47,10 @@ var LoanProductList = function () {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 2, 3, 4]);
-                        return [4 /*yield*/, axios.get('/api/loan-products')];
+                        return [4 /*yield*/, api.get('/loan-products')];
                     case 1:
                         response = _a.sent();
-                        setProducts(response.data);
+                        setProducts(response);
                         return [3 /*break*/, 4];
                     case 2:
                         err_1 = _a.sent();

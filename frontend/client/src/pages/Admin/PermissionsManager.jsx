@@ -34,8 +34,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import { api } from '@/lib/api';
 var PermissionsManager = function () {
     var _a = useState([]), roles = _a[0], setRoles = _a[1];
     var _b = useState([]), permissions = _b[0], setPermissions = _b[1];
@@ -49,13 +49,13 @@ var PermissionsManager = function () {
                     case 0:
                         _b.trys.push([0, 2, 3, 4]);
                         return [4 /*yield*/, Promise.all([
-                                axios.get('/api/permissions/roles'),
-                                axios.get('/api/permissions')
+                                api.get('/permissions/roles'),
+                                api.get('/permissions')
                             ])];
                     case 1:
                         _a = _b.sent(), rolesRes = _a[0], permissionsRes = _a[1];
-                        setRoles(rolesRes.data);
-                        setPermissions(permissionsRes.data);
+                        setRoles(rolesRes);
+                        setPermissions(permissionsRes);
                         return [3 /*break*/, 4];
                     case 2:
                         err_1 = _b.sent();
@@ -76,7 +76,7 @@ var PermissionsManager = function () {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4 /*yield*/, axios.post("/api/permissions/roles/".concat(roleId, "/permissions"), { permission_id: permissionId })];
+                    return [4 /*yield*/, api.post("/permissions/roles/".concat(roleId, "/permissions"), { permission_id: permissionId })];
                 case 1:
                     _a.sent();
                     alert('Permission assigned successfully');

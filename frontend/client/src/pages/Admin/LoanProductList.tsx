@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import { api } from '@/lib/api';
 
 const LoanProductList: React.FC = () => {
     const [products, setProducts] = useState<any[]>([]);
@@ -9,8 +9,8 @@ const LoanProductList: React.FC = () => {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const response = await axios.get('/api/loan-products');
-                setProducts(response.data);
+                const response = await api.get('/loan-products');
+                setProducts(response);
             } catch (err) {
                 setError('Failed to fetch loan products');
             } finally {
