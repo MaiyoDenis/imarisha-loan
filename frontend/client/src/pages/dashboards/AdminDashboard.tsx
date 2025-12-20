@@ -8,11 +8,13 @@ import Layout from '@/components/layout/Layout';
 import {
   AlertCircle, Download, RefreshCw, TrendingUp, Package,
   DollarSign, Users, Activity, Zap, PieChart as PieIcon,
-  Target, ShoppingCart, CheckCircle2
+  Target, ShoppingCart, CheckCircle2, Bell, MessageSquare, User, LogOut, ChevronDown
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import KPICard from '@/components/dashboards/KPICard';
 import { useRoleRedirect } from '@/hooks/use-role-redirect';
+import { useLocation } from 'wouter';
+import { useToast } from '@/hooks/use-toast';
 
 interface AdminDashboardData {
   timestamp: string;
@@ -95,6 +97,9 @@ interface AdminDashboardData {
 }
 
 export default function AdminDashboard() {
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  
   useRoleRedirect({
     allowedRoles: ['admin', 'branch_manager'],
     fallbackPath: '/dashboard'
@@ -104,6 +109,24 @@ export default function AdminDashboard() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [sectionFilter, setSectionFilter] = useState<'all' | 'product' | 'lending' | 'topproducts' | 'branch'>('all');
   const [lendingAnalyticsFilter, setLendingAnalyticsFilter] = useState<'all' | 'active' | 'completed' | 'pending'>('all');
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [notifications] = useState([
+    { id: 1, message: 'Low stock alert: Product X', time: '5 min ago', read: false },
+    { id: 2, message: 'Loan repayment due', time: '1 hour ago', read: false },
+    { id: 3, message: 'System maintenance scheduled', time: '2 hours ago', read: true }
+  ]);
+  const [messages] = useState([
+    { id: 1, sender: 'John Doe', message: 'Can you review the report?', time: '10 min ago', unread: true },
+    { id: 2, sender: 'Jane Smith', message: 'Meeting at 3 PM', time: '30 min ago', unread: false }
+  ]);
+
+  const userStr = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
+  const user = userStr ? JSON.parse(userStr) : null;
+  const userInitials = user ? `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase() : 'A';
+  const userName = user ? `${user.firstName} ${user.lastName}` : 'Admin';
+
+  const unreadNotifications = notifications.filter(n => !n.read).length;
+  const unreadMessages = messages.filter(m => m.unread).length;
 
   const { data: dashboard, isLoading, isError, refetch } = useQuery<AdminDashboardData>({
     queryKey: ['adminDashboard', branchId],
@@ -120,6 +143,25 @@ export default function AdminDashboard() {
       await refetch();
     } finally {
       setIsRefreshing(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('user');
+      toast({
+        title: "Logged out",
+        description: "You have been logged out successfully",
+      });
+      setLocation('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to logout",
+        variant: "destructive",
+      });
     }
   };
 
@@ -230,7 +272,7 @@ export default function AdminDashboard() {
     <Layout>
       <div className="min-h-screen p-6 bg-gradient-to-br from-slate-50 to-slate-100">
         <div className="max-w-7xl mx-auto">
-          {/* Header */}
+          {/* Main Dashboard Header */}
           <div className="flex justify-between items-start mb-8">
             <div>
               <h1 className="text-4xl font-bold tracking-tight text-slate-900">Reports & Analytics</h1>
