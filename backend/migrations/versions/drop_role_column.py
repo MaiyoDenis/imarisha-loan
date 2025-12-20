@@ -23,13 +23,10 @@ def upgrade():
     
     if 'role' in users_columns:
         print("Dropping 'role' column...")
-        try:
-            op.drop_column('users', 'role')
-            print("Successfully dropped 'role' column")
-        except Exception as e:
-            print(f"Error dropping role column: {e}")
-            conn.rollback()
-            raise
+        op.drop_column('users', 'role')
+        print("Successfully dropped 'role' column")
+    else:
+        print("'role' column does not exist, skipping drop")
 
 
 def downgrade():
