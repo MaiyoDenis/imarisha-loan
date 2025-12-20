@@ -60,7 +60,6 @@ const allSidebarItems: MenuItem[] = [
   { icon: Users, label: "Groups", href: "/groups", roles: ["admin", "executive", "operations_manager"] },
   { icon: Users, label: "Members", href: "/members", roles: ["admin", "executive", "operations_manager"] },
   { icon: Wallet, label: "Savings", href: "/savings", roles: ["admin", "executive", "operations_manager"] },
-  { icon: BarChart3, label: "Reports", href: "/reports", roles: ["admin", "executive", "operations_manager"] },
   { icon: Settings, label: "Settings", href: "/settings" },
 ];
 

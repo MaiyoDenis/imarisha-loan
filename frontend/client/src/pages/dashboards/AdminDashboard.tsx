@@ -102,6 +102,8 @@ export default function AdminDashboard() {
 
   const [branchId, setBranchId] = useState<number | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [sectionFilter, setSectionFilter] = useState<'all' | 'product' | 'lending' | 'topproducts' | 'branch'>('all');
+  const [lendingAnalyticsFilter, setLendingAnalyticsFilter] = useState<'all' | 'active' | 'completed' | 'pending'>('all');
 
   const { data: dashboard, isLoading, isError, refetch } = useQuery<AdminDashboardData>({
     queryKey: ['adminDashboard', branchId],
@@ -231,30 +233,43 @@ export default function AdminDashboard() {
           {/* Header */}
           <div className="flex justify-between items-start mb-8">
             <div>
-              <h1 className="text-4xl font-bold tracking-tight text-slate-900">Admin Dashboard</h1>
-              <p className="text-slate-600 mt-2">Complete product lending & profit analytics</p>
+              <h1 className="text-4xl font-bold tracking-tight text-slate-900">Reports & Analytics</h1>
+              <p className="text-slate-600 mt-2">Generate insights and monitor performance across your organization.</p>
               {dashboard?.timestamp && (
                 <p className="text-xs text-slate-500 mt-2">
                   Last updated: {new Date(dashboard.timestamp).toLocaleString()}
                 </p>
               )}
             </div>
-            <div className="flex gap-3">
-              <button
-                onClick={handleRefresh}
-                disabled={isRefreshing}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+            <div className="flex flex-col gap-3">
+              <div className="flex gap-3">
+                <button
+                  onClick={handleRefresh}
+                  disabled={isRefreshing}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+                >
+                  <RefreshCw size={18} className={isRefreshing ? 'animate-spin' : ''} />
+                  {isRefreshing ? 'Refreshing...' : 'Refresh'}
+                </button>
+                <button
+                  onClick={handleExport}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                >
+                  <Download size={18} />
+                  Export
+                </button>
+              </div>
+              <select
+                value={sectionFilter}
+                onChange={(e) => setSectionFilter(e.target.value as 'all' | 'product' | 'lending' | 'topproducts' | 'branch')}
+                className="px-4 py-2 border border-slate-300 rounded-lg bg-white text-slate-700 font-medium hover:border-slate-400 transition focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <RefreshCw size={18} className={isRefreshing ? 'animate-spin' : ''} />
-                {isRefreshing ? 'Refreshing...' : 'Refresh'}
-              </button>
-              <button
-                onClick={handleExport}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
-              >
-                <Download size={18} />
-                Export
-              </button>
+                <option value="all">All Sections</option>
+                <option value="product">Product Inventory Overview</option>
+                <option value="lending">Lending Analytics</option>
+                <option value="topproducts">Top Performing Products</option>
+                <option value="branch">Branch Comparison</option>
+              </select>
             </div>
           </div>
 
@@ -298,204 +313,246 @@ export default function AdminDashboard() {
           )}
 
           {/* Product Overview */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-              <Package className="text-blue-600" size={28} />
-              Product Inventory Overview
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-              <KPICard
-                title="Total Products"
-                value={formatNumber(dashboard.product_overview.total_products)}
-                icon={<Package size={24} />}
-                status="success"
-              />
-              <KPICard
-                title="Inventory Value"
-                value={formatCurrency(dashboard.product_overview.total_inventory_value)}
-                icon={<DollarSign size={24} />}
-              />
-              <KPICard
-                title="Active Products"
-                value={formatNumber(dashboard.product_overview.active_products)}
-                status="success"
-              />
-              <KPICard
-                title="Low Stock Alerts"
-                value={formatNumber(dashboard.product_overview.low_stock_alerts)}
-                status={dashboard.product_overview.low_stock_alerts > 0 ? 'warning' : 'success'}
-              />
-              <KPICard
-                title="Market Value"
-                value={formatCurrency(dashboard.product_overview.total_market_value)}
-              />
+          {(sectionFilter === 'all' || sectionFilter === 'product') && (
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <Package className="text-blue-600" size={28} />
+                Product Inventory Overview
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <KPICard
+                  title="Total Products"
+                  value={formatNumber(dashboard.product_overview.total_products)}
+                  icon={<Package size={24} />}
+                  status="success"
+                />
+                <KPICard
+                  title="Inventory Value"
+                  value={formatCurrency(dashboard.product_overview.total_inventory_value)}
+                  icon={<DollarSign size={24} />}
+                />
+                <KPICard
+                  title="Active Products"
+                  value={formatNumber(dashboard.product_overview.active_products)}
+                  status="success"
+                />
+                <KPICard
+                  title="Low Stock Alerts"
+                  value={formatNumber(dashboard.product_overview.low_stock_alerts)}
+                  status={dashboard.product_overview.low_stock_alerts > 0 ? 'warning' : 'success'}
+                />
+                <KPICard
+                  title="Market Value"
+                  value={formatCurrency(dashboard.product_overview.total_market_value)}
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Lending Analytics */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-              <Activity className="text-purple-600" size={28} />
-              Lending Analytics
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-              <KPICard
-                title="Active Loans"
-                value={formatNumber(dashboard.lending_analytics.total_loans_active)}
-                icon={<Activity size={24} />}
-                status="success"
-              />
-              <KPICard
-                title="Completed Loans"
-                value={formatNumber(dashboard.lending_analytics.total_loans_completed)}
-                icon={<CheckCircle2 size={24} />}
-                status="success"
-              />
-              <KPICard
-                title="Total Borrowed"
-                value={formatCurrency(dashboard.lending_analytics.total_borrowed_amount)}
-                icon={<TrendingUp size={24} />}
-              />
-              <KPICard
-                title="Total Paid"
-                value={formatCurrency(dashboard.lending_analytics.total_paid_amount)}
-              />
-              <KPICard
-                title="Outstanding"
-                value={formatCurrency(dashboard.lending_analytics.total_outstanding)}
-                status={dashboard.lending_analytics.total_outstanding > 0 ? 'warning' : 'normal'}
-              />
+          {(sectionFilter === 'all' || sectionFilter === 'lending') && (
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+                  <Activity className="text-purple-600" size={28} />
+                  Lending Analytics
+                </h2>
+                <select
+                  value={lendingAnalyticsFilter}
+                  onChange={(e) => setLendingAnalyticsFilter(e.target.value as 'all' | 'active' | 'completed' | 'pending')}
+                  className="px-4 py-2 border border-slate-300 rounded-lg bg-white text-slate-700 font-medium hover:border-slate-400 transition focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">View All</option>
+                  <option value="active">Active Loans</option>
+                  <option value="completed">Completed Loans</option>
+                  <option value="pending">Pending Loans</option>
+                </select>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                {(lendingAnalyticsFilter === 'all' || lendingAnalyticsFilter === 'active') && (
+                  <KPICard
+                    title="Active Loans"
+                    value={formatNumber(dashboard.lending_analytics.total_loans_active)}
+                    icon={<Activity size={24} />}
+                    status="success"
+                  />
+                )}
+                {(lendingAnalyticsFilter === 'all' || lendingAnalyticsFilter === 'completed') && (
+                  <KPICard
+                    title="Completed Loans"
+                    value={formatNumber(dashboard.lending_analytics.total_loans_completed)}
+                    icon={<CheckCircle2 size={24} />}
+                    status="success"
+                  />
+                )}
+                {(lendingAnalyticsFilter === 'all') && (
+                  <>
+                    <KPICard
+                      title="Total Borrowed"
+                      value={formatCurrency(dashboard.lending_analytics.total_borrowed_amount)}
+                      icon={<TrendingUp size={24} />}
+                    />
+                    <KPICard
+                      title="Total Paid"
+                      value={formatCurrency(dashboard.lending_analytics.total_paid_amount)}
+                    />
+                    <KPICard
+                      title="Outstanding"
+                      value={formatCurrency(dashboard.lending_analytics.total_outstanding)}
+                      status={dashboard.lending_analytics.total_outstanding > 0 ? 'warning' : 'normal'}
+                    />
+                  </>
+                )}
+                {(lendingAnalyticsFilter === 'pending') && (
+                  <KPICard
+                    title="Pending Loans"
+                    value={formatNumber(dashboard.lending_analytics.total_loans_pending)}
+                    icon={<AlertCircle size={24} />}
+                    status="warning"
+                  />
+                )}
+              </div>
+              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                {(lendingAnalyticsFilter === 'all') && (
+                  <>
+                    <KPICard
+                      title="Expected Total Income"
+                      value={formatCurrency(dashboard.lending_analytics.expected_total_income)}
+                    />
+                    <KPICard
+                      title="Borrowed vs Paid Ratio"
+                      value={`${dashboard.lending_analytics.borrowed_to_paid_ratio.toFixed(1)}%`}
+                    />
+                  </>
+                )}
+              </div>
             </div>
-            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <KPICard
-                title="Expected Total Income"
-                value={formatCurrency(dashboard.lending_analytics.expected_total_income)}
-              />
-              <KPICard
-                title="Borrowed vs Paid Ratio"
-                value={`${dashboard.lending_analytics.borrowed_to_paid_ratio.toFixed(1)}%`}
-              />
-            </div>
-          </div>
+          )}
 
           {/* Profit Analysis */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-              <TrendingUp className="text-green-600" size={28} />
-              Profit Analysis & Financial Performance
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <KPICard
-                title="Cost of Goods Sold"
-                value={formatCurrency(dashboard.profit_analysis.cost_of_goods_sold)}
-                status="normal"
-              />
-              <KPICard
-                title="Revenue (Selling Price)"
-                value={formatCurrency(dashboard.profit_analysis.revenue_selling_price)}
-                status="success"
-              />
-              <KPICard
-                title="Gross Profit"
-                value={formatCurrency(dashboard.profit_analysis.gross_profit)}
-                icon={<Zap size={24} />}
-                status={dashboard.profit_analysis.gross_profit > 0 ? 'success' : 'warning'}
-              />
-              <KPICard
-                title="Profit Margin"
-                value={`${dashboard.profit_analysis.profit_margin_percentage.toFixed(2)}%`}
-                status={dashboard.profit_analysis.profit_margin_percentage > 0 ? 'success' : 'warning'}
-              />
+          {(sectionFilter === 'all' || sectionFilter === 'lending') && (
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <TrendingUp className="text-green-600" size={28} />
+                Profit Analysis & Financial Performance
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <KPICard
+                  title="Cost of Goods Sold"
+                  value={formatCurrency(dashboard.profit_analysis.cost_of_goods_sold)}
+                  status="normal"
+                />
+                <KPICard
+                  title="Revenue (Selling Price)"
+                  value={formatCurrency(dashboard.profit_analysis.revenue_selling_price)}
+                  status="success"
+                />
+                <KPICard
+                  title="Gross Profit"
+                  value={formatCurrency(dashboard.profit_analysis.gross_profit)}
+                  icon={<Zap size={24} />}
+                  status={dashboard.profit_analysis.gross_profit > 0 ? 'success' : 'warning'}
+                />
+                <KPICard
+                  title="Profit Margin"
+                  value={`${dashboard.profit_analysis.profit_margin_percentage.toFixed(2)}%`}
+                  status={dashboard.profit_analysis.profit_margin_percentage > 0 ? 'success' : 'warning'}
+                />
+              </div>
+              <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <KPICard
+                  title="Interest Income (Realized)"
+                  value={formatCurrency(dashboard.profit_analysis.total_interest_income)}
+                />
+                <KPICard
+                  title="Processing Fees"
+                  value={formatCurrency(dashboard.profit_analysis.total_processing_fees)}
+                />
+                <KPICard
+                  title="Expected Income (Pending)"
+                  value={formatCurrency(dashboard.profit_analysis.expected_income_pending)}
+                />
+              </div>
             </div>
-            <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-              <KPICard
-                title="Interest Income (Realized)"
-                value={formatCurrency(dashboard.profit_analysis.total_interest_income)}
-              />
-              <KPICard
-                title="Processing Fees"
-                value={formatCurrency(dashboard.profit_analysis.total_processing_fees)}
-              />
-              <KPICard
-                title="Expected Income (Pending)"
-                value={formatCurrency(dashboard.profit_analysis.expected_income_pending)}
-              />
-            </div>
-          </div>
+          )}
 
           {/* Repayment Tracking */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-              <CheckCircle2 className="text-emerald-600" size={28} />
-              Repayment Performance Tracking
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <KPICard
-                title="Total Disbursed"
-                value={formatNumber(dashboard.repayment_tracking.total_disbursed)}
-              />
-              <KPICard
-                title="Total Completed"
-                value={formatNumber(dashboard.repayment_tracking.total_completed)}
-                status="success"
-              />
-              <KPICard
-                title="Repayment Rate"
-                value={`${dashboard.repayment_tracking.repayment_rate.toFixed(1)}%`}
-                status={dashboard.repayment_tracking.repayment_rate > 80 ? 'success' : 'warning'}
-              />
-              <KPICard
-                title="Default Rate"
-                value={`${dashboard.repayment_tracking.default_rate.toFixed(1)}%`}
-                status={dashboard.repayment_tracking.default_rate < 5 ? 'success' : 'warning'}
-              />
+          {(sectionFilter === 'all' || sectionFilter === 'lending') && (
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <CheckCircle2 className="text-emerald-600" size={28} />
+                Repayment Performance Tracking
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <KPICard
+                  title="Total Disbursed"
+                  value={formatNumber(dashboard.repayment_tracking.total_disbursed)}
+                />
+                <KPICard
+                  title="Total Completed"
+                  value={formatNumber(dashboard.repayment_tracking.total_completed)}
+                  status="success"
+                />
+                <KPICard
+                  title="Repayment Rate"
+                  value={`${dashboard.repayment_tracking.repayment_rate.toFixed(1)}%`}
+                  status={dashboard.repayment_tracking.repayment_rate > 80 ? 'success' : 'warning'}
+                />
+                <KPICard
+                  title="Default Rate"
+                  value={`${dashboard.repayment_tracking.default_rate.toFixed(1)}%`}
+                  status={dashboard.repayment_tracking.default_rate < 5 ? 'success' : 'warning'}
+                />
+              </div>
+              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <KPICard
+                  title="Overdue Loans"
+                  value={formatNumber(dashboard.repayment_tracking.overdue_loans)}
+                  status={dashboard.repayment_tracking.overdue_loans > 0 ? 'warning' : 'success'}
+                />
+                <KPICard
+                  title="Outstanding Balance"
+                  value={formatCurrency(dashboard.repayment_tracking.outstanding_balance)}
+                />
+              </div>
             </div>
-            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <KPICard
-                title="Overdue Loans"
-                value={formatNumber(dashboard.repayment_tracking.overdue_loans)}
-                status={dashboard.repayment_tracking.overdue_loans > 0 ? 'warning' : 'success'}
-              />
-              <KPICard
-                title="Outstanding Balance"
-                value={formatCurrency(dashboard.repayment_tracking.outstanding_balance)}
-              />
-            </div>
-          </div>
+          )}
 
           {/* Growth Metrics */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-              <TrendingUp className="text-indigo-600" size={28} />
-              Growth Metrics
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-white rounded-lg p-4 border border-slate-200">
-                <h3 className="text-sm font-semibold text-slate-600 uppercase">Month to Date</h3>
-                <p className="text-2xl font-bold text-slate-900 mt-2">{formatNumber(dashboard.growth_metrics.mtd_new_loans)}</p>
-                <p className="text-xs text-slate-500 mt-1">New Loans</p>
-                <p className="text-xl font-semibold text-slate-900 mt-3">{formatCurrency(dashboard.growth_metrics.mtd_amount)}</p>
-                <p className="text-xs text-slate-500">Amount</p>
-              </div>
-              <div className="bg-white rounded-lg p-4 border border-slate-200">
-                <h3 className="text-sm font-semibold text-slate-600 uppercase">Quarter to Date</h3>
-                <p className="text-2xl font-bold text-slate-900 mt-2">{formatNumber(dashboard.growth_metrics.qtd_new_loans)}</p>
-                <p className="text-xs text-slate-500 mt-1">New Loans</p>
-                <p className="text-xl font-semibold text-slate-900 mt-3">{formatCurrency(dashboard.growth_metrics.qtd_amount)}</p>
-                <p className="text-xs text-slate-500">Amount</p>
-              </div>
-              <div className="bg-white rounded-lg p-4 border border-slate-200">
-                <h3 className="text-sm font-semibold text-slate-600 uppercase">Year to Date</h3>
-                <p className="text-2xl font-bold text-slate-900 mt-2">{formatNumber(dashboard.growth_metrics.ytd_new_loans)}</p>
-                <p className="text-xs text-slate-500 mt-1">New Loans</p>
-                <p className="text-xl font-semibold text-slate-900 mt-3">{formatCurrency(dashboard.growth_metrics.ytd_amount)}</p>
-                <p className="text-xs text-slate-500">Amount</p>
+          {(sectionFilter === 'all' || sectionFilter === 'lending') && (
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <TrendingUp className="text-indigo-600" size={28} />
+                Growth Metrics
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-white rounded-lg p-4 border border-slate-200">
+                  <h3 className="text-sm font-semibold text-slate-600 uppercase">Month to Date</h3>
+                  <p className="text-2xl font-bold text-slate-900 mt-2">{formatNumber(dashboard.growth_metrics.mtd_new_loans)}</p>
+                  <p className="text-xs text-slate-500 mt-1">New Loans</p>
+                  <p className="text-xl font-semibold text-slate-900 mt-3">{formatCurrency(dashboard.growth_metrics.mtd_amount)}</p>
+                  <p className="text-xs text-slate-500">Amount</p>
+                </div>
+                <div className="bg-white rounded-lg p-4 border border-slate-200">
+                  <h3 className="text-sm font-semibold text-slate-600 uppercase">Quarter to Date</h3>
+                  <p className="text-2xl font-bold text-slate-900 mt-2">{formatNumber(dashboard.growth_metrics.qtd_new_loans)}</p>
+                  <p className="text-xs text-slate-500 mt-1">New Loans</p>
+                  <p className="text-xl font-semibold text-slate-900 mt-3">{formatCurrency(dashboard.growth_metrics.qtd_amount)}</p>
+                  <p className="text-xs text-slate-500">Amount</p>
+                </div>
+                <div className="bg-white rounded-lg p-4 border border-slate-200">
+                  <h3 className="text-sm font-semibold text-slate-600 uppercase">Year to Date</h3>
+                  <p className="text-2xl font-bold text-slate-900 mt-2">{formatNumber(dashboard.growth_metrics.ytd_new_loans)}</p>
+                  <p className="text-xs text-slate-500 mt-1">New Loans</p>
+                  <p className="text-xl font-semibold text-slate-900 mt-3">{formatCurrency(dashboard.growth_metrics.ytd_amount)}</p>
+                  <p className="text-xs text-slate-500">Amount</p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Top Products */}
-          {dashboard.top_products && dashboard.top_products.length > 0 && (
+          {(sectionFilter === 'all' || sectionFilter === 'topproducts') && dashboard.top_products && dashboard.top_products.length > 0 && (
             <div className="mb-8 bg-white rounded-lg border border-slate-200 p-6">
               <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center gap-2">
                 <ShoppingCart className="text-rose-600" size={28} />
@@ -535,7 +592,7 @@ export default function AdminDashboard() {
           )}
 
           {/* Branch Comparison */}
-          {dashboard.branch_comparison && dashboard.branch_comparison.length > 0 && (
+          {(sectionFilter === 'all' || sectionFilter === 'branch') && dashboard.branch_comparison && dashboard.branch_comparison.length > 0 && (
             <div className="bg-white rounded-lg border border-slate-200 p-6">
               <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center gap-2">
                 <Target className="text-cyan-600" size={28} />
