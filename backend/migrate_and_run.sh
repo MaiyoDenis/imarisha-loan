@@ -4,7 +4,7 @@ set -e
 cd "$(dirname "$0")"
 
 echo "Running database migrations..."
-flask db upgrade
+flask db upgrade d4e5f6g7h8i9
 
 echo "Seeding database..."
 python seed.py
