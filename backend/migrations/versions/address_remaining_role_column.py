@@ -1,4 +1,4 @@
-"""Address remaining role column - set default value for role column
+"""Address remaining role column - aggressively remove NOT NULL constraint and column
 
 Revision ID: address_remaining_role_column
 Revises: final_cleanup_role_column
@@ -18,45 +18,33 @@ depends_on = None
 def upgrade():
     conn = op.get_bind()
     
+    print("Removing role column constraint...")
+    
     try:
-        result = conn.execute(text(
-            "SELECT column_name FROM information_schema.columns WHERE table_name='users' AND column_name='role'"
-        ))
-        role_exists = bool(result.fetchone())
-        print(f"Role column exists in schema: {role_exists}")
-        
-        if role_exists:
-            print("Setting default value for role column...")
-            try:
-                conn.execute(text("ALTER TABLE users ALTER COLUMN role SET DEFAULT 'admin'"))
-                conn.commit()
-                print("Successfully set default value for role column")
-            except Exception as e:
-                print(f"Error setting default: {e}")
-                try:
-                    conn.rollback()
-                except:
-                    pass
-            
-            print("Updating existing NULL values...")
-            try:
-                conn.execute(text("UPDATE users SET role = 'admin' WHERE role IS NULL"))
-                conn.commit()
-                print("Successfully updated NULL role values")
-            except Exception as e:
-                print(f"Error updating values: {e}")
-                try:
-                    conn.rollback()
-                except:
-                    pass
-        else:
-            print("Role column does not exist in schema")
+        print("Step 1: Making role column nullable...")
+        conn.execute(text("ALTER TABLE users ALTER COLUMN role DROP NOT NULL"))
+        conn.commit()
+        print("  ✓ Made nullable")
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"  - {e}")
         try:
             conn.rollback()
         except:
             pass
+    
+    try:
+        print("Step 2: Dropping role column...")
+        conn.execute(text("ALTER TABLE users DROP COLUMN IF EXISTS role CASCADE"))
+        conn.commit()
+        print("  ✓ Dropped column")
+    except Exception as e:
+        print(f"  - {e}")
+        try:
+            conn.rollback()
+        except:
+            pass
+    
+    print("Role constraint removal complete")
 
 
 def downgrade():
