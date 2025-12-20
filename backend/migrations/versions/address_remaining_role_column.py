@@ -1,4 +1,4 @@
-"""Address remaining role column - use information_schema for verification
+"""Address remaining role column - set default value for role column
 
 Revision ID: address_remaining_role_column
 Revises: final_cleanup_role_column
@@ -26,10 +26,31 @@ def upgrade():
         print(f"Role column exists in schema: {role_exists}")
         
         if role_exists:
-            print("Dropping role column...")
-            conn.execute(text('ALTER TABLE users DROP COLUMN role CASCADE'))
-            conn.commit()
-            print("Successfully dropped role column")
+            print("Setting default value for role column...")
+            try:
+                conn.execute(text("ALTER TABLE users ALTER COLUMN role SET DEFAULT 'admin'"))
+                conn.commit()
+                print("Successfully set default value for role column")
+            except Exception as e:
+                print(f"Error setting default: {e}")
+                try:
+                    conn.rollback()
+                except:
+                    pass
+            
+            print("Updating existing NULL values...")
+            try:
+                conn.execute(text("UPDATE users SET role = 'admin' WHERE role IS NULL"))
+                conn.commit()
+                print("Successfully updated NULL role values")
+            except Exception as e:
+                print(f"Error updating values: {e}")
+                try:
+                    conn.rollback()
+                except:
+                    pass
+        else:
+            print("Role column does not exist in schema")
     except Exception as e:
         print(f"Error: {e}")
         try:
