@@ -26,6 +26,7 @@ import OperationsDashboard from "@/pages/dashboards/OperationsDashboard";
 import RiskDashboard from "@/pages/dashboards/RiskDashboard";
 import MemberAnalyticsDashboard from "@/pages/dashboards/MemberAnalyticsDashboard";
 import ForecastDashboard from "@/pages/dashboards/ForecastDashboard";
+import AdminDashboard from "@/pages/dashboards/AdminDashboard";
 import { AIAnalyticsDashboard } from "@/pages/dashboards/AIAnalyticsDashboard";
 import { GamificationDashboard } from "@/pages/gamification/GamificationDashboard";
 import { FieldOperationsPage } from "@/pages/field-operations/FieldOperationsPage";
@@ -37,6 +38,7 @@ import { MemberDashboardPage } from "@/pages/field-officer/MemberDashboardPage";
 // import BranchList from "@/pages/Admin/Branches/BranchList";
 import LoanProductList from "@/pages/Admin/LoanProductList";
 import PermissionsManager from "@/pages/Admin/PermissionsManager";
+import ProductManagement from "@/pages/Admin/ProductManagement";
 import BranchManagerDashboard from "@/pages/Dashboards/BranchManagerDashboard";
 import ProcurementOfficerDashboard from "@/pages/ProcurementOfficerDashboard";
 
@@ -59,6 +61,20 @@ function Router() {
         {(params) => (
           <ProtectedRoute allowedRoles={["admin"]} fallbackPath="/dashboard">
             <PermissionsManager {...params} />
+          </ProtectedRoute>
+        )}
+      </Route>
+      <Route path="/admin/product-management">
+        {(params) => (
+          <ProtectedRoute allowedRoles={["admin", "branch_manager"]} fallbackPath="/dashboard">
+            <ProductManagement {...params} />
+          </ProtectedRoute>
+        )}
+      </Route>
+      <Route path="/dashboards/admin">
+        {(params) => (
+          <ProtectedRoute allowedRoles={["admin", "branch_manager"]} fallbackPath="/dashboard">
+            <AdminDashboard {...params} />
           </ProtectedRoute>
         )}
       </Route>

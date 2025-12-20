@@ -40,6 +40,7 @@ interface MenuItem {
 
 const allSidebarItems: MenuItem[] = [
   { icon: LayoutDashboard, label: "Main Dashboard", href: "/dashboard", roles: ["admin", "executive", "operations_manager", "risk_manager", "field_officer", "loan_officer", "customer"] },
+  { icon: BarChart3, label: "System Analytics", href: "/dashboards/admin", roles: ["admin"] },
   { icon: Building2, label: "Branch Dashboard", href: "/dashboards/branch-manager", roles: ["branch_manager"] },
   { icon: Users, label: "Staff", href: "/users", roles: ["branch_manager"] },
   { icon: CreditCard, label: "Loans", href: "/loans", roles: ["branch_manager", "admin", "executive", "operations_manager", "procurement_officer"] },

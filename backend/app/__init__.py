@@ -76,13 +76,14 @@ def create_app(config_class=Config):
     
     
     # Initialize services
-    from app.services import mfa_service, audit_service, notification_service, payment_service, risk_service, dashboard_service, currency_service, ussd_service, bi_service, kyc_service, aml_service, gdpr_service, voice_assistant, voice_analytics, demand_forecasting, inventory_optimization, etl_service
+    from app.services import mfa_service, audit_service, notification_service, payment_service, risk_service, dashboard_service, admin_dashboard_service, currency_service, ussd_service, bi_service, kyc_service, aml_service, gdpr_service, voice_assistant, voice_analytics, demand_forecasting, inventory_optimization, etl_service
     mfa_service.init_app(app)
     audit_service.init_app(app)
     notification_service.init_app(app)
     payment_service.init_app(app)
     risk_service.init_app(app)
     dashboard_service.init_app(app)
+    admin_dashboard_service.init_app(app)
     currency_service.init_app(app)
     ussd_service.init_app(app)
     bi_service.init_app(app)

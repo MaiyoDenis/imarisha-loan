@@ -15,7 +15,7 @@ function getRoleRedirectPath(role: string): string {
     'field_officer': '/field-officer',
     'loan_officer': '/dashboard',
     'branch_manager': '/dashboards/branch-manager',
-    'admin': '/dashboards/executive',
+    'admin': '/dashboards/admin',
     'procurement_officer': '/store',
     'customer': '/dashboard',
   };

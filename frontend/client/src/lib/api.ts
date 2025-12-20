@@ -39,6 +39,10 @@ export const api = {
     method: "POST",
     body: data ? JSON.stringify(data) : undefined,
   }),
+  patch: (endpoint: string, data?: any) => fetchAPI(endpoint, {
+    method: "PATCH",
+    body: data ? JSON.stringify(data) : undefined,
+  }),
 
   // Auth
   login: async (username: string, password: string) => {
@@ -91,6 +95,10 @@ export const api = {
   getDashboardSummary: (branchId?: number) => {
     const params = branchId ? `?branch_id=${branchId}` : "";
     return fetchAPI(`/dashboards/summary${params}`);
+  },
+  getAdminDashboard: (branchId?: number) => {
+    const params = branchId ? `?branch_id=${branchId}` : "";
+    return fetchAPI(`/dashboards/admin${params}`);
   },
   getKPI: (kpiName: string, branchId?: number, period?: string) => {
     const params = new URLSearchParams();

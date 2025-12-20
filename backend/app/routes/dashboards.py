@@ -1,6 +1,8 @@
 from flask import Blueprint, jsonify, request
 from app.services.dashboard_service import dashboard_service
+from app.services.admin_dashboard_service import admin_dashboard_service
 from app.services import audit_service, AuditEventType, RiskLevel
+from app.utils.decorators import admin_required
 
 bp = Blueprint('dashboards', __name__, url_prefix='/api/dashboards')
 
@@ -114,6 +116,27 @@ def get_dashboard_summary():
         }
         
         return jsonify(summary)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@bp.route('/admin', methods=['GET'])
+@admin_required
+def get_admin_dashboard():
+    """Get comprehensive admin dashboard for product and lending management"""
+    branch_id = request.args.get('branch_id', type=int)
+    
+    try:
+        dashboard_data = admin_dashboard_service.get_admin_dashboard(branch_id)
+        
+        audit_service.log_event(
+            event_type=AuditEventType.API_ACCESS,
+            resource="dashboard",
+            action="view_admin",
+            details={'branch_id': branch_id},
+            risk_level=RiskLevel.LOW
+        )
+        
+        return jsonify(dashboard_data)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

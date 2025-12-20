@@ -10,6 +10,7 @@ from .payment_service import payment_service
 from .loan_service import loan_service
 from .risk_service import risk_service
 from .dashboard_service import dashboard_service
+from .admin_dashboard_service import admin_dashboard_service
 from .ai_analytics_service import AIAnalyticsService
 from .currency_service import currency_service
 from .ussd_service import ussd_service
@@ -32,6 +33,7 @@ __all__ = [
     'loan_service',
     'risk_service',
     'dashboard_service',
+    'admin_dashboard_service',
     'AIAnalyticsService',
     'currency_service',
     'ussd_service',
