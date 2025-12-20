@@ -30,14 +30,18 @@ def upgrade():
         
         for role_name in required_roles:
             try:
+                # Use INSERT ... ON CONFLICT DO NOTHING to avoid race conditions and errors
+                conn.execute(sa.text("INSERT INTO roles (name) VALUES (:role_name) ON CONFLICT (name) DO NOTHING"), {"role_name": role_name})
+                conn.commit()
+                print(f"Ensured role exists: {role_name}")
+            except Exception as e:
+                # Catch exceptions for databases that don't support ON CONFLICT
+                print(f"Could not use ON CONFLICT for role {role_name}, checking existence manually. Error: {e}")
+                conn.rollback()
                 result = conn.execute(sa.text("SELECT id FROM roles WHERE name = :role_name"), {"role_name": role_name})
                 if not result.fetchone():
                     conn.execute(sa.text("INSERT INTO roles (name) VALUES (:role_name)"), {"role_name": role_name})
                     conn.commit()
-                    print(f"Created missing role: {role_name}")
-            except Exception as e:
-                print(f"Error creating role {role_name}: {e}")
-                conn.rollback()
         
         try:
             result = conn.execute(sa.text("SELECT id, name FROM roles"))
@@ -48,18 +52,22 @@ def upgrade():
             role_map = {}
         
         if role_map:
-            for role_name, role_id in role_map.items():
-                if role_name:
-                    try:
-                        result = conn.execute(
-                            sa.text("UPDATE users SET role_id = :role_id WHERE role = :role_name AND (role_id IS NULL OR role_id = 0)"),
-                            {"role_id": role_id, "role_name": role_name}
-                        )
-                        conn.commit()
-                        print(f"Migrated {result.rowcount} users from role '{role_name}' to role_id {role_id}")
-                    except Exception as e:
-                        print(f"Error migrating role {role_name}: {e}")
-                        conn.rollback()
+            # Check if 'role' column exists before trying to migrate data from it
+            if 'role' in users_columns:
+                for role_name, role_id in role_map.items():
+                    if role_name:
+                        try:
+                            result = conn.execute(
+                                sa.text("UPDATE users SET role_id = :role_id WHERE role = :role_name AND (role_id IS NULL OR role_id = 0)"),
+                                {"role_id": role_id, "role_name": role_name}
+                            )
+                            conn.commit()
+                            print(f"Migrated {result.rowcount} users from role '{role_name}' to role_id {role_id}")
+                        except Exception as e:
+                            print(f"Error migrating role {role_name}: {e}")
+                            conn.rollback()
+            else:
+                print("'role' column not found, skipping data migration from 'role' to 'role_id'.")
         
         try:
             result = conn.execute(

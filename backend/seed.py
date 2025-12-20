@@ -165,6 +165,7 @@ def seed_data():
                     name=group_name,
                     branch_id=branch.id,
                     loan_officer_id=lo.id,
+                    location=fake.address(),
                     max_members=10,
                     is_active=True
                 )
