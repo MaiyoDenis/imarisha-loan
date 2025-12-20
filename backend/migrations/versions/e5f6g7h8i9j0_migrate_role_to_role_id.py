@@ -56,7 +56,7 @@ def upgrade():
     except:
         existing_roles = set()
     
-    default_roles = ['admin', 'loan_officer', 'field_officer', 'member', 'customer']
+    default_roles = ['admin', 'loan_officer', 'field_officer', 'member', 'customer', 'branch_manager', 'procurement_officer']
     all_roles = list(existing_roles) + [r for r in default_roles if r not in existing_roles]
     
     try:
@@ -89,14 +89,19 @@ def upgrade():
     
     if 'role' in users_columns:
         try:
-            op.alter_column('users', 'role_id', existing_type=sa.Integer(), nullable=False)
+            op.alter_column('users', 'role', existing_type=sa.Text(), nullable=True)
         except:
             pass
         
         try:
-            op.drop_column('users', 'role')
+            op.execute(sa.text("ALTER TABLE users DROP COLUMN role"))
         except:
             pass
+    
+    try:
+        op.alter_column('users', 'role_id', existing_type=sa.Integer(), nullable=False)
+    except:
+        pass
     
     try:
         op.create_foreign_key('fk_users_role_id_roles', 'users', 'roles', ['role_id'], ['id'])
