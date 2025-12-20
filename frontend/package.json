@@ -93,6 +93,7 @@
     "eslint": "^8.56.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "terser": "^5.44.1"
   }
 }
