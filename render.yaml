@@ -5,7 +5,7 @@ services:
     region: frankfurt
     plan: free
     buildCommand: "cd backend && pip install -r requirements.txt && flask db stamp b4c36442d5cd && flask db upgrade && python seed.py"
-    startCommand: "cd backend && gunicorn -w 1 -b 0.0.0.0:$PORT --timeout 120 wsgi:app"
+    startCommand: "cd backend && bash migrate_and_run.sh"
     envVars:
       - key: FLASK_ENV
         value: production

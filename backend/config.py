@@ -6,10 +6,9 @@ load_dotenv()
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
     
-    # PostgreSQL Database Configuration (PostgreSQL is now the default)
-    # Temporary fallback to SQLite for immediate testing
+    # PostgreSQL Database Configuration (Production)
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'sqlite:///imarisha.db'
+        'postgresql://imarisha_postgres_gua6_user:YeQSmgRC6Wg4o4l2d0fCfCiF3jAiJmnt@dpg-d53ddtmmcj7s73e5knbg-a.oregon-postgres.render.com/imarisha_postgres_gua6'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # PostgreSQL-specific configuration
