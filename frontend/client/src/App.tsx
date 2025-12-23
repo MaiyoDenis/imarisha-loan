@@ -144,7 +144,7 @@ function Router() {
       </Route>
       <Route path="/mobile-features">
         {(params) => (
-          <ProtectedRoute allowedRoles={["admin", "executive"]} fallbackPath="/dashboard">
+          <ProtectedRoute allowedRoles={["admin", "executive", "field_officer"]} fallbackPath="/dashboard">
             <MobileFeaturesDashboard {...params} />
           </ProtectedRoute>
         )}

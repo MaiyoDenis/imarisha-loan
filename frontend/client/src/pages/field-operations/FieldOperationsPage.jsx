@@ -2,11 +2,9 @@ import React, { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import { MapPin, AlertCircle, Download, RefreshCw, TrendingUp, CheckCircle2, Clock, FileText, Plus } from 'lucide-react';
-import { AddGroupModal } from '@/components/field-officer/AddGroupModal';
+import { MapPin, AlertCircle, Download, RefreshCw, TrendingUp, CheckCircle2, Clock, FileText } from 'lucide-react';
 export var FieldOperationsPage = function () {
     var _a = useState('overview'), activeTab = _a[0], setActiveTab = _a[1];
-    var _b = useState(false), showAddGroup = _b[0], setShowAddGroup = _b[1];
     var refetch = useQuery({
         queryKey: ["fieldOfficerGroups"],
         queryFn: function () { return api.getFieldOfficerGroups(); },
@@ -71,10 +69,6 @@ export var FieldOperationsPage = function () {
               <p className="text-muted-foreground mt-2">Manage your visits, applications, and field work efficiently</p>
             </div>
             <div className="flex gap-3">
-              <button onClick={function () { return setShowAddGroup(true); }} className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/80 transition">
-                <Plus size={18}/>
-                Add Group
-              </button>
               <button className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/80 transition">
                 <RefreshCw size={18}/>
                 Sync
@@ -314,11 +308,6 @@ export var FieldOperationsPage = function () {
             </div>)}
         </div>
       </div>
-
-      <AddGroupModal open={showAddGroup} onOpenChange={setShowAddGroup} onSuccess={function () {
-            refetch();
-            setShowAddGroup(false);
-        }}/>
     </Layout>);
 };
 export default FieldOperationsPage;

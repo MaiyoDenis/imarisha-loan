@@ -398,7 +398,7 @@ export const api = {
     idNumber?: string;
     memberCode?: string;
     groupId: number;
-  }) => fetchAPI("/field-officer/groups/members", {
+  }) => fetchAPI("/field-officer/members", {
       method: "POST",
       body: JSON.stringify(data),
   }),

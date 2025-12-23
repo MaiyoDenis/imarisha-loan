@@ -34,8 +34,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -48,9 +49,11 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
+import { AddGroupModal } from "@/components/field-officer/AddGroupModal";
 import { downloadCSV, downloadJSON, downloadExcel, generateGroupReport, generateGroupMembersReport, generateLoansReport, } from "@/lib/exportUtils";
 export default function Groups() {
     var _this = this;
+    var setLocation = useLocation()[1];
     var toast = useToast().toast;
     // Debug logging
     useEffect(function () {
@@ -61,23 +64,30 @@ export default function Groups() {
     var _c = useState(false), isMembersOpen = _c[0], setIsMembersOpen = _c[1];
     var _d = useState(false), isReportOpen = _d[0], setIsReportOpen = _d[1];
     var _e = useState("overview"), reportType = _e[0], setReportType = _e[1];
+    var _f = useState(false), showAddGroupModal = _f[0], setShowAddGroupModal = _f[1];
+    var queryClient = useQueryClient();
     var userStr = localStorage.getItem('user');
     var user = userStr ? JSON.parse(userStr) : null;
-    var _f = useQuery({
-        queryKey: ["groups"],
-        queryFn: api.getGroups,
+    var userRole = (user === null || user === void 0 ? void 0 : user.role) ? user.role.toLowerCase().replace(/[\s-]+/g, '_').trim() : '';
+    var isFieldOfficer = userRole === 'field_officer';
+
+    var _g = useQuery({
+        queryKey: ["groups", isFieldOfficer],
+        queryFn: isFieldOfficer ? api.getFieldOfficerGroups : api.getGroups,
         staleTime: 10 * 60 * 1000,
         gcTime: 15 * 60 * 1000,
-    }), _g = _f.data, groups = _g === void 0 ? [] : _g, isLoading = _f.isLoading;
-    var _h = useQuery({
+    }), _h = _g.data, groups = _h === void 0 ? [] : _h, isLoading = _g.isLoading;
+    var _i = useQuery({
         queryKey: ["members"],
         queryFn: api.getMembers,
+        enabled: !isFieldOfficer,
         staleTime: 10 * 60 * 1000,
         gcTime: 15 * 60 * 1000,
-    }).data, members = _h === void 0 ? [] : _h;
+    }).data, members = _i === void 0 ? [] : _i;
     var _j = useQuery({
         queryKey: ["loans"],
         queryFn: function () { return api.getLoans(); },
+        enabled: !isFieldOfficer,
         staleTime: 10 * 60 * 1000,
         gcTime: 15 * 60 * 1000,
     }).data, loans = _j === void 0 ? [] : _j;
@@ -218,7 +228,7 @@ export default function Groups() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <Button className="btn-neon flex-1 sm:flex-none">
+              <Button className="btn-neon flex-1 sm:flex-none" onClick={function () { return setShowAddGroupModal(true); }}>
                 <UserPlus className="mr-2 h-4 w-4"/> New Group
               </Button>
             </div>
@@ -236,20 +246,38 @@ export default function Groups() {
                 ? "Try adjusting your search criteria"
                 : "Create your first lending group to get started."}
               </p>
-              {!searchQuery && (<Button>
+              {!searchQuery && (<Button onClick={function () { return setShowAddGroupModal(true); }}>
                   <UserPlus className="mr-2 h-4 w-4"/> Create Group
                 </Button>)}
             </CardContent>
           </Card>) : (<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredGroups.map(function (group) {
-                var groupMembers = members.filter(function (m) { return m.groupId === group.id; });
-                var groupLoans = loans.filter(function (l) {
-                    var loanMember = members.find(function (m) { return m.id === l.memberId; });
-                    return loanMember && loanMember.groupId === group.id;
-                });
-                var totalLoanAmount = groupLoans.reduce(function (sum, l) { return sum + parseFloat(l.principleAmount || "0"); }, 0);
-                var outstandingBalance = groupLoans.reduce(function (sum, l) { return sum + parseFloat(l.outstandingBalance || "0"); }, 0);
-                return (<Card key={group.id} className="relative overflow-visible transition-shadow duration-300 hover:shadow-xl">
+                var memberCount = 0;
+                var savingsAmount = 0;
+                var outstandingAmount = 0;
+                var loanCount = 0;
+                var totalLoanedAmount = 0;
+
+                if (isFieldOfficer) {
+                    memberCount = group.totalMembers || 0;
+                    savingsAmount = parseFloat(group.totalSavings || "0");
+                    outstandingAmount = parseFloat(group.totalLoansOutstanding || "0");
+                    loanCount = group.totalLoans || 0;
+                    totalLoanedAmount = parseFloat(group.totalLoaned || "0");
+                } else {
+                    var groupMembers = members.filter(function (m) { return m.groupId === group.id; });
+                    var groupLoans = loans.filter(function (l) {
+                        var loanMember = members.find(function (m) { return m.id === l.memberId; });
+                        return loanMember && loanMember.groupId === group.id;
+                    });
+                    memberCount = groupMembers.length;
+                    savingsAmount = groupMembers.reduce(function (sum, m) { return sum + parseFloat(m.savingsBalance || "0"); }, 0);
+                    outstandingAmount = groupLoans.reduce(function (sum, l) { return sum + parseFloat(l.outstandingBalance || "0"); }, 0);
+                    loanCount = groupLoans.length;
+                    totalLoanedAmount = groupLoans.reduce(function (sum, l) { return sum + parseFloat(l.principleAmount || "0"); }, 0);
+                }
+
+                return (<Card key={group.id} className="relative overflow-visible transition-shadow duration-300 hover:shadow-xl cursor-pointer" onClick={function () { return setLocation("/field-officer/groups/".concat(group.id)); }}>
                   <span className="aura" style={{ pointerEvents: 'none', position: 'absolute', inset: 0 }}></span>
                   <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
                     <div className="space-y-1">
@@ -260,7 +288,7 @@ export default function Groups() {
                     </div>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
+                        <Button variant="ghost" className="h-8 w-8 p-0" onClick={function (e) { return e.stopPropagation(); }}>
                           <span className="sr-only">Open menu</span>
                           <MoreHorizontal className="h-4 w-4"/>
                         </Button>
@@ -287,23 +315,23 @@ export default function Groups() {
                           Members
                         </div>
                         <div className="font-medium">
-                          {groupMembers.length}/{group.maxMembers}
+                          {memberCount}/{group.maxMembers}
                         </div>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <div className="text-muted-foreground">Loans</div>
-                        <div className="font-medium">{groupLoans.length}</div>
+                        <div className="font-medium">{loanCount}</div>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <div className="text-muted-foreground">Total Loaned</div>
                         <div className="font-medium">
-                          KES {totalLoanAmount.toLocaleString()}
+                          KES {totalLoanedAmount.toLocaleString()}
                         </div>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <div className="text-muted-foreground">Outstanding</div>
                         <div className="font-medium">
-                          KES {outstandingBalance.toLocaleString()}
+                          KES {outstandingAmount.toLocaleString()}
                         </div>
                       </div>
                       <div className="flex items-center justify-between text-sm">
@@ -314,10 +342,10 @@ export default function Groups() {
                       </div>
 
                       <div className="pt-4 flex gap-2">
-                        <Button variant="outline" className="flex-1 text-xs" onClick={function () { return handleViewMembers(group); }}>
+                        <Button variant="outline" className="flex-1 text-xs" onClick={function (e) { e.stopPropagation(); handleViewMembers(group); }}>
                           View Members <ArrowRight className="ml-2 h-3 w-3"/>
                         </Button>
-                        <Button variant="outline" className="flex-1 text-xs" onClick={function () { return handleOpenReport(group); }}>
+                        <Button variant="outline" className="flex-1 text-xs" onClick={function (e) { e.stopPropagation(); handleOpenReport(group); }}>
                           <FileText className="mr-1 h-3 w-3"/> Report
                         </Button>
                       </div>
@@ -536,5 +564,13 @@ export default function Groups() {
           </Tabs>
         </DialogContent>
       </Dialog>
+
+      <AddGroupModal
+        open={showAddGroupModal}
+        onOpenChange={setShowAddGroupModal}
+        onSuccess={function () {
+          queryClient.invalidateQueries({ queryKey: ["groups"] });
+        }}
+      />
     </Layout>);
 }

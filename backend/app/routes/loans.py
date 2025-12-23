@@ -1,5 +1,4 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import get_jwt_identity
 from app.models import Loan, LoanType, Member, LoanProduct, LoanProductItem, SavingsAccount
 from app import db
 from decimal import Decimal
@@ -16,18 +15,7 @@ bp = Blueprint('loans', __name__, url_prefix='/api/loans')
 def get_loans():
     status = request.args.get('status')
     
-    # Get current user
     from app.models import User
-    user_id = get_jwt_identity()
-    # If get_jwt_identity returns ID directly (integer or string)
-    # If it returns object, adjust accordingly. 
-    # Based on auth.py: session['user_id'] = user.id. 
-    # But here we are using @login_required which might use session or JWT.
-    # Let's check decorators.py to see how login_required works.
-    # Wait, auth.py uses session. loans.py imports get_jwt_identity.
-    # This suggests mixed auth or I need to check decorators.py.
-    
-    # Let's assume session based on auth.py
     from flask import session
     user_id = session.get('user_id')
     user = User.query.get(user_id)
@@ -187,6 +175,7 @@ def mark_loan_under_review(id):
 @bp.route('/<int:id>/approve', methods=['POST'])
 @role_required(['admin', 'branch_manager', 'procurement_officer'])
 def approve_loan(id):
+    from flask import session
     loan = Loan.query.get(id)
     if not loan:
         return jsonify({'error': 'Loan not found'}), 404
@@ -196,7 +185,7 @@ def approve_loan(id):
         
     loan.status = 'approved'
     loan.approval_date = datetime.utcnow()
-    loan.approved_by = get_jwt_identity()
+    loan.approved_by = session.get('user_id')
     
     db.session.commit()
     
@@ -205,6 +194,7 @@ def approve_loan(id):
 @bp.route('/<int:id>/reject', methods=['POST'])
 @role_required(['admin', 'branch_manager', 'procurement_officer'])
 def reject_loan(id):
+    from flask import session
     data = request.get_json()
     reason = data.get('reason')
     
@@ -217,7 +207,7 @@ def reject_loan(id):
         
     loan.status = 'rejected'
     loan.rejected_date = datetime.utcnow()
-    loan.rejected_by = get_jwt_identity()
+    loan.rejected_by = session.get('user_id')
     loan.rejection_reason = reason
     
     db.session.commit()
@@ -227,6 +217,7 @@ def reject_loan(id):
 @bp.route('/<int:id>/disburse', methods=['POST'])
 @role_required(['admin', 'branch_manager', 'procurement_officer'])
 def disburse_loan(id):
+    from flask import session
     loan = Loan.query.get(id)
     if not loan:
         return jsonify({'error': 'Loan not found'}), 404
@@ -243,7 +234,7 @@ def disburse_loan(id):
         
     loan.status = 'disbursed'
     loan.disbursement_date = datetime.utcnow()
-    loan.disbursed_by = get_jwt_identity()
+    loan.disbursed_by = session.get('user_id')
     
     # Set due date (e.g., 1 month from now or based on duration)
     # For simplicity, let's say due date is application date + duration months

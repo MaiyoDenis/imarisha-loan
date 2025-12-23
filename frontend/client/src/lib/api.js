@@ -478,7 +478,7 @@ export var api = {
             body: JSON.stringify(data),
         });
     },
-    addMemberToGroup: function (data) { return fetchAPI("/field-officer/groups/members", {
+    addMemberToGroup: function (data) { return fetchAPI("/field-officer/members", {
         method: "POST",
         body: JSON.stringify(data),
     }); },

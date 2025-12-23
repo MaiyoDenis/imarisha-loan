@@ -1,5 +1,4 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import get_jwt_identity
 from app.models import User, Group, Member, Loan, Transaction, SavingsAccount, DrawdownAccount, LoanType, LoanProduct, LoanProductItem, Role, GroupVisit
 from app import db
 from decimal import Decimal
@@ -16,6 +15,7 @@ bp = Blueprint('field_officer', __name__, url_prefix='/api/field-officer')
 @login_required
 def get_officer_groups():
     from flask import session
+    from sqlalchemy import func
     user_id = session.get('user_id')
     user = User.query.get(user_id)
     
@@ -46,48 +46,83 @@ def get_officer_groups():
     
     query = Group.query
     if user.role.name == 'admin':
-        pass  # Admin sees all groups
+        pass
     elif user.role.name == 'branch_manager':
-        # Branch managers see all groups in their branch
         query = query.filter_by(branch_id=user.branch_id)
     else:
-        # Field officers and loan officers see only their assigned groups
         query = query.filter_by(loan_officer_id=user_id)
     
     groups = query.order_by(Group.created_at.desc()).all()
+    group_ids = [g.id for g in groups]
+    
+    if not group_ids:
+        return jsonify([])
+    
+    member_stats = db.session.query(
+        Member.group_id,
+        func.count(Member.id).label('total_members'),
+        func.coalesce(func.sum(SavingsAccount.balance), Decimal('0')).label('total_savings')
+    ).outerjoin(SavingsAccount, Member.id == SavingsAccount.member_id).filter(
+        Member.group_id.in_(group_ids)
+    ).group_by(Member.group_id).all()
+    
+    loan_stats = db.session.query(
+        Member.group_id,
+        func.coalesce(func.sum(Loan.outstanding_balance), Decimal('0')).label('total_outstanding'),
+        func.coalesce(func.sum(Loan.total_amount), Decimal('0')).label('total_due'),
+        func.count(Loan.id).label('loan_count'),
+        func.coalesce(func.sum(Loan.principle_amount), Decimal('0')).label('total_principle')
+    ).join(Loan, Member.id == Loan.member_id).filter(
+        Member.group_id.in_(group_ids),
+        Loan.status.in_(['pending', 'approved', 'disbursed', 'released'])
+    ).group_by(Member.group_id).all()
+    
+    repayment_stats = db.session.query(
+        Member.group_id,
+        func.coalesce(func.sum(Transaction.amount), Decimal('0')).label('total_repaid')
+    ).join(Transaction, Member.id == Transaction.member_id).filter(
+        Member.group_id.in_(group_ids),
+        Transaction.transaction_type == 'loan_repayment'
+    ).group_by(Member.group_id).all()
+    
+    member_dict = {m[0]: m for m in member_stats}
+    loan_dict = {l[0]: l for l in loan_stats}
+    repay_dict = {r[0]: r for r in repayment_stats}
     
     groups_data = []
     for group in groups:
         group_dict = group.to_dict()
-        members = Member.query.filter_by(group_id=group.id).all()
         
-        total_members = len(members)
-        total_savings = sum(member.savings_account.balance for member in members 
-                           if member.savings_account)
+        member_stat = member_dict.get(group.id)
+        if member_stat:
+            group_dict['totalMembers'] = member_stat.total_members
+            group_dict['totalSavings'] = str(member_stat.total_savings)
+        else:
+            group_dict['totalMembers'] = 0
+            group_dict['totalSavings'] = '0'
         
-        loans = Loan.query.join(Member).filter(
-            Member.group_id == group.id,
-            Loan.status.in_(['active', 'pending'])
-        ).all()
+        loan_stat = loan_dict.get(group.id)
+        if loan_stat:
+            total_outstanding = float(loan_stat.total_outstanding)
+            total_due = float(loan_stat.total_due)
+            group_dict['totalLoansOutstanding'] = str(total_outstanding)
+            group_dict['totalLoans'] = loan_stat.loan_count
+            group_dict['totalLoaned'] = str(loan_stat.total_principle)
+        else:
+            total_outstanding = 0
+            total_due = 0
+            group_dict['totalLoansOutstanding'] = '0'
+            group_dict['totalLoans'] = 0
+            group_dict['totalLoaned'] = '0'
         
-        total_loans_outstanding = sum([float(loan.outstanding_balance) for loan in loans])
-        
-        repayments = Transaction.query.join(Member).filter(
-            Member.group_id == group.id,
-            Transaction.transaction_type == 'loan_repayment'
-        ).all()
+        repay_stat = repay_dict.get(group.id)
+        total_repaid = float(repay_stat.total_repaid) if repay_stat else 0
         
         repayment_rate = 0
-        if loans:
-            total_due = sum([float(loan.total_amount) for loan in loans])
-            total_repaid = sum([float(t.amount) for t in repayments])
-            repayment_rate = (total_repaid / total_due * 100) if total_due > 0 else 0
+        if total_due > 0:
+            repayment_rate = (total_repaid / total_due * 100)
         
-        group_dict['totalMembers'] = total_members
-        group_dict['totalSavings'] = str(total_savings)
-        group_dict['totalLoansOutstanding'] = str(total_loans_outstanding)
         group_dict['repaymentRate'] = round(repayment_rate, 2)
-        
         groups_data.append(group_dict)
     
     return jsonify(groups_data)
@@ -96,6 +131,8 @@ def get_officer_groups():
 @login_required
 def get_group_members(group_id):
     from flask import session
+    from sqlalchemy import func
+    from sqlalchemy.orm import joinedload
     user_id = session.get('user_id')
     user = User.query.get(user_id)
     
@@ -106,25 +143,59 @@ def get_group_members(group_id):
     if user.role.name != 'admin' and group.loan_officer_id != user_id:
         return jsonify({'error': 'Unauthorized'}), 403
     
-    members = Member.query.filter_by(group_id=group_id).all()
+    members = Member.query.options(joinedload(Member.user)).filter_by(group_id=group_id).all()
+    member_ids = [m.id for m in members]
+    
+    if not member_ids:
+        return jsonify([])
+    
+    loan_stats = db.session.query(
+        Loan.member_id,
+        func.count(Loan.id).label('active_loans_count'),
+        func.coalesce(func.sum(Loan.outstanding_balance), Decimal('0')).label('total_outstanding')
+    ).filter(
+        Loan.member_id.in_(member_ids),
+        Loan.status.in_(['pending', 'approved', 'disbursed', 'released'])
+    ).group_by(Loan.member_id).all()
+    
+    savings_stats = db.session.query(
+        SavingsAccount.member_id,
+        SavingsAccount.balance
+    ).filter(SavingsAccount.member_id.in_(member_ids)).all()
+    
+    repayment_stats = db.session.query(
+        Transaction.member_id,
+        func.coalesce(func.sum(Transaction.amount), Decimal('0')).label('total_repaid')
+    ).filter(
+        Transaction.member_id.in_(member_ids),
+        Transaction.transaction_type == 'loan_repayment'
+    ).group_by(Transaction.member_id).all()
+    
+    loan_dict = {l[0]: l for l in loan_stats}
+    savings_dict = {s[0]: s[1] for s in savings_stats}
+    repay_dict = {r[0]: r for r in repayment_stats}
     
     members_data = []
     for member in members:
         member_dict = member.to_dict()
         
-        active_loans = Loan.query.filter_by(member_id=member.id, status='active').all()
-        member_dict['activeLoans'] = len(active_loans)
-        member_dict['totalOutstanding'] = str(sum([float(loan.outstanding_balance) for loan in active_loans]))
+        loan_stat = loan_dict.get(member.id)
+        if loan_stat:
+            member_dict['activeLoans'] = loan_stat.active_loans_count
+            member_dict['totalOutstanding'] = str(loan_stat.total_outstanding)
+        else:
+            member_dict['activeLoans'] = 0
+            member_dict['totalOutstanding'] = '0'
         
-        savings = member.savings_account
-        if savings:
-            member_dict['savingsBalance'] = str(savings.balance)
+        savings_balance = savings_dict.get(member.id)
+        if savings_balance:
+            member_dict['savingsBalance'] = str(savings_balance)
+        else:
+            member_dict['savingsBalance'] = '0'
         
-        repayments = Transaction.query.filter_by(
-            member_id=member.id,
-            transaction_type='loan_repayment'
-        ).all()
-        member_dict['totalRepaid'] = str(sum([float(t.amount) for t in repayments]))
+        repay_stat = repay_dict.get(member.id)
+        total_repaid = float(repay_stat.total_repaid) if repay_stat else 0
+        member_dict['totalRepaid'] = str(total_repaid)
         
         member_dict['user'] = {
             'firstName': member.user.first_name,
@@ -160,7 +231,7 @@ def get_member_dashboard(member_id):
         'phone': member.user.phone
     }
     
-    active_loans = Loan.query.filter_by(member_id=member_id, status='active').all()
+    active_loans = Loan.query.filter_by(member_id=member_id, status='disbursed').all()
     
     loans_data = []
     total_outstanding = Decimal('0')
@@ -436,8 +507,8 @@ def get_group_stats(group_id):
         Member.group_id == group_id
     ).all()
     
-    total_loans_disbursed = sum([float(loan.principle_amount) for loan in loans if loan.status in ['active', 'completed']])
-    total_loans_outstanding = sum([float(loan.outstanding_balance) for loan in loans if loan.status == 'active'])
+    total_loans_disbursed = sum([float(loan.principle_amount) for loan in loans if loan.status in ['disbursed', 'released', 'completed']])
+    total_loans_outstanding = sum([float(loan.outstanding_balance) for loan in loans if loan.status == 'disbursed'])
     
     repayments = Transaction.query.join(Member).filter(
         Member.group_id == group_id,
@@ -446,7 +517,7 @@ def get_group_stats(group_id):
     
     total_repaid = sum([float(t.amount) for t in repayments])
     
-    active_loans = [l for l in loans if l.status == 'active']
+    active_loans = [l for l in loans if l.status == 'disbursed']
     repayment_rate = 0
     if active_loans:
         total_due = sum([float(loan.total_amount) for loan in active_loans])
@@ -518,6 +589,7 @@ def add_member_to_group():
     member = Member(
         user_id=existing_user.id,
         group_id=group_id,
+        branch_id=group.branch_id,
         member_code=member_code,
         status='active'
     )
