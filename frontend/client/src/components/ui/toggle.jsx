@@ -35,4 +35,5 @@ var Toggle = React.forwardRef(function (_a, ref) {
     return (<TogglePrimitive.Root ref={ref} className={cn(toggleVariants({ variant: variant, size: size, className: className }))} {...props}/>);
 });
 Toggle.displayName = TogglePrimitive.Root.displayName;
+// eslint-disable-next-line react-refresh/only-export-components
 export { Toggle, toggleVariants };

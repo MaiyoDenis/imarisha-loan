@@ -78,7 +78,7 @@ export function useOfflineQueue(): OfflineQueueState {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, []);
+  }, [processQueue]);
 
   // Auto-process queue when online and not processing
   useEffect(() => {
@@ -86,7 +86,7 @@ export function useOfflineQueue(): OfflineQueueState {
       const timer = setTimeout(() => processQueue(), 2000);
       return () => clearTimeout(timer);
     }
-  }, [isOnline, queue.length, isProcessing]);
+  }, [isOnline, queue.length, isProcessing, processQueue]);
 
   const addToQueue = useCallback(async (request: Omit<QueuedRequest, 'id' | 'timestamp' | 'retryCount'>) => {
     const queuedRequest: QueuedRequest = {

@@ -28,7 +28,7 @@ export function useQRScanner(): QRScannerState {
     return () => {
       stopScanning();
     };
-  }, []);
+  }, [stopScanning]);
 
   const startScanning = useCallback(async () => {
     if (!isSupported) {
@@ -63,7 +63,7 @@ export function useQRScanner(): QRScannerState {
       setError(errorMessage);
       console.error('[QR Scanner] Start failed:', err);
     }
-  }, [isSupported]);
+  }, [isSupported, scanQRCode]);
 
   const stopScanning = useCallback(() => {
     setIsScanning(false);
@@ -117,7 +117,7 @@ export function useQRScanner(): QRScannerState {
 
     // Continue scanning
     animationFrameRef.current = requestAnimationFrame(scanQRCode);
-  }, [isScanning, stopScanning]);
+  }, [isScanning, stopScanning, detectQRCode]);
 
   const detectQRCode = useCallback((imageData: ImageData): string | null => {
     // This is a placeholder for QR code detection

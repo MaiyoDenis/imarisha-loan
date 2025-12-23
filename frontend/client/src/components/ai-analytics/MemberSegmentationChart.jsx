@@ -12,10 +12,10 @@ var SEGMENT_DESCRIPTIONS = {
 export var MemberSegmentationChart = function (_a) {
     var segments = _a.segments, totalMembers = _a.totalMembers, _b = _a.isLoading, isLoading = _b === void 0 ? false : _b;
     if (isLoading) {
-        return (<div className="bg-card rounded-lg shadow p-6">
+        return (<div className="bg-card rounded-xl border border-border/50 shadow-sm p-4 md:p-5">
         <div className="animate-pulse space-y-4">
-          <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-          <div className="h-64 bg-gray-200 rounded"></div>
+          <div className="h-4 bg-muted rounded w-1/4"></div>
+          <div className="h-64 bg-muted rounded"></div>
         </div>
       </div>);
     }
@@ -29,17 +29,17 @@ export var MemberSegmentationChart = function (_a) {
         });
     });
     if (chartData.length === 0) {
-        return (<div className="bg-card rounded-lg shadow p-6">
-        <p className="text-gray-500 text-center py-12">No member data available</p>
+        return (<div className="bg-card rounded-xl border border-border/50 shadow-sm p-4 md:p-5">
+        <p className="text-muted-foreground text-center py-12">No member data available</p>
       </div>);
     }
-    return (<div className="bg-card rounded-lg shadow p-6">
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-          <Users className="w-5 h-5"/>
+    return (<div className="bg-card rounded-xl border border-border/50 shadow-sm p-4 md:p-5">
+      <div className="mb-4">
+        <h3 className="text-lg font-semibold text-card-foreground flex items-center gap-2">
+          <Users className="w-5 h-5 text-primary"/>
           Member Behavioral Segmentation
         </h3>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-muted-foreground mt-1">
           {totalMembers} members grouped by behavior and performance patterns
         </p>
       </div>
@@ -56,16 +56,16 @@ export var MemberSegmentationChart = function (_a) {
         </ResponsiveContainer>
       </div>
 
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-        {chartData.map(function (segment, index) { return (<div key={segment.name} className="border border-border rounded-lg p-4">
+      <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+        {chartData.map(function (segment, index) { return (<div key={segment.name} className="border border-border/50 rounded-lg p-3 bg-accent">
             <div className="flex items-start gap-3">
               <div className="w-4 h-4 rounded-full flex-shrink-0 mt-1" style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>
               <div className="flex-1">
-                <p className="font-medium text-foreground">{segment.name}</p>
+                <p className="font-medium text-card-foreground">{segment.name}</p>
                 <p className="text-sm text-muted-foreground mt-1">
                   {segment.count} members ({segment.percentage.toFixed(1)}%)
                 </p>
-                <p className="text-xs text-gray-500 mt-2">
+                <p className="text-xs text-muted-foreground/80 mt-2">
                   {SEGMENT_DESCRIPTIONS[segment.name]}
                 </p>
               </div>
@@ -73,8 +73,8 @@ export var MemberSegmentationChart = function (_a) {
           </div>); })}
       </div>
 
-      <div className="mt-6 bg-purple-50 border border-purple-200 rounded-lg p-4">
-        <p className="text-sm text-purple-900">
+      <div className="mt-4 bg-purple-500/10 border border-purple-300/40 rounded-lg p-3">
+        <p className="text-sm text-purple-300">
           <strong>Insight:</strong> Focus engagement efforts on High-Value and Growth Potential segments 
           to maximize portfolio health, while developing retention strategies for At-Risk and Inactive members.
         </p>

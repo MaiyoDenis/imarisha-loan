@@ -81,7 +81,7 @@ export function useIndexedDB(dbName, storeName) {
                         })];
             }
         });
-    }); }, [db, dbName, storeName, initDB]);
+    }); }, [db, storeName, initDB]);
     var get = useCallback(function (id) { return __awaiter(_this, void 0, void 0, function () {
         var database, _a;
         return __generator(this, function (_b) {
@@ -104,7 +104,7 @@ export function useIndexedDB(dbName, storeName) {
                         })];
             }
         });
-    }); }, [db, dbName, storeName, initDB]);
+    }); }, [db, storeName, initDB]);
     var getAll = useCallback(function () { return __awaiter(_this, void 0, void 0, function () {
         var database, _a;
         return __generator(this, function (_b) {
@@ -127,7 +127,7 @@ export function useIndexedDB(dbName, storeName) {
                         })];
             }
         });
-    }); }, [db, dbName, storeName, initDB]);
+    }); }, [db, storeName, initDB]);
     var update = useCallback(function (data) { return __awaiter(_this, void 0, void 0, function () {
         var database, _a;
         return __generator(this, function (_b) {
@@ -150,7 +150,7 @@ export function useIndexedDB(dbName, storeName) {
                         })];
             }
         });
-    }); }, [db, dbName, storeName, initDB]);
+    }); }, [db, storeName, initDB]);
     var remove = useCallback(function (id) { return __awaiter(_this, void 0, void 0, function () {
         var database, _a;
         return __generator(this, function (_b) {
@@ -173,7 +173,7 @@ export function useIndexedDB(dbName, storeName) {
                         })];
             }
         });
-    }); }, [db, dbName, storeName, initDB]);
+    }); }, [db, storeName, initDB]);
     var clear = useCallback(function () { return __awaiter(_this, void 0, void 0, function () {
         var database, _a;
         return __generator(this, function (_b) {
@@ -196,7 +196,7 @@ export function useIndexedDB(dbName, storeName) {
                         })];
             }
         });
-    }); }, [db, dbName, storeName, initDB]);
+    }); }, [db, storeName, initDB]);
     return {
         db: db,
         isReady: isReady,

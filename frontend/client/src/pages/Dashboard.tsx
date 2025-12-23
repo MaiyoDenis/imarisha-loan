@@ -1,4 +1,4 @@
-gimport { useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Sparkles, TrendingDown, AlertCircle, RefreshCw } from "lucide-react";
 import { useEffect } from "react";
 import { useLocation } from "wouter";

@@ -97,14 +97,14 @@ export function useOfflineQueue() {
             window.removeEventListener('online', handleOnline);
             window.removeEventListener('offline', handleOffline);
         };
-    }, []);
+    }, [processQueue]);
     // Auto-process queue when online and not processing
     useEffect(function () {
         if (isOnline && queue.length > 0 && !isProcessing) {
             var timer_1 = setTimeout(function () { return processQueue(); }, 2000);
             return function () { return clearTimeout(timer_1); };
         }
-    }, [isOnline, queue.length, isProcessing]);
+    }, [isOnline, queue.length, isProcessing, processQueue]);
     var addToQueue = useCallback(function (request) { return __awaiter(_this, void 0, void 0, function () {
         var queuedRequest;
         return __generator(this, function (_a) {

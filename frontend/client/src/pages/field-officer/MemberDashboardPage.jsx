@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation, useRoute } from "wouter";
 import { api } from "@/lib/api";
@@ -9,7 +9,6 @@ import { LoadingSpinner } from "@/components/ui/loading";
 import { AlertCircle, ChevronLeft, DollarSign, TrendingUp, CreditCard, PiggyBank, Phone, Code, Percent, Calendar, } from "lucide-react";
 import { ApplyLoanForm } from "@/components/field-officer/ApplyLoanForm";
 import { TransferFundsForm } from "@/components/field-officer/TransferFundsForm";
-import { ProfileMenu } from "@/components/field-officer/ProfileMenu";
 export function MemberDashboardPage() {
     var _a = useLocation(), setLocation = _a[1];
     var _b = useRoute("/field-officer/members/:memberId"), params = _b[1];
@@ -63,7 +62,6 @@ export function MemberDashboardPage() {
             <TrendingUp className="h-5 w-5"/>
             {showTransferForm ? "Cancel" : "Transfer"}
           </Button>
-          <ProfileMenu />
         </div>
       </div>
 

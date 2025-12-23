@@ -35,7 +35,7 @@ export function useIndexedDB(dbName: string, storeName: string) {
       request.onerror = () => reject(request.error);
       request.onsuccess = () => resolve(request.result);
     });
-  }, [db, dbName, storeName, initDB]);
+  }, [db, storeName, initDB]);
 
   const get = useCallback(async (id: any) => {
     const database = db || (await initDB());
@@ -47,7 +47,7 @@ export function useIndexedDB(dbName: string, storeName: string) {
       request.onerror = () => reject(request.error);
       request.onsuccess = () => resolve(request.result);
     });
-  }, [db, dbName, storeName, initDB]);
+  }, [db, storeName, initDB]);
 
   const getAll = useCallback(async () => {
     const database = db || (await initDB());
@@ -59,7 +59,7 @@ export function useIndexedDB(dbName: string, storeName: string) {
       request.onerror = () => reject(request.error);
       request.onsuccess = () => resolve(request.result);
     });
-  }, [db, dbName, storeName, initDB]);
+  }, [db, storeName, initDB]);
 
   const update = useCallback(async (data: any) => {
     const database = db || (await initDB());
@@ -71,7 +71,7 @@ export function useIndexedDB(dbName: string, storeName: string) {
       request.onerror = () => reject(request.error);
       request.onsuccess = () => resolve(request.result);
     });
-  }, [db, dbName, storeName, initDB]);
+  }, [db, storeName, initDB]);
 
   const remove = useCallback(async (id: any) => {
     const database = db || (await initDB());
@@ -83,7 +83,7 @@ export function useIndexedDB(dbName: string, storeName: string) {
       request.onerror = () => reject(request.error);
       request.onsuccess = () => resolve(request.result);
     });
-  }, [db, dbName, storeName, initDB]);
+  }, [db, storeName, initDB]);
 
   const clear = useCallback(async () => {
     const database = db || (await initDB());
@@ -95,7 +95,7 @@ export function useIndexedDB(dbName: string, storeName: string) {
       request.onerror = () => reject(request.error);
       request.onsuccess = () => resolve(request.result);
     });
-  }, [db, dbName, storeName, initDB]);
+  }, [db, storeName, initDB]);
 
   return {
     db,

@@ -40,4 +40,5 @@ function Badge(_a) {
     var className = _a.className, variant = _a.variant, props = __rest(_a, ["className", "variant"]);
     return (<div className={cn(badgeVariants({ variant: variant }), className)} {...props}/>);
 }
+// eslint-disable-next-line react-refresh/only-export-components
 export { Badge, badgeVariants };

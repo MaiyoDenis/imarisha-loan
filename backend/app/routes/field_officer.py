@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import get_jwt_identity
-from app.models import User, Group, Member, Loan, Transaction, SavingsAccount, DrawdownAccount, LoanType, LoanProduct, LoanProductItem, Role
+from app.models import User, Group, Member, Loan, Transaction, SavingsAccount, DrawdownAccount, LoanType, LoanProduct, LoanProductItem, Role, GroupVisit
 from app import db
 from decimal import Decimal
 import uuid
@@ -542,3 +542,57 @@ def add_member_to_group():
     db.session.commit()
     
     return jsonify(member.to_dict()), 201
+
+@bp.route('/groups/<int:group_id>/visits', methods=['GET', 'POST'])
+@login_required
+def manage_group_visits(group_id):
+    from flask import session
+    user_id = session.get('user_id')
+    user = User.query.get(user_id)
+    
+    group = Group.query.get(group_id)
+    if not group:
+        return jsonify({'error': 'Group not found'}), 404
+    
+    if user.role.name != 'admin' and group.loan_officer_id != user_id:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    if request.method == 'POST':
+        # Import GroupVisit model
+        try:
+            from app.models import GroupVisit
+        except ImportError:
+            return jsonify({'error': 'Group visits feature not yet available'}), 501
+        
+        data = request.get_json()
+        
+        if not data or not data.get('visitDate') or not data.get('notes'):
+            return jsonify({'error': 'visitDate and notes are required'}), 400
+        
+        try:
+            from datetime import datetime
+            visit_date = datetime.fromisoformat(data.get('visitDate')).date()
+        except:
+            return jsonify({'error': 'Invalid visit date format'}), 400
+        
+        visit = GroupVisit(
+            group_id=group_id,
+            field_officer_id=user_id,
+            visit_date=visit_date,
+            notes=data.get('notes')
+        )
+        
+        db.session.add(visit)
+        db.session.commit()
+        
+        return jsonify(visit.to_dict()), 201
+    
+    # GET request
+    try:
+        from app.models import GroupVisit
+    except ImportError:
+        return jsonify([]), 200
+    
+    visits = GroupVisit.query.filter_by(group_id=group_id).order_by(GroupVisit.visit_date.desc()).all()
+    
+    return jsonify([visit.to_dict() for visit in visits])

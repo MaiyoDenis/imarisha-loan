@@ -398,9 +398,58 @@ export const api = {
     idNumber?: string;
     memberCode?: string;
     groupId: number;
-  }) =>
-    fetchAPI("/field-officer/members", {
+  }) => fetchAPI("/field-officer/groups/members", {
       method: "POST",
       body: JSON.stringify(data),
-    }),
+  }),
+  getSchedule: async () => {
+    // Mock data for now, simulating API call
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return [
+      {
+        id: '1',
+        date: new Date().toISOString(),
+        groupName: 'Nairobi West Group',
+        location: 'Westlands Community Hall',
+        time: '10:00 AM',
+        status: 'in-progress',
+        type: 'meeting',
+        contactPerson: 'John Doe',
+        phone: '+254 712 345 678'
+      },
+      {
+        id: '2',
+        date: new Date(Date.now() + 86400000).toISOString(), // Tomorrow
+        groupName: 'South C Savings Group',
+        location: 'South C Market',
+        time: '2:00 PM',
+        status: 'pending',
+        type: 'collection',
+        contactPerson: 'Jane Smith',
+        phone: '+254 722 123 456'
+      },
+      {
+        id: '3',
+        date: new Date(Date.now() + 172800000).toISOString(), // Day after tomorrow
+        groupName: 'Kilimani Business Group',
+        location: 'Kilimani Plaza',
+        time: '3:30 PM',
+        status: 'pending',
+        type: 'disbursement',
+        contactPerson: 'Michael Johnson',
+        phone: '+254 733 987 654'
+      },
+      {
+        id: '4',
+        date: new Date(Date.now() - 86400000).toISOString(), // Yesterday
+        groupName: 'Langata Women Group',
+        location: 'Langata Primary School',
+        time: '11:00 AM',
+        status: 'completed',
+        type: 'visit',
+        contactPerson: 'Sarah Williams',
+        phone: '+254 711 222 333'
+      }
+    ];
+  },
 };

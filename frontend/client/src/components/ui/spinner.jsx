@@ -9,6 +9,7 @@ var __rest = (this && this.__rest) || function (s, e) {
         }
     return t;
 };
+import * as React from "react";
 import { Loader2Icon } from "lucide-react";
 import { cn } from "@/lib/utils";
 function Spinner(_a) {

@@ -288,9 +288,9 @@ export default function RiskDashboard() {
               {dashboard.early_warnings.slice(0, 10).map(function (warning) { return (<div key={warning.member_id} className="p-4 border-l-4 border-l-accent bg-accent/10 rounded">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
-                      <h4 className="font-semibold text-card-foreground">{warning.member_name}</h4>
+                      <h4 className="font-semibold text-foreground">{warning.member_name}</h4>
                       <div className="flex flex-wrap gap-2 mt-2">
-                        {warning.risk_flags.map(function (flag) { return (<span key={flag} className="px-2 py-1 bg-accent text-foreground/90 rounded text-xs">
+                        {warning.risk_flags.map(function (flag) { return (<span key={flag} className="px-2 py-1 bg-yellow-200 text-yellow-800 rounded text-xs">
                             {flag.replace(/_/g, ' ')}
                           </span>); })}
                       </div>

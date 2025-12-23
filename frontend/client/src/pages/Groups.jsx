@@ -34,13 +34,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Users, MoreHorizontal, UserPlus, ArrowRight, Eye, Download, FileText, Sheet, Search, Filter } from "lucide-react";
+import { Users, MoreHorizontal, UserPlus, ArrowRight, Eye, Download, FileText, Sheet, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/components/ui/dialog";
@@ -52,11 +52,17 @@ import { downloadCSV, downloadJSON, downloadExcel, generateGroupReport, generate
 export default function Groups() {
     var _this = this;
     var toast = useToast().toast;
+    // Debug logging
+    useEffect(function () {
+        console.log('Groups page mounted');
+    }, []);
     var _a = useState(""), searchQuery = _a[0], setSearchQuery = _a[1];
     var _b = useState(null), selectedGroup = _b[0], setSelectedGroup = _b[1];
     var _c = useState(false), isMembersOpen = _c[0], setIsMembersOpen = _c[1];
     var _d = useState(false), isReportOpen = _d[0], setIsReportOpen = _d[1];
     var _e = useState("overview"), reportType = _e[0], setReportType = _e[1];
+    var userStr = localStorage.getItem('user');
+    var user = userStr ? JSON.parse(userStr) : null;
     var _f = useQuery({
         queryKey: ["groups"],
         queryFn: api.getGroups,
@@ -89,10 +95,19 @@ export default function Groups() {
         gcTime: 10 * 60 * 1000,
     }).data, groupMembers = _k === void 0 ? [] : _k;
     var filteredGroups = groups.filter(function (group) {
+        var _a;
         var searchLower = searchQuery.toLowerCase();
-        return (group.name.toLowerCase().includes(searchLower) ||
+        var matchesSearch = (group.name.toLowerCase().includes(searchLower) ||
             group.id.toString().includes(searchLower) ||
             group.branchId.toString().includes(searchLower));
+        var userRole = (_a = user === null || user === void 0 ? void 0 : user.role) === null || _a === void 0 ? void 0 : _a.toLowerCase().replace(/[\s-]+/g, '_').trim();
+        if (userRole === 'field_officer') {
+            // Ensure both IDs are treated as numbers for comparison
+            var userId = Number(user.id);
+            var officerId = Number(group.loanOfficerId);
+            return matchesSearch && officerId === userId;
+        }
+        return matchesSearch;
     });
     var handleViewMembers = function (group) {
         setSelectedGroup(group);
@@ -167,7 +182,7 @@ export default function Groups() {
     };
     return (<Layout>
       <div className="p-8 space-y-8">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-4xl font-heading font-extrabold tracking-tight text-gradient">
               Groups
@@ -176,40 +191,38 @@ export default function Groups() {
               Manage lending groups and their schedules.
             </p>
           </div>
-          <div className="flex gap-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="btn-neon">
-                  <Download className="mr-2 h-4 w-4"/> Export Reports
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={function () { return handleExportGroupsOverview("csv"); }}>
-                  <Sheet className="mr-2 h-4 w-4"/> Export as CSV
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={function () { return handleExportGroupsOverview("excel"); }}>
-                  <FileText className="mr-2 h-4 w-4"/> Export as Excel
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={function () { return handleExportGroupsOverview("json"); }}>
-                  <Download className="mr-2 h-4 w-4"/> Export as JSON
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+          
+          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center w-full md:w-auto">
+            <div className="relative w-full sm:w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
+              <Input placeholder="Search groups..." className="pl-9 bg-background neon-input h-10" value={searchQuery} onChange={function (e) { return setSearchQuery(e.target.value); }}/>
+            </div>
 
-            <Button className="btn-neon">
-              <UserPlus className="mr-2 h-4 w-4"/> Create New Group
-            </Button>
-          </div>
-        </div>
+            <div className="flex gap-2 w-full sm:w-auto">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="btn-neon flex-1 sm:flex-none">
+                    <Download className="mr-2 h-4 w-4"/> Export
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={function () { return handleExportGroupsOverview("csv"); }}>
+                    <Sheet className="mr-2 h-4 w-4"/> Export as CSV
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={function () { return handleExportGroupsOverview("excel"); }}>
+                    <FileText className="mr-2 h-4 w-4"/> Export as Excel
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={function () { return handleExportGroupsOverview("json"); }}>
+                    <Download className="mr-2 h-4 w-4"/> Export as JSON
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-        <div className="flex items-center gap-4 glass-card gradient-border p-4 rounded-lg">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground"/>
-            <Input placeholder="Search by group name, ID, or branch..." className="pl-9 bg-background neon-input" value={searchQuery} onChange={function (e) { return setSearchQuery(e.target.value); }}/>
+              <Button className="btn-neon flex-1 sm:flex-none">
+                <UserPlus className="mr-2 h-4 w-4"/> New Group
+              </Button>
+            </div>
           </div>
-          <Button variant="outline" className="gap-2 btn-neon">
-            <Filter className="h-4 w-4"/> Filter
-          </Button>
         </div>
 
         {isLoading ? (<div className="text-center py-12">Loading groups...</div>) : filteredGroups.length === 0 ? (<Card className="border-dashed">

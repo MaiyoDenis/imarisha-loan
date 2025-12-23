@@ -1,68 +1,22 @@
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import Layout from "@/components/layout/Layout";
 import { api } from "@/lib/api";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/loading";
-import { AlertCircle, Search, Plus, TrendingUp, Users, DollarSign, Percent, Download, Smartphone } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { AddGroupModal } from "@/components/field-officer/AddGroupModal";
-import { ProfileMenu } from "@/components/field-officer/ProfileMenu";
+import { AlertCircle, TrendingUp, Users, DollarSign, Percent, Download } from "lucide-react";
 import { ExportDataModal } from "@/components/field-officer/ExportDataModal";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MobileFeaturesDashboard } from "../mobile-features/MobileFeaturesDashboard";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+var COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 export function FieldOfficerDashboard() {
     var _a = useLocation(), setLocation = _a[1];
-    var _b = useState(""), searchTerm = _b[0], setSearchTerm = _b[1];
-    var _c = useState(false), showAddGroup = _c[0], setShowAddGroup = _c[1];
-    var _d = useState(false), showExportData = _d[0], setShowExportData = _d[1];
-    var _e = useState({
-        minRepayment: 0,
-        minMembers: 0,
-        sortBy: "name",
-    }), filters = _e[0], setFilters = _e[1];
-    var _f = useQuery({
+    var _b = useState(false), showExportData = _b[0], setShowExportData = _b[1];
+    var _c = useQuery({
         queryKey: ["fieldOfficerGroups"],
         queryFn: function () { return api.getFieldOfficerGroups(); },
-    }), groups = _f.data, isLoading = _f.isLoading, error = _f.error, refetch = _f.refetch;
-    var filteredAndSortedGroups = useMemo(function () {
-        if (!groups)
-            return [];
-        var filtered = groups.filter(function (group) {
-            var matchesSearch = group.name
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase());
-            var meetsRepaymentFilter = group.repaymentRate >= filters.minRepayment;
-            var meetsMembersFilter = group.totalMembers >= filters.minMembers;
-            return matchesSearch && meetsRepaymentFilter && meetsMembersFilter;
-        });
-        return filtered.sort(function (a, b) {
-            switch (filters.sortBy) {
-                case "members":
-                    return b.totalMembers - a.totalMembers;
-                case "savings":
-                    return (parseFloat(b.totalSavings || "0") - parseFloat(a.totalSavings || "0"));
-                case "repayment":
-                    return b.repaymentRate - a.repaymentRate;
-                case "name":
-                default:
-                    return a.name.localeCompare(b.name);
-            }
-        });
-    }, [groups, searchTerm, filters]);
+    }), groups = _c.data, isLoading = _c.isLoading, error = _c.error;
     var analytics = useMemo(function () {
         if (!groups || groups.length === 0) {
             return {
@@ -85,42 +39,31 @@ export function FieldOfficerDashboard() {
     if (isLoading)
         return <LoadingSpinner />;
     return (<Layout>
-    <div className="space-y-8 px-4 sm:px-6 lg:px-8 py-6">
+    <div className="space-y-6 px-4 sm:px-6 lg:px-8 py-6 bg-gradient-to-br from-background via-background to-muted/20 min-h-screen">
+      {/* Header */}
       <div className="flex justify-between items-start gap-4">
         <div className="flex-1">
-          <h1 className="text-4xl font-bold tracking-tight">Field Officer Dashboard</h1>
-          <p className="text-muted-foreground mt-2">Manage your assigned groups, members, and field operations</p>
+          <h1 className="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">
+            Field Officer Dashboard
+          </h1>
+          <p className="text-muted-foreground mt-2">Track your groups, manage visits, and monitor performance</p>
         </div>
         <div className="flex items-center gap-2">
           <Button onClick={function () { return setShowExportData(true); }} className="gap-2" variant="outline" size="lg">
             <Download className="h-5 w-5"/>
             Export
           </Button>
-          <Button onClick={function () { return setShowAddGroup(true); }} className="gap-2" size="lg">
-            <Plus className="h-5 w-5"/>
-            Add Group
-          </Button>
-          <ProfileMenu />
         </div>
       </div>
 
-      <Tabs defaultValue="groups" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
-          <TabsTrigger value="groups">My Groups</TabsTrigger>
-          <TabsTrigger value="mobile-features">
-            <Smartphone className="w-4 h-4 mr-2"/>
-            Mobile Tools
-          </TabsTrigger>
-        </TabsList>
+      {error && (<div className="flex items-center gap-3 rounded-lg bg-destructive/10 p-4 text-red-800">
+          <AlertCircle className="h-5 w-5"/>
+          <span>{error.message}</span>
+        </div>)}
 
-        <TabsContent value="groups" className="space-y-8">
-          {error && (<div className="flex items-center gap-3 rounded-lg bg-destructive/10 p-4 text-red-800">
-              <AlertCircle className="h-5 w-5"/>
-              <span>{error.message}</span>
-            </div>)}
-
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-primary/30">
+      {/* Key Metrics */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-blue-900">
                   Total Groups
@@ -136,7 +79,7 @@ export function FieldOfficerDashboard() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+            <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-green-900">
                   Total Members
@@ -152,7 +95,7 @@ export function FieldOfficerDashboard() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+            <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-purple-900">
                   Total Savings
@@ -160,15 +103,15 @@ export function FieldOfficerDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="flex items-baseline justify-between">
-                  <p className="text-2xl font-bold text-purple-900">
-                    KES {(analytics.totalSavings / 1000000).toFixed(1)}M
+                  <p className="text-xl font-bold text-purple-900">
+                    KES {new Intl.NumberFormat('en-KE').format(analytics.totalSavings)}
                   </p>
                   <DollarSign className="h-5 w-5 text-purple-600"/>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+            <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-orange-900">
                   Outstanding Loans
@@ -176,15 +119,15 @@ export function FieldOfficerDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="flex items-baseline justify-between">
-                  <p className="text-2xl font-bold text-orange-900">
-                    KES {(analytics.totalOutstanding / 1000000).toFixed(1)}M
+                  <p className="text-xl font-bold text-orange-900">
+                    KES {new Intl.NumberFormat('en-KE').format(analytics.totalOutstanding)}
                   </p>
                   <TrendingUp className="h-5 w-5 text-orange-600"/>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-cyan-50 to-cyan-100 border-cyan-200">
+            <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-cyan-900">
                   Avg. Repayment Rate
@@ -201,103 +144,88 @@ export function FieldOfficerDashboard() {
             </Card>
           </div>
 
-          <Card className="border-2">
-            <CardHeader className="pb-4">
-              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-                <div>
-                  <CardTitle>Groups Overview</CardTitle>
-                  <CardDescription>
-                    {filteredAndSortedGroups.length} of {groups === null || groups === void 0 ? void 0 : groups.length} groups
-                  </CardDescription>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                  <div className="relative flex-1 sm:flex-none">
-                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground"/>
-                    <Input placeholder="Search groups..." value={searchTerm} onChange={function (e) { return setSearchTerm(e.target.value); }} className="pl-10"/>
-                  </div>
-                  <select value={filters.sortBy} onChange={function (e) {
-            return setFilters(__assign(__assign({}, filters), { sortBy: e.target.value }));
-        }} className="px-3 py-2 border rounded-md text-sm">
-                    <option value="name">Sort by Name</option>
-                    <option value="members">Sort by Members</option>
-                    <option value="savings">Sort by Savings</option>
-                    <option value="repayment">Sort by Repayment Rate</option>
-                  </select>
-                </div>
-              </div>
+      {/* Charts Section */}
+      {groups && groups.length > 0 && (<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Financial Overview Chart */}
+          <Card className="col-span-1">
+            <CardHeader>
+              <CardTitle>Financial Overview by Group</CardTitle>
             </CardHeader>
+            <CardContent>
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={groups} margin={{
+                top: 20,
+                right: 30,
+                left: 20,
+                bottom: 5,
+            }}>
+                    <CartesianGrid strokeDasharray="3 3"/>
+                    <XAxis dataKey="name"/>
+                    <YAxis />
+                    <Tooltip cursor={{ fill: 'transparent' }} formatter={function (value) { return "KES ".concat(new Intl.NumberFormat('en-KE').format(value)); }}/>
+                    <Legend />
+                    <Bar dataKey="totalSavings" name="Total Savings" fill="#8884d8"/>
+                    <Bar dataKey="totalLoansOutstanding" name="Outstanding Loans" fill="#82ca9d"/>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
           </Card>
 
-          {filteredAndSortedGroups && filteredAndSortedGroups.length === 0 ? (<Card className="border-dashed">
-              <CardContent className="pt-12 text-center">
-                <p className="text-muted-foreground text-lg">
-                  {(groups === null || groups === void 0 ? void 0 : groups.length) === 0 ? "No groups assigned" : "No groups match your search"}
-                </p>
-              </CardContent>
-            </Card>) : (<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {filteredAndSortedGroups === null || filteredAndSortedGroups === void 0 ? void 0 : filteredAndSortedGroups.map(function (group) { return (<Card key={group.id} className="cursor-pointer hover:shadow-xl hover:border-blue-300 transition-all duration-300 border-2" onClick={function () { return setLocation("/field-officer/groups/".concat(group.id)); }}>
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <CardTitle className="text-lg line-clamp-2">
-                        {group.name}
-                      </CardTitle>
-                      <div className={"px-3 py-1 rounded-full text-xs font-semibold ".concat(group.repaymentRate >= 80
-                    ? "bg-green-100 text-green-700"
-                    : group.repaymentRate >= 50
-                        ? "bg-yellow-100 text-yellow-700"
-                        : "bg-red-100 text-red-700")}>
-                        {group.repaymentRate.toFixed(1)}%
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-primary/10 p-3 rounded-lg">
-                        <p className="text-xs text-muted-foreground mb-1">Members</p>
-                        <p className="text-2xl font-bold text-primary">
-                          {group.totalMembers}
-                        </p>
-                      </div>
-                      <div className="bg-green-50 p-3 rounded-lg">
-                        <p className="text-xs text-muted-foreground mb-1">Savings</p>
-                        <p className="text-sm font-bold text-secondary">
-                          KES {parseFloat(group.totalSavings || "0").toLocaleString()}
-                        </p>
-                      </div>
-                    </div>
+          {/* Repayment Performance Chart */}
+          <Card className="col-span-1">
+            <CardHeader>
+              <CardTitle>Repayment Performance</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={groups} layout="vertical" margin={{
+                top: 20,
+                right: 30,
+                left: 40,
+                bottom: 5,
+            }}>
+                    <CartesianGrid strokeDasharray="3 3"/>
+                    <XAxis type="number" domain={[0, 100]}/>
+                    <YAxis dataKey="name" type="category" width={100}/>
+                    <Tooltip cursor={{ fill: 'transparent' }} formatter={function (value) { return "".concat(value, "%"); }}/>
+                    <Legend />
+                    <Bar dataKey="repaymentRate" name="Repayment Rate (%)" fill="#ffc658">
+                      {groups.map(function (entry, index) { return (<Cell key={"cell-".concat(index)} fill={entry.repaymentRate >= 90 ? '#4ade80' : entry.repaymentRate >= 70 ? '#facc15' : '#f87171'}/>); })}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
 
-                    <div className="bg-orange-50 p-3 rounded-lg">
-                      <p className="text-xs text-muted-foreground mb-1">
-                        Outstanding Loans
-                      </p>
-                      <p className="text-lg font-bold text-orange-600">
-                        KES{" "}
-                        {parseFloat(group.totalLoansOutstanding || "0").toLocaleString()}
-                      </p>
-                    </div>
+          {/* Member Distribution Chart */}
+          <Card className="col-span-1 lg:col-span-2">
+            <CardHeader>
+              <CardTitle>Member Distribution</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={groups} cx="50%" cy="50%" labelLine={false} label={function (_a) {
+            var name = _a.name, percent = _a.percent;
+            return "".concat(name, " ").concat(((percent || 0) * 100).toFixed(0), "%");
+        }} outerRadius={100} fill="#8884d8" dataKey="totalMembers" nameKey="name">
+                      {groups.map(function (entry, index) { return (<Cell key={"cell-".concat(index)} fill={COLORS[index % COLORS.length]}/>); })}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        </div>)}
 
-                    <div className="pt-2 border-t">
-                      <Button onClick={function (e) {
-                    e.stopPropagation();
-                    setLocation("/field-officer/groups/".concat(group.id));
-                }} className="w-full bg-primary hover:bg-primary/80">
-                        View Members
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>); })}
-            </div>)}
-        </TabsContent>
-
-        <TabsContent value="mobile-features">
-          <MobileFeaturesDashboard embedded={true}/>
-        </TabsContent>
-      </Tabs>
-
-      <AddGroupModal open={showAddGroup} onOpenChange={setShowAddGroup} onSuccess={function () {
-            refetch();
-            setShowAddGroup(false);
-        }}/>
+      {/* Mobile Tools Section - Moved to Sidebar */}
 
       <ExportDataModal open={showExportData} onOpenChange={setShowExportData} groups={groups || []}/>
     </div>

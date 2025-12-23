@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation, useRoute } from "wouter";
 import { api } from "@/lib/api";
@@ -20,7 +20,6 @@ import {
 } from "lucide-react";
 import { ApplyLoanForm } from "@/components/field-officer/ApplyLoanForm";
 import { TransferFundsForm } from "@/components/field-officer/TransferFundsForm";
-import { ProfileMenu } from "@/components/field-officer/ProfileMenu";
 
 interface Loan {
   id: number;
@@ -137,7 +136,6 @@ export function MemberDashboardPage() {
             <TrendingUp className="h-5 w-5" />
             {showTransferForm ? "Cancel" : "Transfer"}
           </Button>
-          <ProfileMenu />
         </div>
       </div>
 

@@ -366,7 +366,7 @@ export default function ExecutiveDashboard() {
         </div>
 
         {/* Last Updated */}
-        <div className="text-center text-sm text-muted-foreground">
+        <div className="text-center text-sm text-gray-500">
           Last updated: {new Date(dashboard.timestamp).toLocaleString()}
         </div>
       </div>

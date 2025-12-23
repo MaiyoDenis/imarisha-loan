@@ -9,6 +9,7 @@ var __rest = (this && this.__rest) || function (s, e) {
         }
     return t;
 };
+import * as React from "react";
 import { cn } from "@/lib/utils";
 function Kbd(_a) {
     var className = _a.className, props = __rest(_a, ["className"]);

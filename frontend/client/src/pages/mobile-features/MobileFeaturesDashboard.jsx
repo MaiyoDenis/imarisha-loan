@@ -13,6 +13,7 @@ import { useCamera } from '@/hooks/use-camera';
 import { useBiometricAuth } from '@/hooks/use-biometric-auth';
 import { useVoiceToText } from '@/hooks/use-voice-to-text';
 import { useQRScanner } from '@/hooks/use-qr-scanner';
+import Layout from "@/components/layout/Layout";
 import { Smartphone, MapPin, Camera, Shield, Wifi, WifiOff, Mic, MicOff, QrCode, Play, Square } from 'lucide-react';
 export function MobileFeaturesDashboard(_a) {
     var _b = _a.embedded, embedded = _b === void 0 ? false : _b;
@@ -32,7 +33,7 @@ export function MobileFeaturesDashboard(_a) {
     var _k = useVoiceToText(), isListening = _k.isListening, transcript = _k.transcript, interimTranscript = _k.interimTranscript, startListening = _k.startListening, stopListening = _k.stopListening, resetTranscript = _k.resetTranscript;
     // QR scanner features
     var _l = useQRScanner(), isScanning = _l.isScanning, qrSupported = _l.isSupported, qrError = _l.error, scannedData = _l.scannedData, startScanning = _l.startScanning, stopScanning = _l.stopScanning, resetData = _l.resetData;
-    return (<div className={embedded ? "space-y-6" : "container mx-auto p-6 space-y-6"}>
+    var content = (<div className={embedded ? "space-y-6" : "container mx-auto p-6 space-y-6"}>
       <PWAUpdateBanner />
 
       {!embedded && (<div className="flex items-center justify-between">
@@ -395,4 +396,8 @@ export function MobileFeaturesDashboard(_a) {
         </TabsContent>
       </Tabs>
     </div>);
+    if (embedded) {
+        return content;
+    }
+    return <Layout>{content}</Layout>;
 }

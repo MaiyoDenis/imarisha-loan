@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation, useRoute } from "wouter";
 import { api } from "@/lib/api";
@@ -8,8 +8,8 @@ import { LoadingSpinner } from "@/components/ui/loading";
 import { AlertCircle, ChevronLeft, Search, Plus, DollarSign, TrendingUp, Users, Download } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { AddCustomerModal } from "@/components/field-officer/AddCustomerModal";
-import { ProfileMenu } from "@/components/field-officer/ProfileMenu";
 import { ExportDataModal } from "@/components/field-officer/ExportDataModal";
+import { GroupVisitsSection } from "@/components/field-officer/GroupVisitsSection";
 
 interface Member {
   id: number;
@@ -122,7 +122,6 @@ export function GroupMembersPage() {
             <Plus className="h-5 w-5" />
             Add Customer
           </Button>
-          <ProfileMenu />
         </div>
       </div>
 
@@ -132,6 +131,8 @@ export function GroupMembersPage() {
           <span>{(error as Error).message}</span>
         </div>
       )}
+
+      <GroupVisitsSection groupId={groupId || 0} />
 
       {stats && (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">

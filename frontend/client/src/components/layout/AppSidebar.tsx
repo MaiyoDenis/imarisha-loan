@@ -14,7 +14,9 @@ import {
   Users2,
   Gamepad2,
   MapPin,
-  Store
+  Store,
+  Calendar,
+  Smartphone
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -39,7 +41,13 @@ interface MenuItem {
 }
 
 const allSidebarItems: MenuItem[] = [
-  { icon: LayoutDashboard, label: "Admin Dashboard", href: "/dashboard", roles: ["admin", "executive", "operations_manager", "risk_manager", "field_officer", "loan_officer", "customer"] },
+  { icon: LayoutDashboard, label: "Admin Dashboard", href: "/dashboard", roles: ["admin", "executive", "operations_manager", "risk_manager", "loan_officer", "customer"] },
+  { icon: LayoutDashboard, label: "Field Officer Dashboard", href: "/field-officer", roles: ["field_officer"] },
+  { icon: MapPin, label: "Field Operations", href: "/field-operations", roles: ["admin", "field_officer"] },
+  { icon: Calendar, label: "Schedules", href: "/field-officer/schedule", roles: ["field_officer"] },
+  { icon: Users, label: "Groups", href: "/groups", roles: ["admin", "executive", "operations_manager"] },
+  { icon: Users, label: "My Groups", href: "/groups", roles: ["field_officer"] },
+  { icon: Smartphone, label: "Mobile Tools", href: "/mobile-features", roles: ["admin", "executive", "field_officer"] },
   { icon: BarChart3, label: "Reports & Analytics", href: "/dashboards/admin", roles: ["admin"] },
   { icon: CreditCard, label: "Loans", href: "/loans", roles: ["branch_manager", "admin", "executive", "operations_manager", "procurement_officer"] },
   { icon: Package, label: "Loan Products", href: "/products", roles: ["branch_manager", "admin"] },
@@ -47,7 +55,6 @@ const allSidebarItems: MenuItem[] = [
   { icon: Building2, label: "Branches", href: "/branches", roles: ["admin"] },
   { icon: Users, label: "Staff & Users", href: "/users", roles: ["admin"] },
   { icon: Users, label: "Members", href: "/members", roles: ["admin", "executive", "operations_manager"] },
-  { icon: Users, label: "Groups", href: "/groups", roles: ["admin", "executive", "operations_manager"] },
   { icon: Brain, label: "AI Analytics Dashboard", href: "/dashboards/ai-analytics", roles: ["admin", "executive"] },
   { icon: BarChart3, label: "Executive Dashboard", href: "/dashboards/executive", roles: ["admin", "executive"] },
   { icon: Zap, label: "Operations Dashboard", href: "/dashboards/operations", roles: ["admin", "operations_manager"] },
@@ -58,7 +65,6 @@ const allSidebarItems: MenuItem[] = [
   { icon: Users, label: "Staff", href: "/users", roles: ["branch_manager"] },
   { icon: BarChart3, label: "Procurement Dashboard", href: "/procurement", roles: ["procurement_officer"] },
   { icon: Gamepad2, label: "Gamification", href: "/gamification", roles: ["admin", "executive"] },
-  { icon: MapPin, label: "Field Operations", href: "/field-operations", roles: ["admin", "field_officer"] },
   { icon: Wallet, label: "Savings", href: "/savings", roles: ["admin", "executive", "operations_manager"] },
   { icon: Settings, label: "Settings", href: "/settings" },
 ];
@@ -69,14 +75,19 @@ export function AppSidebar() {
   
   const userStr = localStorage.getItem('user');
   const user = userStr ? JSON.parse(userStr) : null;
-  
-  const userInitials = user ? `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase() : 'U';
-  const userName = user ? `${user.firstName} ${user.lastName}` : 'User';
-  const userRole = user?.role ? user.role.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()) : 'User';
+
+  const normalizeRole = (role: string | undefined) => {
+    if (!role) return '';
+    return role.toLowerCase().replace(/[\s-]+/g, '_').trim();
+  };
+
+  const userRole = normalizeRole(user?.role);
 
   const filteredItems = allSidebarItems.filter((item) => {
     if (!item.roles) return true;
-    return item.roles.includes(user?.role);
+    // Check if any of the allowed roles matches the user's normalized role
+    // We also normalize the allowed roles to be safe
+    return item.roles.some(r => normalizeRole(r) === userRole);
   });
 
   const handleLogout = async () => {
@@ -110,12 +121,12 @@ export function AppSidebar() {
           <span className="text-lg md:text-xl font-heading font-bold tracking-tight text-sidebar-foreground group-data-[collapsible=icon]:hidden" aria-label="Imarisha">Imarisha</span>
         </div>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="overflow-y-auto">
         <SidebarMenu role="navigation" aria-label="Main menu">
           {filteredItems.map((item) => {
             const isActive = location === item.href;
             return (
-              <SidebarMenuItem key={item.href}>
+              <SidebarMenuItem key={`${item.href}-${item.label}`}>
                 <SidebarMenuButton 
                   isActive={isActive} 
                   onClick={() => navigate(item.href)}
@@ -134,15 +145,6 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter>
         <div className="p-2 group-data-[collapsible=icon]:hidden">
-          <div className="flex items-center gap-3 px-2 py-3 mb-2 rounded-md bg-sidebar-accent/50">
-            <div className="h-8 w-8 rounded-full bg-sidebar-primary flex items-center justify-center text-sidebar-primary-foreground font-bold text-xs flex-shrink-0">
-              {userInitials}
-            </div>
-            <div className="flex-1 overflow-hidden min-w-0">
-              <p className="text-xs md:text-sm font-medium truncate">{userName}</p>
-              <p className="text-xs text-sidebar-foreground/50 truncate">{userRole}</p>
-            </div>
-          </div>
           <Button 
             variant="ghost" 
             className="w-full justify-start text-xs md:text-sm text-sidebar-foreground/70 hover:text-destructive hover:bg-destructive/10 h-9 md:h-10 focus-ring-enhanced"

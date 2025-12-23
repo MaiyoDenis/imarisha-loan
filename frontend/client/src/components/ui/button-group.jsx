@@ -9,6 +9,8 @@ var __rest = (this && this.__rest) || function (s, e) {
         }
     return t;
 };
+/* eslint-disable react-refresh/only-export-components */
+import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva } from "class-variance-authority";
 import { cn } from "@/lib/utils";

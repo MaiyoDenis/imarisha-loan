@@ -14,6 +14,7 @@ import { useCamera } from '@/hooks/use-camera';
 import { useBiometricAuth } from '@/hooks/use-biometric-auth';
 import { useVoiceToText } from '@/hooks/use-voice-to-text';
 import { useQRScanner } from '@/hooks/use-qr-scanner';
+import Layout from "@/components/layout/Layout";
 import {
   Smartphone,
   MapPin,
@@ -82,7 +83,7 @@ export function MobileFeaturesDashboard({ embedded = false }: { embedded?: boole
     resetData
   } = useQRScanner();
 
-  return (
+  const content = (
     <div className={embedded ? "space-y-6" : "container mx-auto p-6 space-y-6"}>
       <PWAUpdateBanner />
 
@@ -504,4 +505,10 @@ export function MobileFeaturesDashboard({ embedded = false }: { embedded?: boole
       </Tabs>
     </div>
   );
+
+  if (embedded) {
+    return content;
+  }
+
+  return <Layout>{content}</Layout>;
 }

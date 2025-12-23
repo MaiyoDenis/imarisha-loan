@@ -6,7 +6,6 @@ var statusColors = {
     critical: 'border-l-4 border-l-destructive',
     success: 'border-l-4 border-l-secondary'
 };
-
 var statusIconColors = {
     normal: 'text-primary',
     warning: 'text-accent',
@@ -15,7 +14,7 @@ var statusIconColors = {
 };
 export function KPICard(_a) {
     var title = _a.title, value = _a.value, unit = _a.unit, change = _a.change, icon = _a.icon, _b = _a.status, status = _b === void 0 ? 'normal' : _b, onClick = _a.onClick, _c = _a.className, className = _c === void 0 ? '' : _c;
-    return (<div onClick={onClick} className={"p-4 md:p-6 rounded-lg bg-card border border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer ".concat(statusColors[status], " ").concat(className)}>
+    return (<div onClick={onClick} className={"p-3 md:p-4 rounded-xl bg-card border border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer ".concat(statusColors[status], " ").concat(className)}>
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <p className="text-xs md:text-sm font-medium text-muted-foreground mb-2 truncate">{title}</p>

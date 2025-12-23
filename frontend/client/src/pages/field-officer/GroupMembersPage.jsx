@@ -9,7 +9,7 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation, useRoute } from "wouter";
 import { api } from "@/lib/api";
@@ -19,8 +19,8 @@ import { LoadingSpinner } from "@/components/ui/loading";
 import { AlertCircle, ChevronLeft, Search, Plus, DollarSign, TrendingUp, Users, Download } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { AddCustomerModal } from "@/components/field-officer/AddCustomerModal";
-import { ProfileMenu } from "@/components/field-officer/ProfileMenu";
 import { ExportDataModal } from "@/components/field-officer/ExportDataModal";
+import { GroupVisitsSection } from "@/components/field-officer/GroupVisitsSection";
 export function GroupMembersPage() {
     var _a = useLocation(), setLocation = _a[1];
     var _b = useRoute("/field-officer/groups/:groupId"), match = _b[0], params = _b[1];
@@ -84,7 +84,6 @@ export function GroupMembersPage() {
             <Plus className="h-5 w-5"/>
             Add Customer
           </Button>
-          <ProfileMenu />
         </div>
       </div>
 
@@ -92,6 +91,8 @@ export function GroupMembersPage() {
           <AlertCircle className="h-5 w-5"/>
           <span>{error.message}</span>
         </div>)}
+
+      <GroupVisitsSection groupId={groupId || 0}/>
 
       {stats && (<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
           <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-primary/30">

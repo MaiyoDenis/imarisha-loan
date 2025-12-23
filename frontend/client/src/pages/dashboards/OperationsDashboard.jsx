@@ -233,15 +233,9 @@ export default function OperationsDashboard() {
             <span className="aura"></span>
             <h2 className="text-xl font-heading font-semibold text-foreground mb-4">Pending Tasks</h2>
             <div className="space-y-3">
-              {dashboard.pending_tasks.map(function (task) { return (<div
-                    key={task.id}
-                    className={
-                      "p-4 rounded-lg border-l-4 " +
-                      (task.priority === 'high'
-                        ? 'border-l-destructive bg-destructive/10'
-                        : 'border-l-accent bg-accent/10')
-                    }
-                  >
+              {dashboard.pending_tasks.map(function (task) { return (<div key={task.id} className={"p-4 rounded-lg border-l-4 ".concat(task.priority === 'high'
+                    ? 'border-l-destructive bg-destructive/10'
+                    : 'border-l-accent bg-accent/10')}>
                   <div className="flex justify-between items-start">
                     <div>
                       <h3 className="font-semibold text-card-foreground">{task.title}</h3>

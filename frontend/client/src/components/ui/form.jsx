@@ -20,6 +20,7 @@ var __rest = (this && this.__rest) || function (s, e) {
         }
     return t;
 };
+/* eslint-disable react-refresh/only-export-components */
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { Controller, FormProvider, useFormContext, } from "react-hook-form";
@@ -89,4 +90,5 @@ var FormMessage = React.forwardRef(function (_a, ref) {
     </p>);
 });
 FormMessage.displayName = "FormMessage";
+// eslint-disable-next-line react-refresh/only-export-components
 export { useFormField, Form, FormItem, FormLabel, FormControl, FormDescription, FormMessage, FormField, };

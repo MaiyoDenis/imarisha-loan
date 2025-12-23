@@ -51,7 +51,7 @@ export function useQRScanner() {
         return function () {
             stopScanning();
         };
-    }, []);
+    }, [stopScanning]);
     var startScanning = useCallback(function () { return __awaiter(_this, void 0, void 0, function () {
         var stream, err_1, errorMessage;
         return __generator(this, function (_a) {
@@ -95,7 +95,7 @@ export function useQRScanner() {
                 case 6: return [2 /*return*/];
             }
         });
-    }); }, [isSupported]);
+    }); }, [isSupported, scanQRCode]);
     var stopScanning = useCallback(function () {
         setIsScanning(false);
         if (animationFrameRef.current) {
@@ -137,7 +137,7 @@ export function useQRScanner() {
         }
         // Continue scanning
         animationFrameRef.current = requestAnimationFrame(scanQRCode);
-    }, [isScanning, stopScanning]);
+    }, [isScanning, stopScanning, detectQRCode]);
     var detectQRCode = useCallback(function (imageData) {
         // This is a placeholder for QR code detection
         // In a real implementation, you'd use a library like jsQR

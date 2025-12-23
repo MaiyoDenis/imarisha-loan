@@ -25,12 +25,21 @@ export default [
       ...reactHooks.configs.recommended.rules,
       ...reactRefresh.configs.vite.rules,
       'no-unused-vars': 'off',
+      'no-undef': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
     },
     plugins: {
       '@typescript-eslint': tseslint.plugin,
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
+    },
+  },
+  {
+    files: ['**/*.config.ts', 'script/**/*.ts', 'vite-plugin-meta-images.ts'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
     },
   },
 ]

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -66,11 +66,20 @@ interface Loan {
 
 export default function Groups() {
   const { toast } = useToast();
+  
+  // Debug logging
+  useEffect(() => {
+    console.log('Groups page mounted');
+  }, []);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [isMembersOpen, setIsMembersOpen] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [reportType, setReportType] = useState<"overview" | "members" | "loans">("overview");
+
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : null;
 
   const { data: groups = [], isLoading } = useQuery({
     queryKey: ["groups"],
@@ -106,11 +115,21 @@ export default function Groups() {
 
   const filteredGroups = groups.filter((group: Group) => {
     const searchLower = searchQuery.toLowerCase();
-    return (
+    const matchesSearch = (
       group.name.toLowerCase().includes(searchLower) ||
       group.id.toString().includes(searchLower) ||
       group.branchId.toString().includes(searchLower)
     );
+
+    const userRole = user?.role?.toLowerCase().replace(/[\s-]+/g, '_').trim();
+    if (userRole === 'field_officer') {
+      // Ensure both IDs are treated as numbers for comparison
+      const userId = Number(user.id);
+      const officerId = Number(group.loanOfficerId);
+      return matchesSearch && officerId === userId;
+    }
+
+    return matchesSearch;
   });
 
   const handleViewMembers = (group: Group) => {
@@ -198,7 +217,7 @@ export default function Groups() {
   return (
     <Layout>
       <div className="p-8 space-y-8">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-4xl font-heading font-extrabold tracking-tight text-gradient">
               Groups
@@ -207,45 +226,43 @@ export default function Groups() {
               Manage lending groups and their schedules.
             </p>
           </div>
-          <div className="flex gap-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="btn-neon">
-                  <Download className="mr-2 h-4 w-4" /> Export Reports
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => handleExportGroupsOverview("csv")}>
-                  <Sheet className="mr-2 h-4 w-4" /> Export as CSV
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleExportGroupsOverview("excel")}>
-                  <FileText className="mr-2 h-4 w-4" /> Export as Excel
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleExportGroupsOverview("json")}>
-                  <Download className="mr-2 h-4 w-4" /> Export as JSON
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+          
+          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center w-full md:w-auto">
+            <div className="relative w-full sm:w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input 
+                placeholder="Search groups..." 
+                className="pl-9 bg-background neon-input h-10"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
 
-            <Button className="btn-neon">
-              <UserPlus className="mr-2 h-4 w-4" /> Create New Group
-            </Button>
-          </div>
-        </div>
+            <div className="flex gap-2 w-full sm:w-auto">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="btn-neon flex-1 sm:flex-none">
+                    <Download className="mr-2 h-4 w-4" /> Export
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => handleExportGroupsOverview("csv")}>
+                    <Sheet className="mr-2 h-4 w-4" /> Export as CSV
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleExportGroupsOverview("excel")}>
+                    <FileText className="mr-2 h-4 w-4" /> Export as Excel
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleExportGroupsOverview("json")}>
+                    <Download className="mr-2 h-4 w-4" /> Export as JSON
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-        <div className="flex items-center gap-4 glass-card gradient-border p-4 rounded-lg">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Search by group name, ID, or branch..." 
-              className="pl-9 bg-background neon-input"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+              <Button className="btn-neon flex-1 sm:flex-none">
+                <UserPlus className="mr-2 h-4 w-4" /> New Group
+              </Button>
+            </div>
           </div>
-          <Button variant="outline" className="gap-2 btn-neon">
-            <Filter className="h-4 w-4" /> Filter
-          </Button>
         </div>
 
         {isLoading ? (

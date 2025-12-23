@@ -34,6 +34,7 @@ import { MobileFeaturesDashboard } from "@/pages/mobile-features/MobileFeaturesD
 import { FieldOfficerDashboard } from "@/pages/field-officer/FieldOfficerDashboard";
 import { GroupMembersPage } from "@/pages/field-officer/GroupMembersPage";
 import { MemberDashboardPage } from "@/pages/field-officer/MemberDashboardPage";
+import { SchedulePage } from "@/pages/field-officer/SchedulePage";
 // import UserList from "@/pages/Admin/Users/UserList";
 // import BranchList from "@/pages/Admin/Branches/BranchList";
 import LoanProductList from "@/pages/Admin/LoanProductList";
@@ -148,10 +149,10 @@ function Router() {
           </ProtectedRoute>
         )}
       </Route>
-      <Route path="/field-officer">
+      <Route path="/field-officer/schedule">
         {(params) => (
           <ProtectedRoute allowedRoles={["admin", "field_officer"]} fallbackPath="/dashboard">
-            <FieldOfficerDashboard {...params} />
+            <SchedulePage />
           </ProtectedRoute>
         )}
       </Route>
@@ -166,6 +167,13 @@ function Router() {
         {(params) => (
           <ProtectedRoute allowedRoles={["admin", "field_officer"]} fallbackPath="/dashboard">
             <MemberDashboardPage />
+          </ProtectedRoute>
+        )}
+      </Route>
+      <Route path="/field-officer">
+        {(params) => (
+          <ProtectedRoute allowedRoles={["admin", "field_officer"]} fallbackPath="/dashboard">
+            <FieldOfficerDashboard {...params} />
           </ProtectedRoute>
         )}
       </Route>
@@ -199,7 +207,7 @@ function Router() {
       </Route>
       <Route path="/groups">
         {(params) => (
-          <ProtectedRoute allowedRoles={["admin", "executive", "operations_manager"]} fallbackPath="/dashboard">
+          <ProtectedRoute allowedRoles={["admin", "executive", "operations_manager", "field_officer"]} fallbackPath="/dashboard">
             <Groups {...params} />
           </ProtectedRoute>
         )}

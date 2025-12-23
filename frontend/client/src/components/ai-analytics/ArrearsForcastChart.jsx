@@ -38,10 +38,10 @@ export var ArrearsForcastChart = function (_a) {
           <p className="text-sm text-muted-foreground mt-1">{isDemo ? 'Sample forecast' : '12-month prediction with confidence intervals'}</p>
         </div>
         <div className="flex items-center gap-2">
-          {trend ? (<div className="flex items-center gap-1 text-destructive">
+          {trend ? (<div className="flex items-center gap-1 text-red-400">
               <ArrowUpIcon className="w-4 h-4"/>
               <span className="text-sm font-medium">Increasing</span>
-            </div>) : (<div className="flex items-center gap-1 text-secondary">
+            </div>) : (<div className="flex items-center gap-1 text-emerald-400">
               <ArrowDownIcon className="w-4 h-4"/>
               <span className="text-sm font-medium">Decreasing</span>
             </div>)}

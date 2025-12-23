@@ -37,7 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { Menu, Bell, MessageSquare, User, LogOut, ChevronDown } from "lucide-react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 export default function Layout(_a) {
@@ -95,7 +95,7 @@ export default function Layout(_a) {
           <div className="flex items-center gap-4">
             {/* Notifications */}
             <div className="relative">
-              <button className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-card rounded-lg transition">
+              <button className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-background rounded-lg transition">
                 <Bell size={20}/>
                 {unreadNotifications > 0 && (<span className="absolute top-1 right-1 bg-destructive/100 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                     {unreadNotifications}
@@ -105,7 +105,7 @@ export default function Layout(_a) {
 
             {/* Messages */}
             <div className="relative">
-              <button className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-card rounded-lg transition">
+              <button className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-background rounded-lg transition">
                 <MessageSquare size={20}/>
                 {unreadMessages > 0 && (<span className="absolute top-1 right-1 bg-primary text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                     {unreadMessages}
@@ -115,8 +115,8 @@ export default function Layout(_a) {
 
             {/* Profile Dropdown */}
             <div className="relative">
-              <button onClick={function () { return setShowProfileMenu(!showProfileMenu); }} className="flex items-center gap-2 px-3 py-2 text-foreground hover:bg-card rounded-lg transition">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-yellow-600 flex items-center justify-center text-card font-bold text-sm">
+              <button onClick={function () { return setShowProfileMenu(!showProfileMenu); }} className="flex items-center gap-2 px-3 py-2 text-foreground hover:bg-background rounded-lg transition">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-yellow-600 flex items-center justify-center text-white font-bold text-sm">
                   {userInitials}
                 </div>
                 <span className="text-sm font-medium hidden sm:inline">{userName}</span>
@@ -125,7 +125,7 @@ export default function Layout(_a) {
 
               {/* Profile Menu Dropdown */}
               {showProfileMenu && (<div className="absolute right-0 mt-2 w-48 bg-card rounded-lg border border-border shadow-lg z-50">
-                  <button className="w-full flex items-center gap-2 px-4 py-2 text-foreground hover:bg-muted transition border-b border-border">
+                  <button className="w-full flex items-center gap-2 px-4 py-2 text-foreground hover:bg-background transition border-b border-border">
                     <User size={16}/>
                     <span>Profile Settings</span>
                   </button>

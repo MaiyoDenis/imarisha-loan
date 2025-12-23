@@ -22,7 +22,7 @@ export function useBiometricAuth(): BiometricAuthState {
 
   useEffect(() => {
     checkBiometricSupport();
-  }, []);
+  }, [checkBiometricSupport]);
 
   const checkBiometricSupport = useCallback(async () => {
     try {

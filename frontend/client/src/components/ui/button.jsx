@@ -51,4 +51,5 @@ var Button = React.forwardRef(function (_a, ref) {
     return (<Comp className={cn(buttonVariants({ variant: variant, size: size, className: className }))} ref={ref} {...props}/>);
 });
 Button.displayName = "Button";
+// eslint-disable-next-line react-refresh/only-export-components
 export { Button, buttonVariants };

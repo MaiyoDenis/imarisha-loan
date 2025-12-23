@@ -45,7 +45,7 @@ export function useBiometricAuth() {
     var _f = useState([]), supportedTypes = _f[0], setSupportedTypes = _f[1];
     useEffect(function () {
         checkBiometricSupport();
-    }, []);
+    }, [checkBiometricSupport]);
     var checkBiometricSupport = useCallback(function () { return __awaiter(_this, void 0, void 0, function () {
         var available, types, credential, err_1, err_2;
         return __generator(this, function (_a) {

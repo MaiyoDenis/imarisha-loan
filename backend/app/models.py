@@ -417,6 +417,31 @@ class Visit(db.Model):
             'createdAt': self.created_at.isoformat()
         }
 
+class GroupVisit(db.Model):
+    __tablename__ = 'group_visits'
+    id = db.Column(db.Integer, primary_key=True)
+    group_id = db.Column(db.Integer, db.ForeignKey('groups.id'), nullable=False)
+    field_officer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    visit_date = db.Column(db.Date, nullable=False)
+    notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    group = db.relationship('Group', backref='group_visits')
+    field_officer = db.relationship('User', backref='group_visits')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'groupId': self.group_id,
+            'fieldOfficerId': self.field_officer_id,
+            'fieldOfficerName': f"{self.field_officer.first_name} {self.field_officer.last_name}",
+            'visitDate': self.visit_date.isoformat(),
+            'notes': self.notes,
+            'createdAt': self.created_at.isoformat(),
+            'updatedAt': self.updated_at.isoformat()
+        }
+
 class Achievement(db.Model):
     __tablename__ = 'achievements'
     id = db.Column(db.Integer, primary_key=True)

@@ -1,87 +1,52 @@
-# PostgreSQL Migration Plan - COMPLETED ✅
+# Frontend Schedule & Groups Navigation Plan
 
-## Migration Status: ✅ COMPLETE
+## Objective
+Add Schedule and Groups functionality to the field officer sidebar navigation
 
-### ✅ Completed Tasks
+## Tasks Completed
+- ✅ Analyzed existing frontend structure
+- ✅ Identified VisitScheduleWidget component
+- ✅ Reviewed field officer dashboard integration
+- ✅ Updated plan to include Groups navigation
 
-#### 1. Database Configuration Updated
-- [x] Updated `backend/config.py` to use PostgreSQL as default
-- [x] Added PostgreSQL connection pooling configuration
-- [x] Added proper engine options for production
+## Implementation Plan
 
-#### 2. Dependencies Verified
-- [x] PostgreSQL driver `psycopg2-binary` already present in requirements.txt
-- [x] All necessary dependencies confirmed
+### 1. Create Schedule Page Component
+- [ ] Create `/frontend/client/src/pages/field-officer/SchedulePage.tsx`
+- [ ] Integrate VisitScheduleWidget with enhanced features
+- [ ] Add schedule management capabilities
 
-#### 3. Environment Configuration
-- [x] Created `.env.example` with comprehensive PostgreSQL configuration
-- [x] Added environment variable documentation
-- [x] Included local and cloud database examples
+### 2. Create Groups Page Component
+- [ ] Create `/frontend/client/src/pages/field-officer/GroupsPage.tsx`
+- [ ] Move groups functionality from dashboard to dedicated page
+- [ ] Include group management and viewing capabilities
 
-#### 4. Deployment Configuration
-- [x] Updated `render.yaml` for PostgreSQL database integration
-- [x] Added database service configuration for Render.com
-- [x] Docker Compose already configured with PostgreSQL
+### 3. Update Sidebar Navigation
+- [ ] Add Schedule menu item to AppSidebar.tsx with Calendar icon
+- [ ] Add Groups menu item to AppSidebar.tsx with Users icon
+- [ ] Include proper icon and role-based access for field_officer role
+- [ ] Position items appropriately in the navigation
 
-#### 5. Setup Scripts
-- [x] Created `setup_postgres.sh` for easy PostgreSQL setup
-- [x] Added automated migration and seeding
-- [x] Included Docker service management
+### 4. Update Routing
+- [ ] Add route in App.tsx for /field-officer/schedule
+- [ ] Add route in App.tsx for /field-officer/groups
+- [ ] Implement protected routes with field_officer role
+- [ ] Ensure proper navigation flow
 
-#### 6. Documentation
-- [x] Updated TODO.md with migration status
-- [x] Added setup instructions and next steps
+### 5. Update Field Officer Dashboard
+- [ ] Remove Groups section from main dashboard
+- [ ] Streamline dashboard to focus on key metrics only
+- [ ] Keep only essential KPIs and quick actions
 
-## PostgreSQL Connection String Format
-```
-postgresql://username:password@host:port/database_name
-```
+### 6. Test Integration
+- [ ] Verify sidebar navigation works
+- [ ] Test route accessibility
+- [ ] Ensure proper role-based access
+- [ ] Verify Groups functionality still works
 
-## Environment Variables Configured
-- `DATABASE_URL` - PostgreSQL connection string
-- `REDIS_URL` - Redis connection (optional)
-- `CELERY_BROKER_URL` - Celery broker URL
-- `SECRET_KEY` - Application secret key
-
-## Files Modified
-1. ✅ `backend/config.py` - Updated database configuration
-2. ✅ `render.yaml` - Added PostgreSQL database service
-3. ✅ `.env.example` - Created comprehensive environment template
-4. ✅ `setup_postgres.sh` - Created setup automation script
-5. ✅ `TODO.md` - Updated with completion status
-
-## Docker Services Ready
-- ✅ PostgreSQL 15 container configured
-- ✅ Redis 7 container configured
-- ✅ API services with PostgreSQL connection
-- ✅ Health checks and dependencies configured
-
-## Next Steps for Usage
-
-### For Local Development:
-```bash
-# Run the setup script
-./setup_postgres.sh
-
-# Or manually:
-docker-compose up -d postgres redis
-cd backend && flask db upgrade && python seed.py
-docker-compose up -d
-```
-
-### For Production Deployment:
-1. Set up PostgreSQL database on Render.com or cloud provider
-2. Update `DATABASE_URL` environment variable
-3. Deploy using `render.yaml` configuration
-4. Run migrations: `flask db upgrade`
-
-## Expected Benefits Achieved
-- ✅ Better performance with concurrent connections
-- ✅ Advanced database features (JSON, arrays, etc.)
-- ✅ Better scaling for production
-- ✅ Proper ACID compliance
-- ✅ Backup and recovery capabilities
-
-## Migration Complete! 🎉
-
-Your Imarisha Loan System is now configured for PostgreSQL. The system will automatically use PostgreSQL when the `DATABASE_URL` environment variable is set, falling back to the local PostgreSQL configuration for development.
+## Files to Modify
+- `frontend/client/src/pages/field-officer/SchedulePage.tsx` (new)
+- `frontend/client/src/pages/field-officer/GroupsPage.tsx` (new)
+- `frontend/client/src/components/layout/AppSidebar.tsx` (update)
+- `frontend/client/src/App.tsx` (update routes)
+- `frontend/client/src/pages/field-officer/FieldOfficerDashboard.tsx` (remove groups section)

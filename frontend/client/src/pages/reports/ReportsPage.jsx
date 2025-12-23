@@ -76,22 +76,11 @@ export var ReportsPage = function () {
             { id: 'financial', label: 'Financial Report' },
             { id: 'member', label: 'Member Report' },
             { id: 'risk', label: 'Risk Report' },
-        ].map(function (report) {
-                return (
-                  <button
-                    key={report.id}
-                    onClick={function () { return setSelectedReport(report.id); }}
-                    className={
-                      "w-full text-left px-4 py-2 rounded-lg transition " +
-                      (selectedReport === report.id
-                        ? "bg-primary text-white"
-                        : "bg-card text-foreground/90 hover:bg-accent border border-border/50")
-                    }
-                  >
-                    {report.label}
-                  </button>
-                );
-              })}
+        ].map(function (report) { return (<button key={report.id} onClick={function () { return setSelectedReport(report.id); }} className={"w-full text-left px-4 py-2 rounded-lg transition ".concat(selectedReport === report.id
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-card text-foreground/90 hover:bg-accent border border-border/50')}>
+                  {report.label}
+                </button>); })}
             </div>
           </div>
 

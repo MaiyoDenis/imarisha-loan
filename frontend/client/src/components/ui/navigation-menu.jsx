@@ -9,6 +9,7 @@ var __rest = (this && this.__rest) || function (s, e) {
         }
     return t;
 };
+/* eslint-disable react-refresh/only-export-components */
 import * as React from "react";
 import * as NavigationMenuPrimitive from "@radix-ui/react-navigation-menu";
 import { cva } from "class-variance-authority";
@@ -59,4 +60,5 @@ var NavigationMenuIndicator = React.forwardRef(function (_a, ref) {
 });
 NavigationMenuIndicator.displayName =
     NavigationMenuPrimitive.Indicator.displayName;
+// eslint-disable-next-line react-refresh/only-export-components
 export { navigationMenuTriggerStyle, NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuContent, NavigationMenuTrigger, NavigationMenuLink, NavigationMenuIndicator, NavigationMenuViewport, };

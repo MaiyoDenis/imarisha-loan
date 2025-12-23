@@ -34,12 +34,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 function normalizeRole(role) {
     if (!role)
         return '';
-    return role.toLowerCase().replace(/\s+/g, '_').trim();
+    // Replace dashes and spaces with underscores, and lowercase
+    return role.toLowerCase().replace(/[\s-]+/g, '_').trim();
 }
 export function ProtectedRoute(_a) {
     var _this = this;
@@ -49,44 +50,40 @@ export function ProtectedRoute(_a) {
     var _e = useState(false), isAuthorized = _e[0], setIsAuthorized = _e[1];
     useEffect(function () {
         var checkAuth = function () { return __awaiter(_this, void 0, void 0, function () {
-            var userStr, user, userRole, normalizedAllowedRoles, isAllowed;
+            var userStr, user, userRole, normalizedUserRole, normalizedAllowedRoles, isAllowed;
             return __generator(this, function (_a) {
                 userStr = localStorage.getItem('user');
-                console.log('=== ProtectedRoute.tsx checking ===');
-                console.log('localStorage user:', userStr);
-                console.log('allowed roles:', allowedRoles);
                 if (!userStr) {
-                    console.log('❌ No user in localStorage, redirecting to login');
                     setIsAuthorized(false);
                     setIsChecking(false);
-                    // Small delay to ensure redirect happens
                     setTimeout(function () { return setLocation('/'); }, 100);
                     return [2 /*return*/];
                 }
                 try {
                     user = JSON.parse(userStr);
-                    console.log('✓ Parsed user:', user);
-                    console.log('  user.role =', user.role);
-                    userRole = normalizeRole(user.role);
+                    userRole = user.role;
+                    // 1. Direct match check
+                    if (allowedRoles.includes(userRole)) {
+                        setIsAuthorized(true);
+                        setIsChecking(false);
+                        return [2 /*return*/];
+                    }
+                    normalizedUserRole = normalizeRole(userRole);
                     normalizedAllowedRoles = allowedRoles.map(function (r) { return normalizeRole(r); });
-                    console.log('  normalized user role:', userRole);
-                    console.log('  normalized allowed roles:', normalizedAllowedRoles);
-                    isAllowed = normalizedAllowedRoles.includes(userRole);
-                    console.log('  allowed?', isAllowed);
+                    isAllowed = normalizedAllowedRoles.includes(normalizedUserRole);
                     if (!isAllowed) {
-                        console.log('❌ Role not in allowedRoles, redirecting to', fallbackPath);
+                        console.warn("Access denied for role: ".concat(userRole, " (normalized: ").concat(normalizedUserRole, "). Allowed: ").concat(allowedRoles.join(', ')));
                         setIsAuthorized(false);
                         setIsChecking(false);
                         setTimeout(function () { return setLocation(fallbackPath); }, 100);
                     }
                     else {
-                        console.log('✓ Role authorized, rendering component');
                         setIsAuthorized(true);
                         setIsChecking(false);
                     }
                 }
                 catch (e) {
-                    console.error('❌ Failed to parse user:', e);
+                    console.error('Failed to parse user:', e);
                     setIsAuthorized(false);
                     setIsChecking(false);
                     setTimeout(function () { return setLocation(fallbackPath); }, 100);
