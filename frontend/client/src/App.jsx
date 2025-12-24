@@ -1,13 +1,15 @@
-import React, { Suspense, lazy } from "react";
-import { Switch, Route } from "wouter";
+import React, { Suspense, lazy, useEffect } from "react";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { LoadingSpinner } from "@/components/ui/loading";
 import { Toaster } from "@/components/ui/toaster";
 
 // Lazy imports
 const NotFound = lazy(() => import("@/pages/shared/NotFound"));
+const SystemLocked = lazy(() => import("@/pages/shared/SystemLocked"));
+const ITSupportDashboard = lazy(() => import("@/pages/it-support/Dashboard"));
 const Login = lazy(() => import("@/pages/auth/Login"));
 const Register = lazy(() => import("@/pages/auth/Register"));
 const Dashboard = lazy(() => import("@/pages/customer/Dashboard"));
@@ -45,11 +47,47 @@ const ProcurementOfficerDashboard = lazy(() => import("@/pages/procurement/Dashb
 const MemberApprovalPage = lazy(() => import("@/components/field-officer/MemberApprovalPage").then(module => ({ default: module.MemberApprovalPage })));
 
 function Router() {
+    const [location, setLocation] = useLocation();
+   
+    const { data: subscriptionStatus } = useQuery({
+        queryKey: ["/api/subscription/status"],
+        refetchInterval: 60000,
+        retry: false
+    });
+
+    useEffect(() => {
+        if (subscriptionStatus?.status === 'expired') {
+            const userStr = localStorage.getItem('user');
+            let isIT = false;
+            if (userStr) {
+                try {
+                    const user = JSON.parse(userStr);
+                    const role = user.role.toLowerCase().replace(/[\s-]+/g, '_').trim();
+                    if (role === 'it_support') {
+                        isIT = true;
+                    }
+                } catch(e) {}
+            }
+
+            if (!isIT && location !== '/system-locked' && location !== '/') {
+                setLocation('/system-locked');
+            }
+        }
+    }, [subscriptionStatus, location, setLocation]);
+
     return (
       <Suspense fallback={<LoadingSpinner />}>
         <Switch>
           <Route path="/" component={Login}/>
           <Route path="/register" component={Register}/>
+          <Route path="/system-locked" component={SystemLocked}/>
+          <Route path="/dashboards/it-support">
+            {(params) => (
+              <ProtectedRoute allowedRoles={["it_support"]} fallbackPath="/dashboard">
+                <ITSupportDashboard {...params}/>
+              </ProtectedRoute>
+            )}
+          </Route>
           <Route path="/dashboard" component={Dashboard}/>
           {/* <Route path="/admin/users" component={UserList} /> */}
           {/* <Route path="/admin/branches" component={BranchList} /> */}

@@ -1,5 +1,5 @@
 
-from flask import Flask, request, g
+from flask import Flask, request, g, session, abort
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
@@ -9,6 +9,7 @@ from flask_mail import Mail
 from config import Config
 import logging
 import os
+from datetime import datetime
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -97,7 +98,7 @@ def create_app(config_class=Config):
     etl_service.init_app(app)
     
     # Register blueprints
-    from app.routes import auth, branches, groups, members, loans, products, transactions, dashboard, payments, jobs, reports, field, gamification, notifications, risk, dashboards, ai_analytics, reporting, field_operations, currency, alternative_payments, ussd, bi_integration, compliance, voice_assistant as voice_assistant_routes, inventory_intelligence, etl_pipeline, users, suppliers, stock, permissions, field_officer, savings
+    from app.routes import auth, branches, groups, members, loans, products, transactions, dashboard, payments, jobs, reports, field, gamification, notifications, risk, dashboards, ai_analytics, reporting, field_operations, currency, alternative_payments, ussd, bi_integration, compliance, voice_assistant as voice_assistant_routes, inventory_intelligence, etl_pipeline, users, suppliers, stock, permissions, field_officer, savings, subscription
     app.register_blueprint(auth.bp)
     app.register_blueprint(users.bp)
     app.register_blueprint(branches.bp)
@@ -131,6 +132,7 @@ def create_app(config_class=Config):
     app.register_blueprint(inventory_intelligence.bp)
     app.register_blueprint(etl_pipeline.bp)
     app.register_blueprint(field_officer.bp)
+    app.register_blueprint(subscription.bp)
     
 
     # Health check endpoint
@@ -198,6 +200,26 @@ def create_app(config_class=Config):
         
         # Log request
         app.logger.info(f"Request {g.request_id}: {request.method} {request.url}")
+
+        # Check Subscription Status
+        if not request.endpoint:
+            return
+
+        # Whitelist
+        if any(request.endpoint.startswith(p) for p in ['static', 'auth.login', 'subscription.status', 'subscription.renew', 'health', 'api_info']):
+             return
+
+        from app.models import SystemSubscription
+        try:
+            latest_sub = SystemSubscription.query.order_by(SystemSubscription.expires_at.desc()).first()
+            
+            if not latest_sub or latest_sub.expires_at < datetime.utcnow():
+                user_role = session.get('role')
+                if user_role != 'it_support':
+                     abort(403, description="System subscription expired. Please contact IT Support.")
+        except Exception as e:
+            # If DB error (e.g. table doesn't exist yet during migration), log and pass
+            logging.error(f"Subscription check failed: {str(e)}")
     
     @app.after_request
     def after_request(response):

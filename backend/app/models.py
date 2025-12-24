@@ -989,3 +989,22 @@ class StockMovement(db.Model):
             'notes': self.notes,
             'createdAt': self.created_at.isoformat()
         }
+
+class SystemSubscription(db.Model):
+    __tablename__ = 'system_subscriptions'
+    id = db.Column(db.Integer, primary_key=True)
+    token = db.Column(db.Text, unique=True, nullable=False)
+    expires_at = db.Column(db.DateTime, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    created_by = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+    creator = db.relationship('User', backref='created_subscriptions')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'token': self.token,
+            'expiresAt': self.expires_at.isoformat(),
+            'createdAt': self.created_at.isoformat(),
+            'createdBy': self.created_by
+        }

@@ -52,6 +52,7 @@ function getRoleRedirectPath(role) {
         'admin': '/dashboards/admin',
         'procurement_officer': '/store',
         'customer': '/dashboard',
+        'it_support': '/dashboards/it-support',
     };
     return roleRedirects[role] || '/dashboard';
 }

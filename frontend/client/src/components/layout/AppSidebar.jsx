@@ -46,6 +46,7 @@ var allSidebarItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/dashboards/operations", roles: ["operations_manager"] },
     { icon: LayoutDashboard, label: "Dashboard", href: "/dashboards/risk", roles: ["risk_manager"] },
     { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard", roles: ["loan_officer", "customer"] },
+    { icon: LayoutDashboard, label: "IT Support Dashboard", href: "/dashboards/it-support", roles: ["it_support"] },
     { icon: LayoutDashboard, label: "Field Officer Dashboard", href: "/field-officer", roles: ["field_officer"] },
     { icon: MapPin, label: "Field Operations", href: "/field-operations", roles: ["admin", "field_officer"] },
     { icon: Calendar, label: "Schedules", href: "/field-officer/schedule", roles: ["field_officer"] },
