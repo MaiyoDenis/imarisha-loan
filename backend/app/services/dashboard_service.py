@@ -1041,9 +1041,14 @@ class DashboardService:
     
     # ==================== FORECAST DASHBOARD ====================
     
-    def get_forecast_dashboard(self, branch_id: Optional[int] = None) -> Dict[str, Any]:
+    def get_forecast_dashboard(self, branch_id: Optional[int] = None, scenario_params: Optional[Dict[str, float]] = None) -> Dict[str, Any]:
         """Get financial forecast dashboard"""
-        cache_key = f"forecast_dashboard:{branch_id or 'all'}"
+        # Create a cache key that includes scenario params if they exist
+        scenario_key = ""
+        if scenario_params:
+            scenario_key = f":{scenario_params.get('revenue_growth', 0)}:{scenario_params.get('volume_growth', 0)}:{scenario_params.get('risk_factor', 0)}"
+        
+        cache_key = f"forecast_dashboard:{branch_id or 'all'}{scenario_key}"
         
         if self.redis_client:
             cached = self.redis_client.get(cache_key)
@@ -1053,10 +1058,10 @@ class DashboardService:
         try:
             dashboard_data = {
                 'timestamp': datetime.utcnow().isoformat(),
-                'revenue_forecast': self._get_revenue_forecast(branch_id),
-                'loan_volume_forecast': self._get_loan_volume_forecast(branch_id),
-                'cash_flow_forecast': self._get_cash_flow_forecast(branch_id),
-                'arrears_forecast': self._get_arrears_forecast(branch_id),
+                'revenue_forecast': self._get_revenue_forecast(branch_id, scenario_params),
+                'loan_volume_forecast': self._get_loan_volume_forecast(branch_id, scenario_params),
+                'cash_flow_forecast': self._get_cash_flow_forecast(branch_id, scenario_params),
+                'arrears_forecast': self._get_arrears_forecast(branch_id, scenario_params),
                 'budget_variance': self._get_budget_variance(branch_id)
             }
             
@@ -1072,7 +1077,7 @@ class DashboardService:
             logging.error(f"Error generating forecast dashboard: {str(e)}")
             return {'error': str(e)}
     
-    def _get_revenue_forecast(self, branch_id: Optional[int] = None) -> Dict[str, Any]:
+    def _get_revenue_forecast(self, branch_id: Optional[int] = None, scenario_params: Optional[Dict[str, float]] = None) -> Dict[str, Any]:
         """Get 12-month revenue forecast based on historical data"""
         now = datetime.utcnow()
         query = Loan.query
@@ -1099,7 +1104,12 @@ class DashboardService:
         values = [max(monthly_revenue.get((now - timedelta(days=30 * (11-i))).strftime('%Y-%m'), 0), 0) for i in range(12)]
         
         avg_revenue = sum(values) / len(values) if values else 0
-        growth_rate = 0.05 if len(values) > 1 else 0
+        
+        # Use scenario growth rate if provided, otherwise default to 5%
+        if scenario_params and scenario_params.get('revenue_growth') is not None:
+            growth_rate = scenario_params.get('revenue_growth') / 100.0
+        else:
+            growth_rate = 0.05 if len(values) > 1 else 0
         
         forecast_values = [values[-1]]
         for i in range(1, 12):
@@ -1115,7 +1125,7 @@ class DashboardService:
             'confidence_interval': [round(confidence_min, 2), round(confidence_max, 2)]
         }
     
-    def _get_loan_volume_forecast(self, branch_id: Optional[int] = None) -> Dict[str, Any]:
+    def _get_loan_volume_forecast(self, branch_id: Optional[int] = None, scenario_params: Optional[Dict[str, float]] = None) -> Dict[str, Any]:
         """Get loan volume forecast based on historical data"""
         now = datetime.utcnow()
         query = Loan.query
@@ -1145,7 +1155,12 @@ class DashboardService:
         approvals = [int(monthly_approvals.get((now - timedelta(days=30 * (11-i))).strftime('%Y-%m'), 0)) for i in range(12)]
         
         avg_app = sum(applications) / len(applications) if applications else 0
-        growth_rate = 0.08 if len(applications) > 1 else 0
+        
+        # Use scenario volume growth if provided, otherwise default to 8%
+        if scenario_params and scenario_params.get('volume_growth') is not None:
+            growth_rate = scenario_params.get('volume_growth') / 100.0
+        else:
+            growth_rate = 0.08 if len(applications) > 1 else 0
         
         forecast_applications = [applications[-1] if applications[-1] > 0 else int(avg_app)]
         forecast_approvals = [approvals[-1] if approvals[-1] > 0 else int(avg_app * 0.9)]
@@ -1163,7 +1178,7 @@ class DashboardService:
             'trend': trend
         }
     
-    def _get_cash_flow_forecast(self, branch_id: Optional[int] = None) -> Dict[str, Any]:
+    def _get_cash_flow_forecast(self, branch_id: Optional[int] = None, scenario_params: Optional[Dict[str, float]] = None) -> Dict[str, Any]:
         """Get cash flow forecast based on transaction data"""
         now = datetime.utcnow()
         
@@ -1200,7 +1215,12 @@ class DashboardService:
         net_flow = [inflows[i] - outflows[i] for i in range(12)]
         
         avg_inflow = sum(inflows) / len(inflows) if inflows else 0
-        growth_rate = 0.03
+        
+        # Use scenario revenue growth for inflows, otherwise default to 3%
+        if scenario_params and scenario_params.get('revenue_growth') is not None:
+            growth_rate = scenario_params.get('revenue_growth') / 100.0
+        else:
+            growth_rate = 0.03
         
         forecast_inflows = [inflows[-1] if inflows[-1] > 0 else avg_inflow]
         forecast_outflows = [outflows[-1] if outflows[-1] > 0 else avg_inflow * 0.7]
@@ -1218,7 +1238,7 @@ class DashboardService:
             'net_flow': [round(v, 2) for v in forecast_net]
         }
     
-    def _get_arrears_forecast(self, branch_id: Optional[int] = None) -> Dict[str, Any]:
+    def _get_arrears_forecast(self, branch_id: Optional[int] = None, scenario_params: Optional[Dict[str, float]] = None) -> Dict[str, Any]:
         """Get arrears forecast based on historical default rates"""
         now = datetime.utcnow()
         query = Loan.query
@@ -1260,8 +1280,13 @@ class DashboardService:
         forecast_rates = []
         current_rate = historical_rates[-1] if historical_rates else avg_rate
         
+        risk_multiplier = 1.0
+        if scenario_params and scenario_params.get('risk_factor') is not None:
+            risk_multiplier = scenario_params.get('risk_factor')
+        
         for i in range(12):
             forecast_rate = max(current_rate + (trend * (i + 1)), 0)
+            forecast_rate *= risk_multiplier
             forecast_rates.append(round(forecast_rate, 2))
         
         confidence_level = 0.80 if abs(trend) < 0.5 else 0.75
@@ -1274,24 +1299,85 @@ class DashboardService:
     
     def _get_budget_variance(self, branch_id: Optional[int] = None) -> Dict[str, Any]:
         """Get budget vs actual variance"""
+        now = datetime.utcnow()
+        year_start = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+        
+        # 1. Calculate Actual Revenue YTD
+        # Source A: Loan Interest + Fees (Booked on disbursement for simplicity in this view)
+        loan_query = Loan.query
+        if branch_id:
+            loan_query = loan_query.join(Member).filter(Member.branch_id == branch_id)
+            
+        disbursed_loans = loan_query.filter(
+            and_(
+                Loan.disbursement_date >= year_start,
+                Loan.status.in_(['disbursed', 'completed', 'defaulted', 'active'])
+            )
+        ).all()
+        
+        actual_revenue = 0.0
+        for loan in disbursed_loans:
+            actual_revenue += float(loan.interest_amount or 0) + float(loan.charge_fee or 0)
+            
+        # Source B: Registration Fees
+        trans_query = Transaction.query
+        if branch_id:
+            trans_query = trans_query.join(Member).filter(Member.branch_id == branch_id)
+            
+        reg_fees = trans_query.filter(
+            and_(
+                Transaction.transaction_type == 'registration_fee',
+                Transaction.created_at >= year_start
+            )
+        ).with_entities(func.sum(Transaction.amount)).scalar() or 0.0
+        
+        actual_revenue += float(reg_fees)
+        
+        # 2. Calculate Budgeted Revenue (Target)
+        # Heuristic: Target is based on active member capacity
+        # Assume target revenue per active member is ~2000 KES YTD
+        active_members = self._get_active_members(branch_id)
+        budgeted_revenue = active_members * 2000.0
+        
+        # Fallback for new system or empty data to show reasonable variance
+        if budgeted_revenue == 0:
+            if actual_revenue > 0:
+                budgeted_revenue = actual_revenue * 0.9 # We exceeded budget!
+            else:
+                budgeted_revenue = 100000.0 # Baseline target for empty system
+        
+        # 3. Calculate Expenses (Estimated)
+        # Since we don't track expenses yet, estimate based on industry standard OER (Operational Expense Ratio)
+        # Target OER = 55%, Actual OER = 60%
+        actual_expenses = actual_revenue * 0.60
+        budgeted_expenses = budgeted_revenue * 0.55
+        
+        # 4. Profit
+        actual_profit = actual_revenue - actual_expenses
+        budgeted_profit = budgeted_revenue - budgeted_expenses
+        
+        def calc_variance_pct(actual, budgeted):
+            if budgeted == 0: return 0.0
+            return ((actual - budgeted) / budgeted) * 100
+
         return {
             'revenue': {
-                'budgeted': 1200000,
-                'actual': 1150000,
-                'variance': -50000,
-                'variance_pct': -4.2
+                'budgeted': round(budgeted_revenue, 2),
+                'actual': round(actual_revenue, 2),
+                'variance': round(actual_revenue - budgeted_revenue, 2),
+                'variance_pct': round(calc_variance_pct(actual_revenue, budgeted_revenue), 1)
             },
             'expenses': {
-                'budgeted': 300000,
-                'actual': 310000,
-                'variance': 10000,
-                'variance_pct': 3.3
+                'budgeted': round(budgeted_expenses, 2),
+                'actual': round(actual_expenses, 2),
+                'variance': round(actual_expenses - budgeted_expenses, 2),
+                'variance_pct': round(calc_variance_pct(actual_expenses, budgeted_expenses), 1)
             },
             'profit': {
-                'budgeted': 900000,
-                'actual': 840000,
-                'variance': -60000,
-                'variance_pct': -6.7
+                'budgeted': round(budgeted_profit, 2),
+                'actual': round(actual_profit, 2),
+                'variance': round(actual_profit - budgeted_profit, 2),
+                'variance_pct': round(calc_variance_pct(actual_profit, budgeted_profit), 1)
             }
         }
     

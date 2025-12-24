@@ -12,20 +12,24 @@ export var ArrearsForcastChart = function (_a) {
         </div>
       </div>);
     }
-    var mockChartData = Array.from({ length: 12 }, function (_, i) { return ({
-        date: new Date(new Date().getFullYear(), new Date().getMonth() + i + 1, 1).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
-        rate: 5.0 + (i * 0.3),
-        upper: 5.0 + (i * 0.3) + 1.5,
-        lower: Math.max(0, 5.0 + (i * 0.3) - 1.5),
-    }); });
+    var mockChartData = Array.from({ length: 12 }, function (_, i) {
+        return ({
+            date: new Date(new Date().getFullYear(), new Date().getMonth() + i + 1, 1).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
+            rate: 5.0 + (i * 0.3),
+            upper: 5.0 + (i * 0.3) + 1.5,
+            lower: Math.max(0, 5.0 + (i * 0.3) - 1.5),
+        });
+    });
     var chartData = !data || !data.predictions || data.predictions.length === 0
         ? mockChartData
-        : data.predictions.map(function (pred) { return ({
-            date: new Date(pred.date).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
-            rate: parseFloat(pred.forecasted_rate.toFixed(2)),
-            upper: parseFloat(pred.upper_bound.toFixed(2)),
-            lower: parseFloat(pred.lower_bound.toFixed(2)),
-        }); });
+        : data.predictions.map(function (pred) {
+            return ({
+                date: new Date(pred.date).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
+                rate: parseFloat(pred.forecasted_rate.toFixed(2)),
+                upper: parseFloat(pred.upper_bound.toFixed(2)),
+                lower: parseFloat(pred.lower_bound.toFixed(2)),
+            });
+        });
     var currentRate = (data === null || data === void 0 ? void 0 : data.current_rate) || 5.0;
     var averageRate = (data === null || data === void 0 ? void 0 : data.average_rate) || 5.0;
     var confidenceLevel = (data === null || data === void 0 ? void 0 : data.confidence_level) || 50;

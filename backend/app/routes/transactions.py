@@ -9,6 +9,7 @@ bp = Blueprint('transactions', __name__, url_prefix='/api/transactions')
 @bp.route('', methods=['GET'])
 def get_transactions():
     member_id = request.args.get('memberId')
+    account_type = request.args.get('accountType')
     
     from flask import session
     from app.models import User
@@ -17,6 +18,9 @@ def get_transactions():
     
     if member_id:
         query = query.filter_by(member_id=member_id)
+        
+    if account_type:
+        query = query.filter_by(account_type=account_type)
         
     if 'user_id' in session:
         user = User.query.get(session['user_id'])

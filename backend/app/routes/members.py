@@ -189,7 +189,7 @@ def process_registration_fee(id):
         'member': member.to_dict()
     })
 
-@bp.route('/pending-approval', methods=['GET'])
+@bp.route('/pending', methods=['GET'])
 def get_pending_members():
     """Get all members pending approval - for procurement officer/branch manager/admin dashboard"""
     # Check if user has permission
@@ -214,20 +214,113 @@ def get_pending_members():
     
     pending_members = query.order_by(Member.created_at.desc()).all()
     
-    return jsonify([{
-        'member': member.to_dict(),
-        'user': {
+    result = []
+    for member in pending_members:
+        member_data = member.to_dict()
+        # Add nested user data
+        member_data['user'] = {
             'id': member.user.id,
             'firstName': member.user.first_name,
             'lastName': member.user.last_name,
-            'email': member.user.email,
+            'username': member.user.username,
             'phone': member.user.phone
-        },
-        'group': {
-            'id': member.group.id,
-            'name': member.group.name
-        } if member.group else None
-    } for member in pending_members])
+        }
+        # Add nested group data if exists
+        if member.group:
+            member_data['group'] = {
+                'id': member.group.id,
+                'name': member.group.name
+            }
+        # Add nested branch data if exists
+        if member.branch:
+            member_data['branch'] = {
+                'id': member.branch.id,
+                'name': member.branch.name,
+                'location': member.branch.location
+            }
+        result.append(member_data)
+    
+    return jsonify(result)
+
+@bp.route('/bulk-approve', methods=['POST'])
+def bulk_approve_members():
+    """Approve multiple pending members at once"""
+    # Check permission
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    allowed_roles = ['procurement_officer', 'branch_manager', 'admin']
+    if user.role.name not in allowed_roles:
+        return jsonify({'error': 'Insufficient permissions'}), 403
+        
+    data = request.get_json()
+    member_ids = data.get('memberIds', [])
+    
+    if not member_ids:
+        return jsonify({'error': 'No members selected'}), 400
+        
+    success_count = 0
+    failed_count = 0
+    
+    for member_id in member_ids:
+        member = Member.query.get(member_id)
+        if member and member.status == 'pending':
+            # Check branch permission for non-admins
+            if user.role.name != 'admin' and member.branch_id != user.branch_id:
+                failed_count += 1
+                continue
+                
+            member.status = 'inactive' # Approved but inactive until registration fee paid
+            success_count += 1
+    
+    db.session.commit()
+    
+    return jsonify({
+        'message': f'Successfully approved {success_count} members',
+        'processed': success_count,
+        'failed': failed_count
+    })
+
+@bp.route('/<int:id>/reject', methods=['POST'])
+def reject_member(id):
+    """Reject a pending member application"""
+    member = Member.query.get(id)
+    if not member:
+        return jsonify({'error': 'Member not found'}), 404
+    
+    if member.status != 'pending':
+        return jsonify({'error': 'Member is not pending approval'}), 400
+    
+    # Check permissions
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    allowed_roles = ['procurement_officer', 'branch_manager', 'admin']
+    if user.role.name not in allowed_roles:
+        return jsonify({'error': 'Insufficient permissions'}), 403
+        
+    # Check branch permission for non-admins
+    if user.role.name != 'admin' and member.branch_id != user.branch_id:
+        return jsonify({'error': 'Cannot reject member from another branch'}), 403
+    
+    # Update status to rejected
+    member.status = 'rejected'
+    db.session.commit()
+    
+    return jsonify({
+        'message': 'Member application rejected',
+        'member': member.to_dict()
+    })
 
 @bp.route('/<int:id>/loan-limit', methods=['GET'])
 def get_loan_limit(id):

@@ -78,9 +78,11 @@ export function CreateLoanDialog() {
                   <SelectValue placeholder="Select loan product"/>
                 </SelectTrigger>
                 <SelectContent>
-                  {products.map(function (product) { return (<SelectItem key={product.id} value={product.id.toString()}>
+                  {products.map(function (product) {
+            return (<SelectItem key={product.id} value={product.id.toString()}>
                       {product.name} - {product.stockQuantity} in stock
-                    </SelectItem>); })}
+                    </SelectItem>);
+        })}
                 </SelectContent>
               </Select>
             </div>

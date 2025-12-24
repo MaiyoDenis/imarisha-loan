@@ -1,10 +1,10 @@
 import React from 'react';
 import { ArrowUp, ArrowDown, TrendingUp } from 'lucide-react';
 var statusColors = {
-    normal: 'border-l-4 border-l-primary',
-    warning: 'border-l-4 border-l-accent',
-    critical: 'border-l-4 border-l-destructive',
-    success: 'border-l-4 border-l-secondary'
+    normal: '',
+    warning: '',
+    critical: '',
+    success: ''
 };
 var statusIconColors = {
     normal: 'text-primary',
@@ -19,8 +19,8 @@ export function KPICard(_a) {
         <div className="flex-1 min-w-0">
           <p className="text-xs md:text-sm font-medium text-muted-foreground mb-2 truncate">{title}</p>
           <div className="flex items-baseline gap-2 flex-wrap">
-            <h3 className="text-2xl md:text-3xl font-bold text-foreground truncate">
-              {typeof value === 'number' ? (value > 1000000 ? "".concat((value / 1000000).toFixed(1), "M") : value.toLocaleString()) : value}
+            <h3 className="text-xl md:text-2xl font-bold text-foreground break-all">
+              {typeof value === 'number' ? value.toLocaleString() : value}
             </h3>
             {unit && <span className="text-xs md:text-sm text-muted-foreground whitespace-nowrap">{unit}</span>}
           </div>

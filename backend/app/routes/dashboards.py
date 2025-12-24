@@ -86,14 +86,21 @@ def get_member_analytics_dashboard():
 def get_forecast_dashboard():
     branch_id = request.args.get('branch_id', type=int)
     
+    # Scenario parameters
+    scenario_params = {
+        'revenue_growth': request.args.get('revenue_growth', type=float),
+        'volume_growth': request.args.get('volume_growth', type=float),
+        'risk_factor': request.args.get('risk_factor', type=float)
+    }
+    
     try:
-        dashboard_data = dashboard_service.get_forecast_dashboard(branch_id)
+        dashboard_data = dashboard_service.get_forecast_dashboard(branch_id, scenario_params)
         
         audit_service.log_event(
             event_type=AuditEventType.API_ACCESS,
             resource="dashboard",
             action="view_forecast",
-            details={'branch_id': branch_id},
+            details={'branch_id': branch_id, 'scenario': scenario_params},
             risk_level=RiskLevel.LOW
         )
         

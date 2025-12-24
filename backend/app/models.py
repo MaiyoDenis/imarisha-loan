@@ -476,6 +476,7 @@ class UserAchievement(db.Model):
             'id': self.id,
             'userId': self.user_id,
             'achievementId': self.achievement_id,
+            'achievement': self.achievement.to_dict() if self.achievement else None,
             'awardedAt': self.awarded_at.isoformat()
         }
 
@@ -614,6 +615,7 @@ class UserChallenge(db.Model):
             'id': self.id,
             'userId': self.user_id,
             'challengeId': self.challenge_id,
+            'challenge': self.challenge.to_dict() if self.challenge else None,
             'progress': str(self.progress),
             'status': self.status,
             'completedAt': self.completed_at.isoformat() if self.completed_at else None,
@@ -664,6 +666,7 @@ class UserReward(db.Model):
             'id': self.id,
             'userId': self.user_id,
             'rewardId': self.reward_id,
+            'reward': self.reward.to_dict() if self.reward else None,
             'redeemedAt': self.redeemed_at.isoformat() if self.redeemed_at else None,
             'earnedAt': self.earned_at.isoformat(),
             'status': self.status
@@ -685,6 +688,7 @@ class Leaderboard(db.Model):
         return {
             'id': self.id,
             'userId': self.user_id,
+            'user': self.user.to_dict() if self.user else None,
             'userName': f"{self.user.first_name} {self.user.last_name}" if self.user else 'Unknown',
             'userBranch': self.user.branch.name if self.user and self.user.branch else 'Unknown',
             'rank': self.rank,

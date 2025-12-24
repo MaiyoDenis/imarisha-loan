@@ -57,7 +57,8 @@ export var MemberSegmentationChart = function (_a) {
       </div>
 
       <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-        {chartData.map(function (segment, index) { return (<div key={segment.name} className="border border-border/50 rounded-lg p-3 bg-accent">
+        {chartData.map(function (segment, index) {
+            return (<div key={segment.name} className="border border-border/50 rounded-lg p-3 bg-accent">
             <div className="flex items-start gap-3">
               <div className="w-4 h-4 rounded-full flex-shrink-0 mt-1" style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>
               <div className="flex-1">
@@ -70,7 +71,8 @@ export var MemberSegmentationChart = function (_a) {
                 </p>
               </div>
             </div>
-          </div>); })}
+          </div>);
+        })}
       </div>
 
       <div className="mt-4 bg-purple-500/10 border border-purple-300/40 rounded-lg p-3">

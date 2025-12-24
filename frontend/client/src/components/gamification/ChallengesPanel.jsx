@@ -44,14 +44,15 @@ export var ChallengesPanel = function (_a) {
           Your Challenges
         </Typography>
         {userChallengesQuery.isLoading ? (<LinearProgress />) : ((_c = userChallengesQuery.data) === null || _c === void 0 ? void 0 : _c.length) > 0 ? (<Grid container spacing={2}>
-            {(_d = userChallengesQuery.data) === null || _d === void 0 ? void 0 : _d.map(function (uc) { return (<Grid size={{ xs: 12, md: 6 }}>
+            {(_d = userChallengesQuery.data) === null || _d === void 0 ? void 0 : _d.map(function (uc) {
+                return (<Grid size={{ xs: 12, md: 6 }}>
                 <Card>
                   <CardContent>
                     <Box sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    mb: 1,
-                }}>
+                        display: "flex",
+                        justifyContent: "space-between",
+                        mb: 1,
+                    }}>
                       <Typography variant="h6">
                         {uc.challengeId}
                       </Typography>
@@ -73,7 +74,8 @@ export var ChallengesPanel = function (_a) {
                       </Button>)}
                   </CardActions>
                 </Card>
-              </Grid>); })}
+              </Grid>);
+            })}
           </Grid>) : (<Typography color="textSecondary">No active challenges.</Typography>)}
       </Paper>
 

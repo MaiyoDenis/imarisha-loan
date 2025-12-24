@@ -39,23 +39,24 @@ export var LeaderboardChart = function (_a) {
               </TableRow>
             </TableHead>
             <TableBody>
-              {data === null || data === void 0 ? void 0 : data.map(function (entry) { return (<TableRow key={entry.id} hover>
+              {data === null || data === void 0 ? void 0 : data.map(function (entry) {
+                return (<TableRow key={entry.id} hover>
                   <TableCell>
                     <Box sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: 40,
-                    height: 40,
-                    borderRadius: "50%",
-                    backgroundColor: medalColors[entry.rank] || "#e0e0e0",
-                    fontWeight: "bold",
-                    color: entry.rank <= 3
-                        ? entry.rank === 1
-                            ? "black"
-                            : "card"
-                        : "black",
-                }}>
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: 40,
+                        height: 40,
+                        borderRadius: "50%",
+                        backgroundColor: medalColors[entry.rank] || "#e0e0e0",
+                        fontWeight: "bold",
+                        color: entry.rank <= 3
+                            ? entry.rank === 1
+                                ? "black"
+                                : "card"
+                            : "black",
+                    }}>
                       {getMedalEmoji(entry.rank)}
                     </Box>
                   </TableCell>
@@ -64,7 +65,8 @@ export var LeaderboardChart = function (_a) {
                   <TableCell align="right">
                     <Chip label={"".concat(entry.points, " pts")} color="primary" variant="outlined"/>
                   </TableCell>
-                </TableRow>); })}
+                </TableRow>);
+            })}
             </TableBody>
           </Table>
         </Box>)}

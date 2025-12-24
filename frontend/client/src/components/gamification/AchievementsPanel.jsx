@@ -13,22 +13,23 @@ export var AchievementsPanel = function (_a) {
           Achievements
         </Typography>
         {achievementsQuery.isLoading ? (<LinearProgress />) : ((_b = achievementsQuery.data) === null || _b === void 0 ? void 0 : _b.length) > 0 ? (<Grid container spacing={2}>
-            {(_c = achievementsQuery.data) === null || _c === void 0 ? void 0 : _c.map(function (achievement) { return (<Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            {(_c = achievementsQuery.data) === null || _c === void 0 ? void 0 : _c.map(function (achievement) {
+                return (<Grid size={{ xs: 12, sm: 6, md: 4 }}>
                 <Card sx={{
-                    cursor: "pointer",
-                    transition: "all 0.3s",
-                    "&:hover": {
-                        transform: "translateY(-4px)",
-                        boxShadow: 3,
-                    },
-                }}>
+                        cursor: "pointer",
+                        transition: "all 0.3s",
+                        "&:hover": {
+                            transform: "translateY(-4px)",
+                            boxShadow: 3,
+                        },
+                    }}>
                   <CardContent>
                     <Box sx={{ textAlign: "center", mb: 1 }}>
                       {achievement.iconUrl && (<img src={achievement.iconUrl} alt={achievement.name} style={{
-                        width: 48,
-                        height: 48,
-                        marginBottom: 8,
-                    }}/>)}
+                            width: 48,
+                            height: 48,
+                            marginBottom: 8,
+                        }}/>)}
                     </Box>
                     <Typography variant="subtitle2" sx={{ fontWeight: "bold", mb: 1 }}>
                       {achievement.name}
@@ -43,7 +44,8 @@ export var AchievementsPanel = function (_a) {
                     </Box>
                   </CardContent>
                 </Card>
-              </Grid>); })}
+              </Grid>);
+            })}
           </Grid>) : (<Typography color="textSecondary">
             No achievements yet. Keep working!
           </Typography>)}
@@ -55,26 +57,27 @@ export var AchievementsPanel = function (_a) {
           Badges
         </Typography>
         {badgesQuery.isLoading ? (<LinearProgress />) : ((_d = badgesQuery.data) === null || _d === void 0 ? void 0 : _d.length) > 0 ? (<Grid container spacing={2}>
-            {(_e = badgesQuery.data) === null || _e === void 0 ? void 0 : _e.map(function (badge) { return (<Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            {(_e = badgesQuery.data) === null || _e === void 0 ? void 0 : _e.map(function (badge) {
+                return (<Grid size={{ xs: 12, sm: 6, md: 4 }}>
                 <Card sx={{
-                    background: "linear-gradient(135deg, ".concat(badge.category === "milestone"
-                        ? "#FFD700"
-                        : badge.category === "expert"
-                            ? "#FF6B6B"
-                            : "#4ECDC4", " 0%, ").concat(badge.category === "milestone"
-                        ? "#FFA500"
-                        : badge.category === "expert"
-                            ? "#FF4444"
-                            : "#44B4AA", " 100%)"),
-                    color: "card",
-                }}>
+                        background: "linear-gradient(135deg, ".concat(badge.category === "milestone"
+                            ? "#FFD700"
+                            : badge.category === "expert"
+                                ? "#FF6B6B"
+                                : "#4ECDC4", " 0%, ").concat(badge.category === "milestone"
+                            ? "#FFA500"
+                            : badge.category === "expert"
+                                ? "#FF4444"
+                                : "#44B4AA", " 100%)"),
+                        color: "card",
+                    }}>
                   <CardContent>
                     <Box sx={{ textAlign: "center", mb: 1 }}>
                       {badge.iconUrl && (<img src={badge.iconUrl} alt={badge.name} style={{
-                        width: 56,
-                        height: 56,
-                        filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.2))",
-                    }}/>)}
+                            width: 56,
+                            height: 56,
+                            filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.2))",
+                        }}/>)}
                     </Box>
                     <Typography variant="subtitle2" sx={{ fontWeight: "bold", mb: 0.5 }}>
                       {badge.name}
@@ -84,7 +87,8 @@ export var AchievementsPanel = function (_a) {
                     </Typography>
                   </CardContent>
                 </Card>
-              </Grid>); })}
+              </Grid>);
+            })}
           </Grid>) : (<Typography color="textSecondary">No badges earned yet.</Typography>)}
       </Paper>
     </Stack>);

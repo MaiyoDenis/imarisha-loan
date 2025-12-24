@@ -1,10 +1,12 @@
 var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
+    if (pack || arguments.length === 2)
+        for (var i = 0, l = from.length, ar; i < l; i++) {
+            if (ar || !(i in from)) {
+                if (!ar)
+                    ar = Array.prototype.slice.call(from, 0, i);
+                ar[i] = from[i];
+            }
         }
-    }
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 import React from 'react';
@@ -69,7 +71,8 @@ export var AtRiskMembersTable = function (_a) {
               </tr>
             </thead>
             <tbody>
-              {members.map(function (member) { return (<tr key={member.member_id} className="border-b border-border/30 hover:bg-accent">
+              {members.map(function (member) {
+                return (<tr key={member.member_id} className="border-b border-border/30 hover:bg-accent">
                   <td className="py-4 px-4 text-card-foreground font-medium">
                     <div className="flex flex-col">
                       <span>{member.member_name}</span>
@@ -86,9 +89,11 @@ export var AtRiskMembersTable = function (_a) {
                   </td>
                   <td className="py-4 px-4">
                     <div className="flex flex-col gap-1">
-                      {member.risk_factors.slice(0, 2).map(function (factor, idx) { return (<span key={idx} className="text-xs bg-accent text-foreground/90 px-2 py-1 rounded w-fit">
+                      {member.risk_factors.slice(0, 2).map(function (factor, idx) {
+                        return (<span key={idx} className="text-xs bg-accent text-foreground/90 px-2 py-1 rounded w-fit">
                           {factor}
-                        </span>); })}
+                        </span>);
+                    })}
                       {member.risk_factors.length > 2 && (<span className="text-xs text-muted-foreground">
                           +{member.risk_factors.length - 2} more
                         </span>)}
@@ -100,7 +105,8 @@ export var AtRiskMembersTable = function (_a) {
                       <span className="hidden sm:inline">Contact</span>
                     </button>
                   </td>
-                </tr>); })}
+                </tr>);
+            })}
             </tbody>
           </table>
         </div>)}

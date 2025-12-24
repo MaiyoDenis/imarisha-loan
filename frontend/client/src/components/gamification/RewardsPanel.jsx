@@ -24,13 +24,14 @@ export var RewardsPanel = function (_a) {
           Available Rewards
         </Typography>
         {rewardsQuery.isLoading ? (<LinearProgress />) : ((_b = rewardsQuery.data) === null || _b === void 0 ? void 0 : _b.length) > 0 ? (<Grid container spacing={2}>
-            {(_c = rewardsQuery.data) === null || _c === void 0 ? void 0 : _c.map(function (reward) { return (<Grid size={{ xs: 12, md: 6 }}>
+            {(_c = rewardsQuery.data) === null || _c === void 0 ? void 0 : _c.map(function (reward) {
+                return (<Grid size={{ xs: 12, md: 6 }}>
                 <Card sx={{
-                    background: reward.canRedeem
-                        ? "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-                        : "linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 100%)",
-                    color: reward.canRedeem ? "card" : "#666",
-                }}>
+                        background: reward.canRedeem
+                            ? "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                            : "linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 100%)",
+                        color: reward.canRedeem ? "card" : "#666",
+                    }}>
                   <CardContent>
                     <Typography variant="h6" sx={{ mb: 1 }}>
                       {reward.name}
@@ -40,37 +41,38 @@ export var RewardsPanel = function (_a) {
                     </Typography>
                     <Box sx={{ display: "flex", gap: 1, mb: 1, flexWrap: "wrap" }}>
                       <Chip label={"".concat(reward.pointsRequired, " Points")} size="small" sx={{
-                    backgroundColor: reward.canRedeem
-                        ? "rgba(255,255,255,0.3)"
-                        : "rgba(0,0,0,0.1)",
-                }}/>
-                      <Chip label={"".concat(reward.discountPercentage, "% Off")} size="small" sx={{
-                    backgroundColor: reward.canRedeem
-                        ? "rgba(255,255,255,0.3)"
-                        : "rgba(0,0,0,0.1)",
-                }}/>
-                      {reward.maxRedemptions && (<Chip label={"".concat(reward.availableRedemptions, " Left")} size="small" sx={{
                         backgroundColor: reward.canRedeem
                             ? "rgba(255,255,255,0.3)"
                             : "rgba(0,0,0,0.1)",
-                    }}/>)}
+                    }}/>
+                      <Chip label={"".concat(reward.discountPercentage, "% Off")} size="small" sx={{
+                        backgroundColor: reward.canRedeem
+                            ? "rgba(255,255,255,0.3)"
+                            : "rgba(0,0,0,0.1)",
+                    }}/>
+                      {reward.maxRedemptions && (<Chip label={"".concat(reward.availableRedemptions, " Left")} size="small" sx={{
+                            backgroundColor: reward.canRedeem
+                                ? "rgba(255,255,255,0.3)"
+                                : "rgba(0,0,0,0.1)",
+                        }}/>)}
                     </Box>
                   </CardContent>
                   <CardActions>
                     {reward.canRedeem ? (<Button size="small" variant="contained" sx={{
-                        backgroundColor: "card",
-                        color: "#667eea",
-                        "&:hover": {
-                            backgroundColor: "#f5f5f5",
-                        },
-                    }} onClick={function () { return handleRedeemReward(reward.id); }} disabled={redeemRewardMutation.isPending}>
+                            backgroundColor: "card",
+                            color: "#667eea",
+                            "&:hover": {
+                                backgroundColor: "#f5f5f5",
+                            },
+                        }} onClick={function () { return handleRedeemReward(reward.id); }} disabled={redeemRewardMutation.isPending}>
                         Redeem Now
                       </Button>) : (<Typography variant="caption">
                         Insufficient points
                       </Typography>)}
                   </CardActions>
                 </Card>
-              </Grid>); })}
+              </Grid>);
+            })}
           </Grid>) : (<Typography color="textSecondary">No rewards available.</Typography>)}
       </Paper>
 

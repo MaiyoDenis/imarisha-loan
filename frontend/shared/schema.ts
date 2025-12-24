@@ -9,7 +9,7 @@ export const users = pgTable("users", {
   username: varchar("username", { length: 100 }).notNull().unique(),
   phone: varchar("phone", { length: 20 }).notNull().unique(),
   password: text("password").notNull(),
-  role: text("role").notNull(), // admin, branch_manager, loan_officer, procurement_officer, customer
+  role: text("role").notNull(), // admin, branch_manager, loan_officer, field_officer, procurement_officer, customer
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   branchId: integer("branch_id"),
