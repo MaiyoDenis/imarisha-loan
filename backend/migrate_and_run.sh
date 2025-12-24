@@ -4,8 +4,7 @@ set -e
 cd "$(dirname "$0")"
 
 echo "Running database migrations..."
-# Fix migration history before upgrading
-flask db stamp b4c36442d5cd
+# Only run upgrade, do not stamp as it skips migrations on fresh DB
 flask db upgrade
 
 echo "Seeding database with fresh data..."

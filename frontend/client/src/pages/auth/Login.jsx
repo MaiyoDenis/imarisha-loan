@@ -40,7 +40,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Lock, Mail, ArrowRight } from "lucide-react";
+import { Lock, Mail, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { api } from "@/lib/api";
 import logo from "/minimalist_fintech_logo_with_geometric_shapes_in_blue_and_teal..png";
@@ -61,6 +61,7 @@ export default function Login() {
     var _b = useState(false), loading = _b[0], setLoading = _b[1];
     var _c = useState(""), username = _c[0], setUsername = _c[1];
     var _d = useState(""), password = _d[0], setPassword = _d[1];
+    var _e = useState(false), showPassword = _e[0], setShowPassword = _e[1];
     var toast = useToast().toast;
     var handleLogin = function (e) { return __awaiter(_this, void 0, void 0, function () {
         var response, redirectPath, error_1;
@@ -143,7 +144,14 @@ export default function Login() {
               </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground"/>
-                <Input id="password" type="password" className="pl-9" required value={password} onChange={function (e) { return setPassword(e.target.value); }} data-testid="input-password"/>
+                <Input id="password" type={showPassword ? "text" : "password"} className="pl-9 pr-10" required value={password} onChange={function (e) { return setPassword(e.target.value); }} data-testid="input-password"/>
+                <button
+                  type="button"
+                  onClick={function() { setShowPassword(!showPassword); }}
+                  className="absolute right-3 top-3 text-muted-foreground hover:text-foreground focus:outline-none"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
             </div>
             <Button type="submit" className="w-full h-11 text-base shadow-lg shadow-primary/20" disabled={loading} data-testid="button-login">
