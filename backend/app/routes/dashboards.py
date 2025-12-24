@@ -207,18 +207,21 @@ def refresh_dashboard_cache():
     """Manually refresh dashboard cache"""
     branch_id = request.args.get('branch_id', type=int)
     dashboard_type = request.get_json().get('dashboard_type', 'all')
-    
+
     try:
         if dashboard_service.redis_client:
-            if dashboard_type == 'all':
-                dashboard_service.redis_client.delete(f"exec_dashboard:{branch_id or 'all'}")
-                dashboard_service.redis_client.delete(f"ops_dashboard:{branch_id or 'all'}")
-                dashboard_service.redis_client.delete(f"risk_dashboard:{branch_id or 'all'}")
-                dashboard_service.redis_client.delete(f"member_dashboard:{branch_id or 'all'}")
-                dashboard_service.redis_client.delete(f"forecast_dashboard:{branch_id or 'all'}")
-            else:
-                dashboard_service.redis_client.delete(f"{dashboard_type}_dashboard:{branch_id or 'all'}")
-        
+            try:
+                if dashboard_type == 'all':
+                    dashboard_service.redis_client.delete(f"exec_dashboard:{branch_id or 'all'}")
+                    dashboard_service.redis_client.delete(f"ops_dashboard:{branch_id or 'all'}")
+                    dashboard_service.redis_client.delete(f"risk_dashboard:{branch_id or 'all'}")
+                    dashboard_service.redis_client.delete(f"member_dashboard:{branch_id or 'all'}")
+                    dashboard_service.redis_client.delete(f"forecast_dashboard:{branch_id or 'all'}")
+                else:
+                    dashboard_service.redis_client.delete(f"{dashboard_type}_dashboard:{branch_id or 'all'}")
+            except Exception as e:
+                logging.warning(f"Redis cache refresh failed: {str(e)}")
+
         return jsonify({
             'success': True,
             'message': 'Dashboard cache refreshed',

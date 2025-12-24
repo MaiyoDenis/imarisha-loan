@@ -24,7 +24,7 @@ class Config:
     }
 
     # Redis Configuration
-    REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
+    REDIS_URL = os.environ.get('REDIS_URL') or os.environ.get('REDISCLOUD_URL') or 'redis://localhost:6379/0'
 
     # Celery Configuration
     CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', REDIS_URL)
