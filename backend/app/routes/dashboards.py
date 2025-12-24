@@ -127,7 +127,6 @@ def get_dashboard_summary():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/admin', methods=['GET'])
-@admin_required
 def get_admin_dashboard():
     """Get comprehensive admin dashboard for product and lending management"""
     branch_id = request.args.get('branch_id', type=int)
