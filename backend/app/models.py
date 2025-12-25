@@ -1034,3 +1034,30 @@ class Message(db.Model):
             'createdAt': self.created_at.isoformat(),
             'readAt': self.read_at.isoformat() if self.read_at else None
         }
+
+class Notification(db.Model):
+    __tablename__ = 'notifications'
+    id = db.Column(db.Integer, primary_key=True)
+    recipient_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    channel = db.Column(db.Text, nullable=False)
+    template_id = db.Column(db.Text)
+    status = db.Column(db.Text, nullable=False, default='pending')
+    is_read = db.Column(db.Boolean, nullable=False, default=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    read_at = db.Column(db.DateTime)
+
+    recipient = db.relationship('User', backref='notifications')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'recipientId': self.recipient_id,
+            'message': self.message,
+            'channel': self.channel,
+            'templateId': self.template_id,
+            'status': self.status,
+            'isRead': self.is_read,
+            'createdAt': self.created_at.isoformat(),
+            'readAt': self.read_at.isoformat() if self.read_at else None,
+        }

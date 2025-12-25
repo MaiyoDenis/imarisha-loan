@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from app.services.notification_service import notification_service, NotificationChannel, NotificationPriority
-from app.models import User
+from app.models import User, Notification
 from app import db
 import json
 
@@ -205,13 +205,9 @@ def get_user_notification_history(user_id):
     offset = request.args.get('offset', 0, type=int)
     
     try:
-        # Get notifications from Redis
-        key = f"notifications:user:{user_id}"
-        notifications = notification_service.redis_client.lrange(key, offset, offset + limit - 1)
+        notifications = Notification.query.filter_by(recipient_id=user_id).order_by(Notification.created_at.desc()).offset(offset).limit(limit).all()
         
-        notification_list = []
-        for notif_json in notifications:
-            notification_list.append(json.loads(notif_json))
+        notification_list = [notification.to_dict() for notification in notifications]
         
         return jsonify({
             'user_id': user_id,

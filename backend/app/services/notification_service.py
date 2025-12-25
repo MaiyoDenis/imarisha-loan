@@ -15,6 +15,9 @@ from flask import current_app, request
 from jinja2 import Template
 from flask_mail import Message
 
+from app import db
+from app.models import Notification as NotificationModel
+
 class NotificationChannel(Enum):
     """Available notification channels"""
     SMS = "sms"
@@ -55,7 +58,6 @@ class NotificationTemplate:
 @dataclass
 class Notification:
     """Notification data structure"""
-    notification_id: str
     recipient_id: int
     channel: NotificationChannel
     template_id: str
@@ -345,23 +347,16 @@ class NotificationService:
         priority: NotificationPriority = NotificationPriority.NORMAL,
         scheduled_at: Optional[str] = None,
         data: Dict[str, Any] = None
-    ) -> str:
+    ) -> int:
         """Send a notification"""
         try:
-            # Generate notification ID
-            notification_id = f"notif_{recipient_id}_{datetime.utcnow().strftime('%Y%m%d%H%M%S%f')}"
-            
-            # Get template
             template = self.templates.get(template_id)
             if not template:
                 raise ValueError(f"Template {template_id} not found")
             
-            # Render message
             rendered_message = self._render_template(template, variables)
             
-            # Create notification object
             notification = Notification(
-                notification_id=notification_id,
                 recipient_id=recipient_id,
                 channel=channel,
                 template_id=template_id,
@@ -373,13 +368,11 @@ class NotificationService:
                 scheduled_at=scheduled_at,
                 sent_at=None,
                 delivered_at=None,
-                read_at=None
+                read_at=None,
             )
             
-            # Store notification
-            self._store_notification(notification)
+            notification_id = self._store_notification(notification)
             
-            # Send immediately if not scheduled
             if not scheduled_at:
                 self._process_notification(notification_id)
             
@@ -400,46 +393,37 @@ class NotificationService:
             return template.body_template
     
 
-    def _store_notification(self, notification: Notification):
-        """Store notification in Redis"""
+    def _store_notification(self, notification: Notification) -> int:
+        """Store notification in the database"""
         try:
-            if not self.redis_client:
-                logging.warning("Redis not available, skipping notification storage")
-                return
-                
-            notification_dict = asdict(notification)
-            notification_dict['channel'] = notification.channel.value
-            notification_dict['priority'] = notification.priority.value
-            notification_dict['status'] = notification.status.value
-            
-            # Store in pending queue
-            queue_key = f"notifications:pending:{notification.channel.value}:{notification.priority.value}"
-            self.redis_client.lpush(queue_key, json.dumps(notification_dict))
-            
-            # Store by recipient for easy access
-            recipient_key = f"notifications:user:{notification.recipient_id}"
-            self.redis_client.lpush(recipient_key, json.dumps(notification_dict))
-            self.redis_client.expire(recipient_key, 30*24*60*60)  # 30 days
-            
+            new_notification = NotificationModel(
+                recipient_id=notification.recipient_id,
+                message=notification.message,
+                channel=notification.channel.value,
+                template_id=notification.template_id,
+                status=notification.status.value,
+            )
+            db.session.add(new_notification)
+            db.session.commit()
+            return new_notification.id
         except Exception as e:
-            logging.error(f"Error storing notification: {str(e)}")
+            logging.error(f"Error storing notification in database: {str(e)}")
+            db.session.rollback()
+            raise
     
-    def _process_notification(self, notification_id: str):
+    def _process_notification(self, notification_id: int):
         """Process and send notification"""
         try:
-            # Get notification from Redis
-            notification_data = self._get_notification(notification_id)
-            if not notification_data:
+            notification = self._get_notification(notification_id)
+            if not notification:
                 logging.warning(f"Notification {notification_id} not found")
                 return
             
-            # Update status to sending
-            notification_data['status'] = NotificationStatus.SENT.value
-            notification_data['sent_at'] = datetime.utcnow().isoformat()
-            self._update_notification(notification_data)
+            notification.status = NotificationStatus.SENT.value
+            self._update_notification(notification)
             
-            # Send based on channel
-            channel = NotificationChannel(notification_data['channel'])
+            channel = NotificationChannel(notification.channel)
+            notification_data = notification.to_dict()
             
             if channel == NotificationChannel.SMS:
                 success = self._send_sms(notification_data)
@@ -448,23 +432,19 @@ class NotificationService:
             elif channel == NotificationChannel.WHATSAPP:
                 success = self._send_whatsapp(notification_data)
             elif channel == NotificationChannel.IN_APP:
-                success = True  # Already stored in Redis
+                success = True
             elif channel == NotificationChannel.WEBSOCKET:
                 success = self._send_websocket(notification_data)
             else:
                 success = False
             
-            # Update status based on result
             if success:
-                notification_data['status'] = NotificationStatus.DELIVERED.value
-                notification_data['delivered_at'] = datetime.utcnow().isoformat()
-                self._update_notification(notification_data)
-                
+                notification.status = NotificationStatus.DELIVERED.value
+                self._update_notification(notification)
                 logging.info(f"Notification {notification_id} delivered successfully")
             else:
-                notification_data['status'] = NotificationStatus.FAILED.value
-                notification_data['error_message'] = "Delivery failed"
-                self._update_notification(notification_data)
+                notification.status = NotificationStatus.FAILED.value
+                self._update_notification(notification)
                 
         except Exception as e:
             logging.error(f"Error processing notification {notification_id}: {str(e)}")
@@ -790,40 +770,22 @@ class NotificationService:
             return True
     
 
-    def _get_notification(self, notification_id: str) -> Optional[Dict[str, Any]]:
-        """Get notification from Redis"""
+    def _get_notification(self, notification_id: int) -> Optional[NotificationModel]:
+        """Get notification from the database"""
         try:
-            if not self.redis_client:
-                return None
-                
-            key = f"notification:{notification_id}"
-            notification_json = self.redis_client.get(key)
-            
-            if not notification_json:
-                return None
-            
-            return json.loads(notification_json)
-            
+            return NotificationModel.query.get(notification_id)
         except Exception as e:
-            logging.error(f"Error getting notification {notification_id}: {str(e)}")
+            logging.error(f"Error getting notification {notification_id} from database: {str(e)}")
             return None
 
-
-    def _update_notification(self, notification_data: Dict[str, Any]):
-        """Update notification status"""
+    def _update_notification(self, notification: NotificationModel):
+        """Update notification status in the database"""
         try:
-            if not self.redis_client:
-                logging.warning("Redis not available, skipping notification update")
-                return
-                
-            key = f"notification:{notification_data['notification_id']}"
-            self.redis_client.setex(
-                key,
-                30*24*60*60,  # 30 days
-                json.dumps(notification_data)
-            )
+            db.session.commit()
         except Exception as e:
-            logging.error(f"Error updating notification: {str(e)}")
+            logging.error(f"Error updating notification in database: {str(e)}")
+            db.session.rollback()
+            raise
     
     def handle_sms_delivery_callback(self, callback_data: Dict[str, Any]) -> Dict[str, Any]:
         """Handle SMS delivery callbacks from Africa's Talking"""
