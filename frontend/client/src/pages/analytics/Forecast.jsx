@@ -153,7 +153,7 @@ export default function ForecastDashboard() {
     if (isLoading) {
         return (<Layout>
         <div className="flex justify-center items-center h-screen">
-          <div className="animate-spin h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="animate-spin h-12 w-12 border-b-2 border-primary"></div>
         </div>
       </Layout>);
     }
@@ -350,7 +350,7 @@ export default function ForecastDashboard() {
                   {dashboard.budget_variance.revenue.variance_pct.toFixed(1)}%
                 </span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
+              <div className="w-full bg-muted rounded-full h-2 mt-3">
                 <div className="bg-primary h-2 rounded-full" style={{
             width: "".concat(Math.min((dashboard.budget_variance.revenue.actual / dashboard.budget_variance.revenue.budgeted) * 100, 100), "%")
         }}/>
@@ -372,8 +372,8 @@ export default function ForecastDashboard() {
                   {dashboard.budget_variance.expenses.variance_pct.toFixed(1)}%
                 </span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
-                <div className="bg-red-600 h-2 rounded-full" style={{
+              <div className="w-full bg-muted rounded-full h-2 mt-3">
+                <div className="bg-destructive h-2 rounded-full" style={{
             width: "".concat(Math.min((dashboard.budget_variance.expenses.actual / dashboard.budget_variance.expenses.budgeted) * 100, 100), "%")
         }}/>
               </div>
@@ -394,7 +394,7 @@ export default function ForecastDashboard() {
                   {dashboard.budget_variance.profit.variance_pct.toFixed(1)}%
                 </span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
+              <div className="w-full bg-muted rounded-full h-2 mt-3">
                 <div className="bg-secondary h-2 rounded-full" style={{
             width: "".concat(Math.min((dashboard.budget_variance.profit.actual / dashboard.budget_variance.profit.budgeted) * 100, 100), "%")
         }}/>
@@ -415,15 +415,15 @@ export default function ForecastDashboard() {
             <AreaChart data={revenueData}>
               <defs>
                 <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0}/>
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3"/>
               <XAxis dataKey="month"/>
               <YAxis />
               <Tooltip formatter={function (value) { return formatCurrency(value); }}/>
-              <Area type="monotone" dataKey="revenue" stroke="#3b82f6" fillOpacity={1} fill="url(#colorRevenue)"/>
+              <Area type="monotone" dataKey="revenue" stroke="hsl(var(--chart-1))" fillOpacity={1} fill="url(#colorRevenue)"/>
             </AreaChart>
           </ResponsiveContainer>
             </div>
@@ -443,8 +443,8 @@ export default function ForecastDashboard() {
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="applications" fill="#3b82f6" name="Applications"/>
-                <Bar dataKey="approvals" fill="#10b981" name="Approvals"/>
+                <Bar dataKey="applications" fill="hsl(var(--chart-1))" name="Applications"/>
+                <Bar dataKey="approvals" fill="hsl(var(--chart-2))" name="Approvals"/>
               </BarChart>
             </ResponsiveContainer>
             </div>
@@ -462,9 +462,9 @@ export default function ForecastDashboard() {
                 <YAxis />
                 <Tooltip formatter={function (value) { return formatCurrency(value); }}/>
                 <Legend />
-                <Bar dataKey="inflows" fill="#10b981" name="Inflows"/>
-                <Bar dataKey="outflows" fill="#ef4444" name="Outflows"/>
-                <Line type="monotone" dataKey="net_flow" stroke="#f59e0b" strokeWidth={2} name="Net Flow"/>
+                <Bar dataKey="inflows" fill="hsl(var(--chart-2))" name="Inflows"/>
+                <Bar dataKey="outflows" fill="hsl(var(--chart-4))" name="Outflows"/>
+                <Line type="monotone" dataKey="net_flow" stroke="hsl(var(--chart-3))" strokeWidth={2} name="Net Flow"/>
               </ComposedChart>
             </ResponsiveContainer>
             </div>
@@ -485,7 +485,7 @@ export default function ForecastDashboard() {
               <XAxis dataKey="month"/>
               <YAxis label={{ value: 'Arrears %', angle: -90, position: 'insideLeft' }}/>
               <Tooltip formatter={function (value) { return "".concat(value.toFixed(2), "%"); }}/>
-              <Line type="monotone" dataKey="rate" stroke="#ef4444" strokeWidth={2} dot={{ fill: '#ef4444' }} name="Predicted Arrears Rate"/>
+              <Line type="monotone" dataKey="rate" stroke="hsl(var(--chart-4))" strokeWidth={2} dot={{ fill: 'hsl(var(--chart-4))' }} name="Predicted Arrears Rate"/>
             </LineChart>
           </ResponsiveContainer>
             </div>
@@ -512,7 +512,7 @@ export default function ForecastDashboard() {
               <XAxis dataKey="month"/>
               <YAxis />
               <Tooltip />
-              <Line type="monotone" dataKey="applications" stroke="#3b82f6" strokeWidth={2} dot={{ fill: '#3b82f6' }}/>
+              <Line type="monotone" dataKey="applications" stroke="hsl(var(--chart-1))" strokeWidth={2} dot={{ fill: 'hsl(var(--chart-1))' }}/>
             </LineChart>
           </ResponsiveContainer>
             </div>

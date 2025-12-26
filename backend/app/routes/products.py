@@ -84,6 +84,21 @@ def update_loan_product(id):
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
+@bp.route('/loan-products/<int:id>', methods=['DELETE'])
+@admin_required
+def delete_loan_product(id):
+    product = LoanProduct.query.get(id)
+    if not product:
+        return jsonify({'error': 'Product not found'}), 404
+    
+    try:
+        product.is_active = False
+        db.session.commit()
+        return jsonify({'message': 'Product deleted successfully'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
 # Loan Types
 @bp.route('/loan-types', methods=['GET'])
 def get_loan_types():
@@ -138,6 +153,21 @@ def update_loan_type(id):
     try:
         db.session.commit()
         return jsonify(loan_type.to_dict())
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+@bp.route('/loan-types/<int:id>', methods=['DELETE'])
+@admin_required
+def delete_loan_type(id):
+    loan_type = LoanType.query.get(id)
+    if not loan_type:
+        return jsonify({'error': 'Loan type not found'}), 404
+    
+    try:
+        loan_type.is_active = False
+        db.session.commit()
+        return jsonify({'message': 'Loan type deleted successfully'})
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500

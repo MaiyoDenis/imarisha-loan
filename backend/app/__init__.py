@@ -6,6 +6,7 @@ from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 from flask_caching import Cache
 from flask_mail import Mail
+from flask_jwt_extended import JWTManager
 from config import Config
 import logging
 import os
@@ -17,6 +18,7 @@ cors = CORS()
 bcrypt = Bcrypt()
 cache = Cache()
 mail = Mail()
+jwt = JWTManager()
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -25,6 +27,7 @@ def create_app(config_class=Config):
     # Initialize extensions
     db.init_app(app)
     migrate.init_app(app, db)
+    jwt.init_app(app)
     
     # Enhanced CORS configuration
     cors.init_app(app, resources={r"/*": {

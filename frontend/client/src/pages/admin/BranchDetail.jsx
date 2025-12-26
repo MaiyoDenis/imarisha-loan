@@ -253,7 +253,7 @@ export default function BranchDetail() {
     var totalCustomers = members.length;
     var totalStaff = branchStaff.length;
     var totalRevenue = loans.reduce(function (sum, loan) { return sum + parseFloat(loan.principleAmount || '0'); }, 0);
-    var activeLoans = loans.filter(function (l) { return l.status === 'active' || l.status === 'pending'; }).length;
+    var activeLoans = loans.filter(function (l) { return ['pending', 'under_review', 'approved', 'disbursed', 'released'].includes(l.status); }).length;
     var outstandingBalance = loans.reduce(function (sum, loan) { return sum + parseFloat(loan.outstandingBalance || '0'); }, 0);
     return (<Layout>
       <div className="p-8 space-y-8">
@@ -305,7 +305,7 @@ export default function BranchDetail() {
               <DollarSign className="h-4 w-4 text-muted-foreground"/>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">KES {(outstandingBalance / 1000).toFixed(0)}K</div>
+              <div className="text-2xl font-bold">KES {outstandingBalance.toLocaleString()}</div>
               <p className="text-xs text-muted-foreground">To be repaid</p>
             </CardContent>
           </Card>
@@ -327,7 +327,7 @@ export default function BranchDetail() {
               <Package className="h-4 w-4 text-muted-foreground"/>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">KES {(totalRevenue / 1000).toFixed(0)}K</div>
+              <div className="text-2xl font-bold">KES {totalRevenue.toLocaleString()}</div>
               <p className="text-xs text-muted-foreground">Total disbursed</p>
             </CardContent>
           </Card>

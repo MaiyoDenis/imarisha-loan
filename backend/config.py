@@ -36,3 +36,12 @@ class Config:
     SESSION_COOKIE_SAMESITE = 'Lax'
     PERMANENT_SESSION_LIFETIME = 86400
     SESSION_PERMANENT = True
+    
+    # JWT Configuration
+    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or SECRET_KEY
+    JWT_TOKEN_LOCATION = ['headers', 'cookies']
+    JWT_HEADER_NAME = 'Authorization'
+    JWT_HEADER_TYPE = 'Bearer'
+    JWT_ACCESS_TOKEN_EXPIRES = 86400
+    JWT_REFRESH_TOKEN_EXPIRES = 2592000
+    JWT_ALGORITHM = 'HS256'

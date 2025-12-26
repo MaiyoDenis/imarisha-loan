@@ -23,6 +23,7 @@ import {
   ChevronDown,
   Menu,
   X,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -87,6 +88,7 @@ const menuSections = [
       { icon: TrendingUp, label: "Risk Management", href: "/dashboards/risk", roles: ["admin"] },
       { icon: Users2, label: "Member Analytics", href: "/dashboards/member-analytics", roles: ["admin", "executive", "operations_manager"] },
       { icon: TrendingUp, label: "Forecasting", href: "/dashboards/forecast", roles: ["admin", "executive"] },
+      { icon: FileText, label: "Reports", href: "/reports", roles: ["admin", "executive", "operations_manager"] },
       { icon: BarChart3, label: "Procurement", href: "/procurement", roles: ["procurement_officer"] },
     ]
   },

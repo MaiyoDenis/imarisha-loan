@@ -109,23 +109,30 @@ export default function Login() {
             }
         });
     }); };
-    return (<div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/5 rounded-full blur-3xl"/>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-secondary/5 rounded-full blur-3xl"/>
+    return (<div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-[#06142A] via-[#0B1E3A] to-[#101735]">
+      <div className="absolute inset-0 -z-10 pointer-events-none" style={{
+        backgroundImage:
+          'linear-gradient(90deg, rgba(99,102,241,0.08) 1px, transparent 1px), linear-gradient(180deg, rgba(99,102,241,0.08) 1px, transparent 1px)',
+        backgroundSize: '40px 40px'
+      }} />
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute -top-24 -left-24 h-[420px] w-[420px] bg-fuchsia-500/20 rounded-full blur-3xl" />
+        <div className="absolute -bottom-24 -right-24 h-[420px] w-[420px] bg-sky-400/20 rounded-full blur-3xl" />
       </div>
 
-      <Card className="w-full max-w-md border-border/50 shadow-xl relative z-10 backdrop-blur-sm bg-card/90">
+      <Card className="w-full max-w-md relative z-10 backdrop-blur-xl bg-[rgba(14,24,44,0.65)] border border-[rgba(99,102,241,0.35)] shadow-[0_10px_60px_rgba(99,102,241,0.25)]">
         <CardHeader className="space-y-4 text-center pb-8">
-          <div className="mx-auto h-16 w-16 rounded-xl bg-gradient-to-br from-primary to-secondary p-0.5 shadow-lg">
-            <div className="h-full w-full rounded-[10px] bg-card flex items-center justify-center overflow-hidden">
+          <div className="mx-auto h-16 w-16 rounded-xl p-[2px] shadow-lg" style={{
+            background: 'linear-gradient(135deg, #60A5FA, #8B5CF6)'
+          }}>
+            <div className="h-full w-full rounded-[10px] bg-[rgba(10,16,30,0.8)] flex items-center justify-center overflow-hidden border border-white/10">
               <img src={logo} alt="Imarisha" className="h-12 w-12 object-contain"/>
             </div>
           </div>
           <div className="space-y-2">
-            <CardTitle className="text-2xl font-bold tracking-tight">Welcome back</CardTitle>
-            <CardDescription>
-              Sign in to your Imarisha Loan Management account
+            <CardTitle className="text-2xl font-heading font-extrabold tracking-tight text-white">Welcome, Please Log In</CardTitle>
+            <CardDescription className="text-slate-300/80">
+              Secure access to your Imarisha account
             </CardDescription>
           </div>
         </CardHeader>

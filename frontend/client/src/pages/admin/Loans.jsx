@@ -1,15 +1,21 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, MoreHorizontal, FileText, CheckCircle, XCircle, Clock, CreditCard } from "lucide-react";
+import { Search, Filter, MoreHorizontal, FileText, CheckCircle, XCircle, Clock, CreditCard, Calendar, User, Info } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu";
 import { Card, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { api } from "@/lib/api";
 import { CreateLoanDialog } from "@/components/ui/CreateLoanDialog";
+import { format } from "date-fns";
 export default function Loans() {
+    var [selectedLoan, setSelectedLoan] = useState(null);
+    var [isDetailsOpen, setIsDetailsOpen] = useState(false);
+    var [isScheduleOpen, setIsScheduleOpen] = useState(false);
     var _a = useQuery({
         queryKey: ["loans"],
         queryFn: function () { return api.getLoans(); },
@@ -79,7 +85,7 @@ export default function Loans() {
                       <TableCell className="font-medium">{loan.loanNumber}</TableCell>
                       <TableCell>{loan.memberId}</TableCell>
                       <TableCell className="text-right font-mono">
-                        KES {parseFloat(loan.principalAmount).toLocaleString()}
+                        KES {parseFloat(loan.principleAmount).toLocaleString()}
                       </TableCell>
                       <TableCell className="text-right font-mono font-bold">
                         KES {parseFloat(loan.totalAmount).toLocaleString()}
@@ -103,8 +109,18 @@ export default function Loans() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem>View Details</DropdownMenuItem>
-                            <DropdownMenuItem>Repayment Schedule</DropdownMenuItem>
+                            <DropdownMenuItem onClick={function () {
+                                setSelectedLoan(loan);
+                                setIsDetailsOpen(true);
+                            }}>
+                              <Info className="mr-2 h-4 w-4" /> View Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={function () {
+                                setSelectedLoan(loan);
+                                setIsScheduleOpen(true);
+                            }}>
+                              <Calendar className="mr-2 h-4 w-4" /> Repayment Schedule
+                            </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             {loan.status === "pending" && (<>
                                 <DropdownMenuItem className="text-secondary">Approve Loan</DropdownMenuItem>
@@ -117,6 +133,139 @@ export default function Loans() {
                 </TableBody>
               </Table>
             </div>)}
+
+          <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Loan Details - {selectedLoan?.loanNumber}</DialogTitle>
+                <DialogDescription>
+                  Detailed information about the loan application and status.
+                </DialogDescription>
+              </DialogHeader>
+              {selectedLoan && (
+                <div className="grid grid-cols-2 gap-6 py-4">
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Member Information</p>
+                      <div className="mt-1 flex items-center gap-2">
+                        <User className="h-4 w-4 text-primary" />
+                        <p className="font-semibold">{selectedLoan.member?.name || 'N/A'}</p>
+                      </div>
+                      <p className="text-xs text-muted-foreground ml-6">Code: {selectedLoan.member?.memberCode || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Loan Type</p>
+                      <p className="font-semibold">{selectedLoan.loanType?.name || 'N/A'}</p>
+                      <p className="text-xs text-muted-foreground">{selectedLoan.loanType?.interestRate}% {selectedLoan.loanType?.interestType} interest</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Status</p>
+                      <Badge variant="outline" className={getStatusStyle(selectedLoan.status) + " mt-1"}>
+                        {selectedLoan.status.toUpperCase()}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="bg-muted/50 p-3 rounded-lg border border-border/50">
+                      <p className="text-sm font-medium text-muted-foreground">Financial Summary</p>
+                      <div className="mt-2 space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span>Principal:</span>
+                          <span className="font-mono">KES {parseFloat(selectedLoan.principleAmount).toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Interest:</span>
+                          <span className="font-mono text-muted-foreground">KES {parseFloat(selectedLoan.interestAmount).toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between text-sm border-t border-border pt-1 font-bold">
+                          <span>Total:</span>
+                          <span className="font-mono">KES {parseFloat(selectedLoan.totalAmount).toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between text-sm text-primary font-bold">
+                          <span>Outstanding:</span>
+                          <span className="font-mono">KES {parseFloat(selectedLoan.outstandingBalance).toLocaleString()}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-xs space-y-1">
+                      <p><span className="text-muted-foreground">Applied:</span> {format(new Date(selectedLoan.applicationDate), 'PPP')}</p>
+                      {selectedLoan.approvalDate && <p><span className="text-muted-foreground">Approved:</span> {format(new Date(selectedLoan.approvalDate), 'PPP')}</p>}
+                      {selectedLoan.dueDate && <p><span className="text-muted-foreground">Due Date:</span> {format(new Date(selectedLoan.dueDate), 'PPP')}</p>}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={isScheduleOpen} onOpenChange={setIsScheduleOpen}>
+            <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Repayment Schedule - {selectedLoan?.loanNumber}</DialogTitle>
+                <DialogDescription>
+                  Estimated monthly repayment breakdown.
+                </DialogDescription>
+              </DialogHeader>
+              {selectedLoan && (
+                <div className="py-4">
+                  <div className="mb-6 grid grid-cols-3 gap-4">
+                    <div className="p-3 bg-muted/30 rounded border border-border/50">
+                      <p className="text-xs text-muted-foreground">Total Amount</p>
+                      <p className="font-bold">KES {parseFloat(selectedLoan.totalAmount).toLocaleString()}</p>
+                    </div>
+                    <div className="p-3 bg-muted/30 rounded border border-border/50">
+                      <p className="text-xs text-muted-foreground">Duration</p>
+                      <p className="font-bold">{selectedLoan.loanType?.durationMonths || 0} Months</p>
+                    </div>
+                    <div className="p-3 bg-muted/30 rounded border border-border/50">
+                      <p className="text-xs text-muted-foreground">Monthly Payment</p>
+                      <p className="font-bold text-primary">
+                        KES {(parseFloat(selectedLoan.totalAmount) / (selectedLoan.loanType?.durationMonths || 1)).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-16">No.</TableHead>
+                        <TableHead>Due Date</TableHead>
+                        <TableHead className="text-right">Amount</TableHead>
+                        <TableHead className="text-right">Remaining Balance</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {(function() {
+                        if (!selectedLoan.loanType) return null;
+                        const total = parseFloat(selectedLoan.totalAmount);
+                        const months = selectedLoan.loanType.durationMonths || 1;
+                        const monthly = total / months;
+                        const startDate = new Date(selectedLoan.disbursementDate || selectedLoan.applicationDate);
+                        const rows = [];
+                        
+                        for (let i = 1; i <= months; i++) {
+                          const dueDate = new Date(startDate);
+                          dueDate.setMonth(startDate.getMonth() + i);
+                          const remaining = total - (monthly * i);
+                          rows.push(
+                            <TableRow key={i}>
+                              <TableCell>{i}</TableCell>
+                              <TableCell>{format(dueDate, 'PP')}</TableCell>
+                              <TableCell className="text-right font-mono">KES {monthly.toLocaleString()}</TableCell>
+                              <TableCell className="text-right font-mono text-muted-foreground">
+                                KES {Math.max(0, remaining).toLocaleString()}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        }
+                        return rows;
+                      })()}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
         </div>
     </Layout>);
 }

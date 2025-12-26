@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Filter, MoreHorizontal, Download, Wallet, ArrowUpRight, ArrowDownLeft, CreditCard } from "lucide-react";
+import { Search, Filter, MoreHorizontal, Download, Wallet, ArrowUpRight, ArrowDownLeft, CreditCard, PlusCircle, MinusCircle } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -16,6 +16,7 @@ import { api } from "@/lib/api";
 import KPICard from "@/components/dashboards/KPICard";
 
 export default function Savings() {
+    const queryClient = useQueryClient();
     const { data: savingsAccounts = [], isLoading: savingsLoading } = useQuery({
         queryKey: ["savings-accounts"],
         queryFn: async () => {
@@ -61,6 +62,16 @@ export default function Savings() {
         return matchesSearch && matchesType;
     });
 
+    const filteredAccounts = savingsAccounts.filter((acc) => {
+        const searchLower = searchTerm.toLowerCase();
+        return (
+            acc.accountNumber?.toLowerCase().includes(searchLower) ||
+            acc.member?.firstName?.toLowerCase().includes(searchLower) ||
+            acc.member?.lastName?.toLowerCase().includes(searchLower) ||
+            acc.member?.memberCode?.toLowerCase().includes(searchLower)
+        );
+    });
+
     const handleDeposit = async (e) => {
         e.preventDefault();
         try {
@@ -77,6 +88,10 @@ export default function Savings() {
                 reference: depositForm.reference || 'Manual Deposit',
                 mpesaCode: depositForm.reference // Using reference as mpesa code for manual entry
             });
+
+            queryClient.invalidateQueries({ queryKey: ["savings-accounts"] });
+            queryClient.invalidateQueries({ queryKey: ["savings-transactions"] });
+            queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
 
             toast({
                 title: "Success",
@@ -109,6 +124,10 @@ export default function Savings() {
                 reference: withdrawForm.reference || 'Manual Withdrawal',
             });
 
+            queryClient.invalidateQueries({ queryKey: ["savings-accounts"] });
+            queryClient.invalidateQueries({ queryKey: ["savings-transactions"] });
+            queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+
             toast({
                 title: "Success",
                 description: `Withdrawal of KES ${withdrawForm.amount} processed successfully`,
@@ -127,9 +146,9 @@ export default function Savings() {
     const getTransactionIcon = (type) => {
         switch (type) {
             case 'deposit':
-                return <ArrowDownLeft className="h-4 w-4 text-secondary"/>;
+                return <PlusCircle className="h-4 w-4 text-emerald-500"/>;
             case 'withdrawal':
-                return <ArrowUpRight className="h-4 w-4 text-destructive"/>;
+                return <MinusCircle className="h-4 w-4 text-rose-500"/>;
             case 'transfer':
                 return <CreditCard className="h-4 w-4 text-primary"/>;
             default:
@@ -140,11 +159,11 @@ export default function Savings() {
     const getTransactionColor = (type) => {
         switch (type) {
             case 'deposit':
-                return "text-secondary";
+                return "text-emerald-600 font-semibold";
             case 'withdrawal':
-                return "text-destructive";
+                return "text-rose-600 font-semibold";
             case 'transfer':
-                return "text-primary";
+                return "text-primary font-semibold";
             default:
                 return "text-muted-foreground";
         }
@@ -180,8 +199,8 @@ export default function Savings() {
                         </Button>
                         <Dialog open={isDepositOpen} onOpenChange={setIsDepositOpen}>
                             <DialogTrigger asChild>
-                                <Button>
-                                    <ArrowDownLeft className="mr-2 h-4 w-4"/> Deposit
+                                <Button className="bg-emerald-600 hover:bg-emerald-700">
+                                    <PlusCircle className="mr-2 h-4 w-4"/> Deposit
                                 </Button>
                             </DialogTrigger>
                             <DialogContent className="sm:max-w-[425px]">
@@ -236,8 +255,8 @@ export default function Savings() {
 
                         <Dialog open={isWithdrawOpen} onOpenChange={setIsWithdrawOpen}>
                             <DialogTrigger asChild>
-                                <Button variant="outline">
-                                    <ArrowUpRight className="mr-2 h-4 w-4"/> Withdraw
+                                <Button variant="outline" className="border-rose-200 text-rose-700 hover:bg-rose-50 hover:text-rose-800">
+                                    <MinusCircle className="mr-2 h-4 w-4"/> Withdraw
                                 </Button>
                             </DialogTrigger>
                             <DialogContent className="sm:max-w-[425px]">
@@ -361,7 +380,7 @@ export default function Savings() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {savingsAccounts.map((account) => (
+                            {filteredAccounts.map((account) => (
                                 <TableRow key={account.id}>
                                     <TableCell className="font-medium">{account.accountNumber}</TableCell>
                                     <TableCell>
@@ -370,7 +389,9 @@ export default function Savings() {
                                     </TableCell>
                                     <TableCell className="font-mono">KES {parseFloat(account.balance).toLocaleString()}</TableCell>
                                     <TableCell>
-                                        <Badge variant="default">Active</Badge>
+                                        <Badge variant={account.member?.status === 'active' ? 'default' : account.member?.status === 'blocked' ? 'destructive' : 'outline'}>
+                                            {account.member?.status || 'Active'}
+                                        </Badge>
                                     </TableCell>
                                     <TableCell>{new Date(account.createdAt).toLocaleDateString()}</TableCell>
                                     <TableCell className="text-right">
@@ -383,9 +404,21 @@ export default function Savings() {
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end">
                                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                <DropdownMenuItem onClick={() => {
+                                                    setDepositForm({ ...depositForm, accountNumber: account.accountNumber });
+                                                    setIsDepositOpen(true);
+                                                }}>
+                                                    <PlusCircle className="mr-2 h-4 w-4 text-emerald-600"/> Deposit
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => {
+                                                    setWithdrawForm({ ...withdrawForm, accountNumber: account.accountNumber });
+                                                    setIsWithdrawOpen(true);
+                                                }}>
+                                                    <MinusCircle className="mr-2 h-4 w-4 text-rose-600"/> Withdraw
+                                                </DropdownMenuItem>
+                                                <DropdownMenuSeparator />
                                                 <DropdownMenuItem>View account</DropdownMenuItem>
                                                 <DropdownMenuItem>View transactions</DropdownMenuItem>
-                                                <DropdownMenuItem>Transfer funds</DropdownMenuItem>
                                                 <DropdownMenuSeparator />
                                                 <DropdownMenuItem className="text-destructive">Freeze account</DropdownMenuItem>
                                             </DropdownMenuContent>

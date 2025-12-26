@@ -128,7 +128,10 @@ class Member(db.Model):
         return {
             'id': self.id,
             'userId': self.user_id,
+            'firstName': self.user.first_name if self.user else None,
+            'lastName': self.user.last_name if self.user else None,
             'groupId': self.group_id,
+            'branchId': self.branch_id,
             'memberCode': self.member_code,
             'registrationFee': str(self.registration_fee),
             'registrationFeePaid': self.registration_fee_paid,
@@ -154,7 +157,8 @@ class SavingsAccount(db.Model):
             'memberId': self.member_id,
             'accountNumber': self.account_number,
             'balance': str(self.balance),
-            'createdAt': self.created_at.isoformat()
+            'createdAt': self.created_at.isoformat(),
+            'member': self.member.to_dict() if self.member else None
         }
 
 class DrawdownAccount(db.Model):
@@ -320,7 +324,12 @@ class Loan(db.Model):
             'rejectedBy': self.rejected_by,
             'rejectionReason': self.rejection_reason,
             'rejectedDate': self.rejected_date.isoformat() if self.rejected_date else None,
-            'createdAt': self.created_at.isoformat()
+            'createdAt': self.created_at.isoformat(),
+            'loanType': self.loan_type.to_dict() if self.loan_type else None,
+            'member': {
+                'memberCode': self.member.member_code,
+                'name': f"{self.member.user.first_name} {self.member.user.last_name}" if self.member and self.member.user else "Unknown"
+            } if self.member else None
         }
 
 class LoanProductItem(db.Model):
@@ -386,7 +395,8 @@ class Transaction(db.Model):
             'status': self.status,
             'confirmedBy': self.confirmed_by,
             'confirmedAt': self.confirmed_at.isoformat() if self.confirmed_at else None,
-            'createdAt': self.created_at.isoformat()
+            'createdAt': self.created_at.isoformat(),
+            'member': self.member.to_dict() if self.member else None
         }
 
 class Visit(db.Model):

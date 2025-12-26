@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Plus, Filter, Battery, Smartphone, Sun, Zap, Package, Edit, Loader2 } from "lucide-react";
+import { Search, Plus, Filter, Battery, Smartphone, Sun, Zap, Package, Edit, Loader2, Trash2 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
@@ -97,6 +97,18 @@ export default function LoanProducts() {
         },
     });
 
+    const deleteMutation = useMutation({
+        mutationFn: (id) => api.deleteLoanProduct(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries(["loan-products"]);
+            toast({ title: "Success", description: "Product deleted successfully" });
+            handleCloseDialog();
+        },
+        onError: (error) => {
+            toast({ title: "Error", description: error.message || "Failed to delete product", variant: "destructive" });
+        },
+    });
+
     const handleOpenDialog = (product = null) => {
         if (product) {
             setCurrentProduct(product);
@@ -160,7 +172,7 @@ export default function LoanProducts() {
         product.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const isSubmitting = createMutation.isPending || updateMutation.isPending;
+    const isSubmitting = createMutation.isPending || updateMutation.isPending || deleteMutation.isPending;
 
     return (
         <Layout>
@@ -334,12 +346,30 @@ export default function LoanProducts() {
                                     rows={3}
                                 />
                             </div>
-                            <DialogFooter>
-                                <Button type="button" variant="outline" onClick={handleCloseDialog}>Cancel</Button>
-                                <Button type="submit" disabled={isSubmitting}>
-                                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                    {currentProduct ? "Update Product" : "Create Product"}
-                                </Button>
+                            <DialogFooter className="flex-col sm:flex-row gap-2">
+                                {currentProduct && (
+                                    <Button 
+                                        type="button" 
+                                        variant="destructive" 
+                                        className="sm:mr-auto"
+                                        onClick={() => {
+                                            if (window.confirm("Are you sure you want to delete this product?")) {
+                                                deleteMutation.mutate(currentProduct.id);
+                                            }
+                                        }}
+                                        disabled={isSubmitting}
+                                    >
+                                        {deleteMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
+                                        Delete Product
+                                    </Button>
+                                )}
+                                <div className="flex gap-2">
+                                    <Button type="button" variant="outline" onClick={handleCloseDialog}>Cancel</Button>
+                                    <Button type="submit" disabled={isSubmitting}>
+                                        {isSubmitting && !deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                        {currentProduct ? "Update Product" : "Create Product"}
+                                    </Button>
+                                </div>
                             </DialogFooter>
                         </form>
                     </DialogContent>

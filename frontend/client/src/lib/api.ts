@@ -213,6 +213,7 @@ export const api = {
         method: "PATCH",
         body: JSON.stringify(data),
     }),
+    deleteLoanProduct: (id: number | string) => fetchAPI(`/loan-products/${id}`, { method: "DELETE" }),
 
     // Loan Types
     getLoanTypes: () => fetchAPI("/loan-types"),

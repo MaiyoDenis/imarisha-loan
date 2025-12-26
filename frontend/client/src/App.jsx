@@ -21,7 +21,7 @@ const Branches = lazy(() => import("@/pages/admin/Branches"));
 const BranchDetail = lazy(() => import("@/pages/admin/BranchDetail"));
 const Users = lazy(() => import("@/pages/admin/Users"));
 const Savings = lazy(() => import("@/pages/admin/Savings"));
-const Reports = lazy(() => import("@/pages/reports/Dashboard"));
+const Reports = lazy(() => import("@/pages/reports/ReportsDashboardFromAdmin"));
 const Settings = lazy(() => import("@/pages/shared/Settings"));
 const Store = lazy(() => import("@/pages/procurement/Store"));
 const ReportsPage = lazy(() => import("@/pages/reports/ReportsPage").then(module => ({ default: module.ReportsPage })));

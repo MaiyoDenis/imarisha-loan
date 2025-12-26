@@ -158,63 +158,63 @@ export default function BranchManagerDashboard() {
         {/* KPI Cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {/* Total Loans */}
-          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-primary/30">
+          <Card className="bg-card border border-primary/30">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-blue-900">Total Loans</CardTitle>
+              <CardTitle className="text-sm font-medium text-foreground">Total Loans</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-baseline justify-between">
-                <p className="text-3xl font-bold text-blue-900">{(branchStats === null || branchStats === void 0 ? void 0 : branchStats.totalLoans) || 0}</p>
+                <p className="text-3xl font-bold text-foreground">{(branchStats === null || branchStats === void 0 ? void 0 : branchStats.totalLoans) || 0}</p>
                 <CreditCard className="h-5 w-5 text-primary"/>
               </div>
-              <p className="text-xs text-blue-700 mt-2">
+              <p className="text-xs text-primary mt-2">
                 {(branchStats === null || branchStats === void 0 ? void 0 : branchStats.activeLoans) || 0} active
               </p>
             </CardContent>
           </Card>
 
           {/* Total Members */}
-          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+          <Card className="bg-card border">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-green-900">Total Members</CardTitle>
+              <CardTitle className="text-sm font-medium text-foreground">Total Members</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-baseline justify-between">
-                <p className="text-3xl font-bold text-green-900">{totalGroupMembers}</p>
+                <p className="text-3xl font-bold text-foreground">{totalGroupMembers}</p>
                 <Users2 className="h-5 w-5 text-secondary"/>
               </div>
-              <p className="text-xs text-green-700 mt-2">
+              <p className="text-xs text-muted-foreground mt-2">
                 {branchGroups.length} groups
               </p>
             </CardContent>
           </Card>
 
           {/* Total Savings */}
-          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+          <Card className="bg-card border">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-purple-900">Total Savings</CardTitle>
+              <CardTitle className="text-sm font-medium text-foreground">Total Savings</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-baseline justify-between">
-                <p className="text-2xl font-bold text-purple-900">
+                <p className="text-2xl font-bold text-foreground">
                   KES {(totalSavings / 1000000).toFixed(1)}M
                 </p>
-                <DollarSign className="h-5 w-5 text-purple-600"/>
+                <DollarSign className="h-5 w-5 text-primary"/>
               </div>
             </CardContent>
           </Card>
 
           {/* Collection Rate */}
-          <Card className="bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200">
+          <Card className="bg-card border">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-amber-900">Collection Rate</CardTitle>
+              <CardTitle className="text-sm font-medium text-foreground">Collection Rate</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-baseline justify-between">
-                <p className="text-3xl font-bold text-amber-900">{avgRepaymentRate.toFixed(1)}%</p>
-                <Percent className="h-5 w-5 text-amber-600"/>
+                <p className="text-3xl font-bold text-foreground">{avgRepaymentRate.toFixed(1)}%</p>
+                <Percent className="h-5 w-5 text-primary"/>
               </div>
-              <p className="text-xs text-amber-700 mt-2">Average repayment</p>
+              <p className="text-xs text-muted-foreground mt-2">Average repayment</p>
             </CardContent>
           </Card>
         </div>
@@ -409,16 +409,16 @@ export default function BranchManagerDashboard() {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-3 gap-4">
                   <div className="text-center p-4 bg-primary/10 rounded-lg">
-                    <p className="text-sm text-muted-foreground">Total Loans</p>
-                    <p className="text-2xl font-bold text-blue-900">{(branchStats === null || branchStats === void 0 ? void 0 : branchStats.totalLoans) || 0}</p>
+                  <p className="text-sm text-muted-foreground">Total Loans</p>
+                  <p className="text-2xl font-bold text-foreground">{(branchStats === null || branchStats === void 0 ? void 0 : branchStats.totalLoans) || 0}</p>
                   </div>
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <p className="text-sm text-muted-foreground">Active</p>
-                    <p className="text-2xl font-bold text-green-900">{(branchStats === null || branchStats === void 0 ? void 0 : branchStats.activeLoans) || 0}</p>
+                  <div className="text-center p-4 bg-card rounded-lg border">
+                  <p className="text-sm text-muted-foreground">Active</p>
+                  <p className="text-2xl font-bold text-foreground">{(branchStats === null || branchStats === void 0 ? void 0 : branchStats.activeLoans) || 0}</p>
                   </div>
                   <div className="text-center p-4 bg-accent/10 rounded-lg">
-                    <p className="text-sm text-muted-foreground">Pending</p>
-                    <p className="text-2xl font-bold text-accent">{(branchStats === null || branchStats === void 0 ? void 0 : branchStats.pendingLoans) || 0}</p>
+                  <p className="text-sm text-muted-foreground">Pending</p>
+                  <p className="text-2xl font-bold text-accent">{(branchStats === null || branchStats === void 0 ? void 0 : branchStats.pendingLoans) || 0}</p>
                   </div>
                 </div>
               </CardContent>
@@ -442,7 +442,7 @@ export default function BranchManagerDashboard() {
                 {products.map(function (product) {
                 var isLowStock = product.stockQuantity <= product.lowStockThreshold;
                 return (<Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                      <div className="h-32 bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center relative">
+                      <div className="h-32 bg-primary/10 flex items-center justify-center relative">
                         <Package className="h-12 w-12 text-primary"/>
                         {isLowStock && (<Badge variant="destructive" className="absolute top-2 right-2 animate-pulse">
                             Low Stock
@@ -493,7 +493,7 @@ export default function BranchManagerDashboard() {
                 </CardContent>
               </Card>) : (<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {suppliers.map(function (supplier) { return (<Card key={supplier.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                    <div className="bg-gradient-to-r from-orange-50 to-orange-100 p-4 border-b">
+                    <div className="bg-primary/10 p-4 border-b border-border">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1">
                           <h3 className="font-bold text-lg">{supplier.name}</h3>

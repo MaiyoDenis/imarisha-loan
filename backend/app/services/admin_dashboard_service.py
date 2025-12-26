@@ -64,12 +64,15 @@ class AdminDashboardService:
                 'timestamp': datetime.utcnow().isoformat(),
                 'product_overview': self._get_product_overview(branch_id),
                 'lending_analytics': self._get_lending_analytics(branch_id),
+                'member_metrics': self._get_member_metrics(branch_id),
+                'risk_metrics': self._get_risk_metrics(branch_id),
                 'profit_analysis': self._get_profit_analysis(branch_id),
                 'repayment_tracking': self._get_repayment_tracking(branch_id),
                 'growth_metrics': self._get_growth_metrics(branch_id),
                 'branch_comparison': self._get_branch_comparison(),
                 'top_products': self._get_top_products(branch_id),
-                'alerts': self._get_admin_alerts(branch_id)
+                'alerts': self._get_admin_alerts(branch_id),
+                'loan_trends': self._get_loan_trends(branch_id)
             }
             
             if self.redis_client:
@@ -144,14 +147,16 @@ class AdminDashboardService:
             
             expected_income = total_interest + total_fees
             
+            total_outstanding = sum(float(l.outstanding_balance) for l in borrowed_loans if l.status != 'completed')
+            
             return {
-                'total_loans_active': len(borrowed_loans),
+                'total_loans_active': len([l for l in borrowed_loans if l.status != 'completed']),
                 'total_loans_completed': len(paid_loans),
                 'total_loans_pending': pending_loans,
                 'total_loans_count': total_loans,
                 'total_borrowed_amount': float(total_borrowed),
                 'total_paid_amount': float(total_paid),
-                'total_outstanding': float(total_borrowed - total_paid),
+                'total_outstanding': float(total_outstanding),
                 'total_interest_income': float(total_interest),
                 'total_processing_fees': float(total_fees),
                 'expected_total_income': float(expected_income),
@@ -421,5 +426,96 @@ class AdminDashboardService:
             logging.error(f"Error generating admin alerts: {str(e)}")
             return []
 
+    def _get_member_metrics(self, branch_id: Optional[int] = None) -> Dict[str, Any]:
+        """Get member related metrics including savings"""
+        try:
+            member_query = Member.query
+            if branch_id:
+                member_query = member_query.filter(Member.branch_id == branch_id)
+            
+            total_members = member_query.count()
+            active_members = member_query.filter(Member.status == 'active').count()
+            
+            savings_query = db.session.query(func.sum(SavingsAccount.balance))
+            if branch_id:
+                savings_query = savings_query.join(Member).filter(Member.branch_id == branch_id)
+            
+            total_savings = savings_query.scalar() or Decimal(0)
+            
+            return {
+                'total_members': total_members,
+                'active_members': active_members,
+                'lifetime_value': float(total_savings) # Used as "Total Savings" in KPI card
+            }
+        except Exception as e:
+            logging.error(f"Error getting member metrics: {str(e)}")
+            return {'total_members': 0, 'active_members': 0, 'lifetime_value': 0}
+
+    def _get_risk_metrics(self, branch_id: Optional[int] = None) -> Dict[str, Any]:
+        """Get risk related metrics"""
+        try:
+            query = Loan.query
+            if branch_id:
+                query = query.join(Member).filter(Member.branch_id == branch_id)
+            
+            # Loans overdue > 7 days
+            seven_days_ago = datetime.utcnow() - timedelta(days=7)
+            at_risk_loans = query.filter(
+                and_(
+                    Loan.status.in_(['approved', 'disbursed']),
+                    Loan.due_date < seven_days_ago
+                )
+            ).count()
+            
+            return {
+                'at_risk_loans': at_risk_loans
+            }
+        except Exception as e:
+            logging.error(f"Error getting risk metrics: {str(e)}")
+            return {'at_risk_loans': 0}
+
+    def _get_loan_trends(self, branch_id: Optional[int] = None) -> List[Dict[str, Any]]:
+        """Get monthly loan vs repayment trends"""
+        try:
+            trends = []
+            # Last 6 months
+            for i in range(5, -1, -1):
+                date = datetime.utcnow() - timedelta(days=i*30)
+                month_name = date.strftime('%b')
+                start_date = date.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+                if i == 0:
+                    end_date = datetime.utcnow()
+                else:
+                    next_month = (start_date + timedelta(days=32)).replace(day=1)
+                    end_date = next_month
+                
+                loan_query = db.session.query(func.sum(Loan.principle_amount))
+                if branch_id:
+                    loan_query = loan_query.join(Member).filter(Member.branch_id == branch_id)
+                
+                disbursed = loan_query.filter(
+                    Loan.disbursement_date >= start_date,
+                    Loan.disbursement_date < end_date
+                ).scalar() or Decimal(0)
+                
+                repayment_query = db.session.query(func.sum(Transaction.amount)).filter(
+                    Transaction.transaction_type == 'loan_repayment',
+                    Transaction.created_at >= start_date,
+                    Transaction.created_at < end_date
+                )
+                if branch_id:
+                    repayment_query = repayment_query.join(Member, Transaction.member_id == Member.id).filter(Member.branch_id == branch_id)
+                
+                repaid = repayment_query.scalar() or Decimal(0)
+                
+                trends.append({
+                    'month': month_name,
+                    'disbursed': float(disbursed),
+                    'repaid': float(repaid)
+                })
+            return trends
+        except Exception as e:
+            logging.error(f"Error getting loan trends: {str(e)}")
+            return []
 
 admin_dashboard_service = AdminDashboardService()

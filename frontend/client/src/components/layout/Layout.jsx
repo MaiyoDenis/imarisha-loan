@@ -103,7 +103,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 export default function Layout(_a) {
     var _this = this;
     var _b, _c;
-    var children = _a.children;
+    var children = _a.children, _d = _a.noSidebar, noSidebar = _d === void 0 ? false : _d;
     var _d = useState(false), showProfileMenu = _d[0], setShowProfileMenu = _d[1];
     var _e = useLocation(), location = _e[0], setLocation = _e[1];
     var scrollPositions = useRef({});
@@ -194,6 +194,11 @@ export default function Layout(_a) {
             });
         });
     };
+    if (noSidebar) {
+        return (<div className="min-h-screen">
+          {children}
+        </div>);
+    }
     return (<SidebarProvider>
       <AppSidebar />
       <SidebarInset>

@@ -166,3 +166,174 @@
 2025-12-19 19:16:01,146 - root - INFO - Inventory Optimization initialized
 2025-12-19 19:16:01,147 - root - INFO - ETL Service initialized
 2025-12-19 19:16:01,619 - app - INFO - Application initialized successfully
+2025-12-26 18:49:28,420 - prophet.plot - ERROR - Importing plotly failed. Interactive plots will not work.
+2025-12-26 18:49:28,450 - root - INFO - MFA Service initialized successfully
+2025-12-26 18:49:28,450 - root - INFO - Audit Service initialized successfully
+2025-12-26 18:49:28,452 - root - INFO - Notification Service: Redis connection established
+2025-12-26 18:49:28,452 - root - INFO - Initialized 18 notification templates
+2025-12-26 18:49:28,452 - root - INFO - Notification Service initialized successfully
+2025-12-26 18:49:28,453 - root - INFO - Payment Service initialized in sandbox mode
+2025-12-26 18:49:28,454 - root - INFO - Risk Service initialized successfully
+2025-12-26 18:49:28,455 - root - INFO - Redis connected successfully for dashboard service using REDIS_URL
+2025-12-26 18:49:28,455 - root - INFO - Dashboard Service initialized successfully
+2025-12-26 18:49:28,458 - root - INFO - Currency Service: Redis connection established
+2025-12-26 18:49:28,458 - root - INFO - Currency Service initialized successfully
+2025-12-26 18:49:28,459 - root - INFO - USSD Service initialized with code: *123#
+2025-12-26 18:49:28,460 - root - INFO - BI Integration Service initialized
+2025-12-26 18:49:28,461 - root - INFO - KYC Service initialized
+2025-12-26 18:49:28,461 - root - INFO - AML Service initialized
+2025-12-26 18:49:28,462 - root - INFO - GDPR Service initialized
+2025-12-26 18:49:28,462 - root - INFO - Voice Assistant initialized
+2025-12-26 18:49:28,463 - root - INFO - Voice Analytics initialized
+2025-12-26 18:49:28,463 - root - INFO - Demand Forecasting initialized
+2025-12-26 18:49:28,463 - root - INFO - Inventory Optimization initialized
+2025-12-26 18:49:28,464 - root - INFO - ETL Service initialized
+2025-12-26 18:49:29,360 - app - INFO - Application initialized successfully
+2025-12-26 18:51:37,503 - prophet.plot - ERROR - Importing plotly failed. Interactive plots will not work.
+2025-12-26 18:51:37,508 - root - INFO - MFA Service initialized successfully
+2025-12-26 18:51:37,508 - root - INFO - Audit Service initialized successfully
+2025-12-26 18:51:37,510 - root - INFO - Notification Service: Redis connection established
+2025-12-26 18:51:37,510 - root - INFO - Initialized 18 notification templates
+2025-12-26 18:51:37,510 - root - INFO - Notification Service initialized successfully
+2025-12-26 18:51:37,511 - root - INFO - Payment Service initialized in sandbox mode
+2025-12-26 18:51:37,512 - root - INFO - Risk Service initialized successfully
+2025-12-26 18:51:37,513 - root - INFO - Redis connected successfully for dashboard service using REDIS_URL
+2025-12-26 18:51:37,513 - root - INFO - Dashboard Service initialized successfully
+2025-12-26 18:51:37,516 - root - INFO - Currency Service: Redis connection established
+2025-12-26 18:51:37,516 - root - INFO - Currency Service initialized successfully
+2025-12-26 18:51:37,516 - root - INFO - USSD Service initialized with code: *123#
+2025-12-26 18:51:37,517 - root - INFO - BI Integration Service initialized
+2025-12-26 18:51:37,517 - root - INFO - KYC Service initialized
+2025-12-26 18:51:37,518 - root - INFO - AML Service initialized
+2025-12-26 18:51:37,519 - root - INFO - GDPR Service initialized
+2025-12-26 18:51:37,520 - root - INFO - Voice Assistant initialized
+2025-12-26 18:51:37,521 - root - INFO - Voice Analytics initialized
+2025-12-26 18:51:37,521 - root - INFO - Demand Forecasting initialized
+2025-12-26 18:51:37,522 - root - INFO - Inventory Optimization initialized
+2025-12-26 18:51:37,523 - root - INFO - ETL Service initialized
+2025-12-26 18:51:38,146 - app - INFO - Application initialized successfully
+2025-12-26 18:51:38,463 - app - INFO - Request 5cba2337-c537-4d08-9ae4-749d77b00077: GET http://localhost/api/dashboard/stats
+2025-12-26 18:51:38,467 - app.routes.dashboard - INFO - Dashboard stats requested by admin (Role: admin, Admin: True, Branch: None)
+2025-12-26 18:51:38,471 - app.routes.dashboard - INFO - Total Loans: 1
+2025-12-26 18:51:38,474 - app.routes.dashboard - INFO - Total Savings: 5000.00
+2025-12-26 18:51:38,477 - app.routes.dashboard - INFO - Active Members: 1
+2025-12-26 18:51:38,484 - app.routes.dashboard - INFO - Collection Rate: 0 (Repaid: 0, Processed: 0)
+2025-12-26 18:51:38,487 - app.routes.dashboard - INFO - Pending Approvals: 0
+2025-12-26 18:51:38,491 - app.routes.dashboard - INFO - Average Loan: 15000.0000000000000000
+2025-12-26 18:51:38,495 - app.routes.dashboard - INFO - Growth: 0 (Current: 1, Prev: 0)
+2025-12-26 18:53:20,509 - prophet.plot - ERROR - Importing plotly failed. Interactive plots will not work.
+2025-12-26 18:53:20,514 - root - INFO - MFA Service initialized successfully
+2025-12-26 18:53:20,514 - root - INFO - Audit Service initialized successfully
+2025-12-26 18:53:20,516 - root - INFO - Notification Service: Redis connection established
+2025-12-26 18:53:20,516 - root - INFO - Initialized 18 notification templates
+2025-12-26 18:53:20,516 - root - INFO - Notification Service initialized successfully
+2025-12-26 18:53:20,517 - root - INFO - Payment Service initialized in sandbox mode
+2025-12-26 18:53:20,518 - root - INFO - Risk Service initialized successfully
+2025-12-26 18:53:20,519 - root - INFO - Redis connected successfully for dashboard service using REDIS_URL
+2025-12-26 18:53:20,519 - root - INFO - Dashboard Service initialized successfully
+2025-12-26 18:53:20,522 - root - INFO - Currency Service: Redis connection established
+2025-12-26 18:53:20,522 - root - INFO - Currency Service initialized successfully
+2025-12-26 18:53:20,523 - root - INFO - USSD Service initialized with code: *123#
+2025-12-26 18:53:20,524 - root - INFO - BI Integration Service initialized
+2025-12-26 18:53:20,524 - root - INFO - KYC Service initialized
+2025-12-26 18:53:20,525 - root - INFO - AML Service initialized
+2025-12-26 18:53:20,526 - root - INFO - GDPR Service initialized
+2025-12-26 18:53:20,526 - root - INFO - Voice Assistant initialized
+2025-12-26 18:53:20,527 - root - INFO - Voice Analytics initialized
+2025-12-26 18:53:20,527 - root - INFO - Demand Forecasting initialized
+2025-12-26 18:53:20,528 - root - INFO - Inventory Optimization initialized
+2025-12-26 18:53:20,528 - root - INFO - ETL Service initialized
+2025-12-26 18:53:21,036 - app - INFO - Application initialized successfully
+2025-12-26 18:55:06,997 - prophet.plot - ERROR - Importing plotly failed. Interactive plots will not work.
+2025-12-26 18:55:07,005 - root - INFO - MFA Service initialized successfully
+2025-12-26 18:55:07,006 - root - INFO - Audit Service initialized successfully
+2025-12-26 18:55:07,007 - root - INFO - Notification Service: Redis connection established
+2025-12-26 18:55:07,007 - root - INFO - Initialized 18 notification templates
+2025-12-26 18:55:07,008 - root - INFO - Notification Service initialized successfully
+2025-12-26 18:55:07,008 - root - INFO - Payment Service initialized in sandbox mode
+2025-12-26 18:55:07,009 - root - INFO - Risk Service initialized successfully
+2025-12-26 18:55:07,010 - root - INFO - Redis connected successfully for dashboard service using REDIS_URL
+2025-12-26 18:55:07,010 - root - INFO - Dashboard Service initialized successfully
+2025-12-26 18:55:07,012 - root - INFO - Currency Service: Redis connection established
+2025-12-26 18:55:07,012 - root - INFO - Currency Service initialized successfully
+2025-12-26 18:55:07,013 - root - INFO - USSD Service initialized with code: *123#
+2025-12-26 18:55:07,013 - root - INFO - BI Integration Service initialized
+2025-12-26 18:55:07,014 - root - INFO - KYC Service initialized
+2025-12-26 18:55:07,014 - root - INFO - AML Service initialized
+2025-12-26 18:55:07,015 - root - INFO - GDPR Service initialized
+2025-12-26 18:55:07,015 - root - INFO - Voice Assistant initialized
+2025-12-26 18:55:07,016 - root - INFO - Voice Analytics initialized
+2025-12-26 18:55:07,016 - root - INFO - Demand Forecasting initialized
+2025-12-26 18:55:07,017 - root - INFO - Inventory Optimization initialized
+2025-12-26 18:55:07,017 - root - INFO - ETL Service initialized
+2025-12-26 18:55:07,523 - app - INFO - Application initialized successfully
+2025-12-26 18:55:07,775 - app - INFO - Request 4c37474e-ca8c-4ed5-a741-c70a493bf668: GET http://localhost/api/dashboard/stats
+2025-12-26 18:55:07,780 - app.routes.dashboard - INFO - Dashboard stats requested by admin (Role: admin, Branch Filter: None)
+2025-12-26 18:55:07,784 - app.routes.dashboard - INFO - Total Loans found: 1 with statuses ['pending', 'under_review', 'approved', 'disbursed', 'released', 'repaid', 'completed']
+2025-12-26 18:55:07,788 - app.routes.dashboard - INFO - Total Savings found: 5000.00
+2025-12-26 18:55:07,791 - app.routes.dashboard - INFO - Active Members found: 1
+2025-12-26 18:55:07,797 - app.routes.dashboard - INFO - Collection Rate: 0 (Repaid: 0, Processed: 0)
+2025-12-26 18:55:07,803 - app.routes.dashboard - INFO - Average Loan: 15000.0000000000000000
+2025-12-26 18:55:07,808 - app.routes.dashboard - INFO - Growth: 0 (Current: 1, Prev: 0)
+2025-12-26 18:57:54,874 - prophet.plot - ERROR - Importing plotly failed. Interactive plots will not work.
+2025-12-26 18:57:54,879 - root - INFO - MFA Service initialized successfully
+2025-12-26 18:57:54,880 - root - INFO - Audit Service initialized successfully
+2025-12-26 18:57:54,881 - root - INFO - Notification Service: Redis connection established
+2025-12-26 18:57:54,882 - root - INFO - Initialized 18 notification templates
+2025-12-26 18:57:54,882 - root - INFO - Notification Service initialized successfully
+2025-12-26 18:57:54,883 - root - INFO - Payment Service initialized in sandbox mode
+2025-12-26 18:57:54,883 - root - INFO - Risk Service initialized successfully
+2025-12-26 18:57:54,885 - root - INFO - Redis connected successfully for dashboard service using REDIS_URL
+2025-12-26 18:57:54,885 - root - INFO - Dashboard Service initialized successfully
+2025-12-26 18:57:54,887 - root - INFO - Currency Service: Redis connection established
+2025-12-26 18:57:54,887 - root - INFO - Currency Service initialized successfully
+2025-12-26 18:57:54,888 - root - INFO - USSD Service initialized with code: *123#
+2025-12-26 18:57:54,888 - root - INFO - BI Integration Service initialized
+2025-12-26 18:57:54,888 - root - INFO - KYC Service initialized
+2025-12-26 18:57:54,889 - root - INFO - AML Service initialized
+2025-12-26 18:57:54,890 - root - INFO - GDPR Service initialized
+2025-12-26 18:57:54,891 - root - INFO - Voice Assistant initialized
+2025-12-26 18:57:54,892 - root - INFO - Voice Analytics initialized
+2025-12-26 18:57:54,892 - root - INFO - Demand Forecasting initialized
+2025-12-26 18:57:54,893 - root - INFO - Inventory Optimization initialized
+2025-12-26 18:57:54,894 - root - INFO - ETL Service initialized
+2025-12-26 18:57:55,381 - app - INFO - Application initialized successfully
+2025-12-26 18:57:55,736 - app - INFO - Request 0d0c5d66-019e-4711-b4c1-9ea6120cfab3: GET http://localhost/api/dashboard/stats
+2025-12-26 18:57:55,740 - app.routes.dashboard - INFO - Dashboard stats requested by BOAZ123 (Role: field_officer, Branch Filter: 8)
+2025-12-26 18:57:55,746 - app.routes.dashboard - INFO - Total Loans found: 1 with statuses ['pending', 'under_review', 'approved', 'disbursed', 'released', 'repaid', 'completed']
+2025-12-26 18:57:55,749 - app.routes.dashboard - INFO - Total Savings found: 5000.00
+2025-12-26 18:57:55,752 - app.routes.dashboard - INFO - Active Members found: 1
+2025-12-26 18:57:55,799 - app.routes.dashboard - INFO - Collection Rate: 0 (Repaid: 0, Processed: 0)
+2025-12-26 18:57:55,804 - app.routes.dashboard - INFO - Average Loan: 15000.0000000000000000
+2025-12-26 18:57:55,811 - app.routes.dashboard - INFO - Growth: 0 (Current: 1, Prev: 0)
+2025-12-26 18:59:10,322 - prophet.plot - ERROR - Importing plotly failed. Interactive plots will not work.
+2025-12-26 18:59:10,327 - root - INFO - MFA Service initialized successfully
+2025-12-26 18:59:10,329 - root - INFO - Audit Service initialized successfully
+2025-12-26 18:59:10,331 - root - INFO - Notification Service: Redis connection established
+2025-12-26 18:59:10,331 - root - INFO - Initialized 18 notification templates
+2025-12-26 18:59:10,331 - root - INFO - Notification Service initialized successfully
+2025-12-26 18:59:10,332 - root - INFO - Payment Service initialized in sandbox mode
+2025-12-26 18:59:10,332 - root - INFO - Risk Service initialized successfully
+2025-12-26 18:59:10,335 - root - INFO - Redis connected successfully for dashboard service using REDIS_URL
+2025-12-26 18:59:10,335 - root - INFO - Dashboard Service initialized successfully
+2025-12-26 18:59:10,345 - root - INFO - Currency Service: Redis connection established
+2025-12-26 18:59:10,345 - root - INFO - Currency Service initialized successfully
+2025-12-26 18:59:10,346 - root - INFO - USSD Service initialized with code: *123#
+2025-12-26 18:59:10,346 - root - INFO - BI Integration Service initialized
+2025-12-26 18:59:10,347 - root - INFO - KYC Service initialized
+2025-12-26 18:59:10,347 - root - INFO - AML Service initialized
+2025-12-26 18:59:10,348 - root - INFO - GDPR Service initialized
+2025-12-26 18:59:10,349 - root - INFO - Voice Assistant initialized
+2025-12-26 18:59:10,349 - root - INFO - Voice Analytics initialized
+2025-12-26 18:59:10,350 - root - INFO - Demand Forecasting initialized
+2025-12-26 18:59:10,350 - root - INFO - Inventory Optimization initialized
+2025-12-26 18:59:10,351 - root - INFO - ETL Service initialized
+2025-12-26 18:59:10,907 - app - INFO - Application initialized successfully
+2025-12-26 18:59:11,387 - app - INFO - Request 47fcc719-2faa-476c-9941-c80082f79915: GET http://localhost/api/dashboard/stats
+2025-12-26 18:59:11,395 - app.routes.dashboard - INFO - Dashboard stats requested by KDMAIYO (Role: it_support, Branch Filter: None)
+2025-12-26 18:59:11,401 - app.routes.dashboard - INFO - Total Loans found: 1 with statuses ['pending', 'under_review', 'approved', 'disbursed', 'released', 'repaid', 'completed']
+2025-12-26 18:59:11,406 - app.routes.dashboard - INFO - Total Savings found: 5000.00
+2025-12-26 18:59:11,412 - app.routes.dashboard - INFO - Active Members found: 1
+2025-12-26 18:59:11,424 - app.routes.dashboard - INFO - Collection Rate: 0 (Repaid: 0, Processed: 0)
+2025-12-26 18:59:11,434 - app.routes.dashboard - INFO - Average Loan: 15000.0000000000000000
+2025-12-26 18:59:11,448 - app.routes.dashboard - INFO - Growth: 0 (Current: 1, Prev: 0)
