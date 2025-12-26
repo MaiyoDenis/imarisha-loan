@@ -82,20 +82,14 @@ export default function AdminDashboardEnhanced() {
 
   const { data: aiInsights, isLoading: insightsLoading } = useQuery({
     queryKey: ['aiInsights'],
-    queryFn: async () => {
-      const response = await fetch('/api/dashboard/ai-insights');
-      return response.json();
-    },
+    queryFn: () => api.getDashboardAIInsights(),
     staleTime: 10 * 60 * 1000,
     refetchInterval: 5 * 60 * 1000,
   });
 
   const { data: activities, isLoading: activitiesLoading } = useQuery({
     queryKey: ['dashboardActivities', activityPeriod],
-    queryFn: async () => {
-      const response = await fetch(`/api/dashboard/activities?period=${activityPeriod}&limit=10`);
-      return response.json();
-    },
+    queryFn: () => api.getDashboardActivities(activityPeriod, 10),
     staleTime: 2 * 60 * 1000,
     refetchInterval: 30 * 1000,
   });

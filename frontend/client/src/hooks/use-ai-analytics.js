@@ -69,19 +69,7 @@ export var useMemberBehavior = function (branchId) {
 export var useClvPrediction = function (memberId) {
     return useQuery({
         queryKey: ['clv-prediction', memberId],
-        queryFn: function () { return __awaiter(void 0, void 0, void 0, function () {
-            var response;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, fetch("/api/ai-analytics/clv-prediction/".concat(memberId))];
-                    case 1:
-                        response = _a.sent();
-                        if (!response.ok)
-                            throw new Error('Failed to fetch CLV prediction');
-                        return [2 /*return*/, response.json()];
-                }
-            });
-        }); },
+        queryFn: function () { return api.getClvPrediction(memberId); },
         enabled: !!memberId,
         staleTime: 5 * 60 * 1000,
         retry: 1,
@@ -92,21 +80,7 @@ export var useSeasonalDemand = function (productId, monthsAhead, branchId) {
     if (monthsAhead === void 0) { monthsAhead = 12; }
     return useQuery({
         queryKey: ['seasonal-demand', productId, monthsAhead, branchId],
-        queryFn: function () { return __awaiter(void 0, void 0, void 0, function () {
-            var params, response;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        params = new URLSearchParams(__assign(__assign({ months_ahead: monthsAhead.toString() }, (productId && { product_id: productId.toString() })), (branchId && { branch_id: branchId.toString() })));
-                        return [4 /*yield*/, fetch("/api/ai-analytics/seasonal-demand?".concat(params))];
-                    case 1:
-                        response = _a.sent();
-                        if (!response.ok)
-                            throw new Error('Failed to fetch seasonal demand');
-                        return [2 /*return*/, response.json()];
-                }
-            });
-        }); },
+        queryFn: function () { return api.getSeasonalDemand(productId, monthsAhead, branchId); },
         staleTime: 5 * 60 * 1000,
         retry: 1,
         gcTime: 10 * 60 * 1000,

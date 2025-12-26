@@ -33,7 +33,7 @@ class Config:
     # Session Configuration
     SESSION_COOKIE_SECURE = os.environ.get('FLASK_ENV') == 'production'
     SESSION_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SAMESITE = 'None' if SESSION_COOKIE_SECURE else 'Lax'
     PERMANENT_SESSION_LIFETIME = 86400
     SESSION_PERMANENT = True
     
@@ -45,3 +45,6 @@ class Config:
     JWT_ACCESS_TOKEN_EXPIRES = 86400
     JWT_REFRESH_TOKEN_EXPIRES = 2592000
     JWT_ALGORITHM = 'HS256'
+
+    # CORS Configuration
+    ALLOWED_ORIGINS = os.environ.get('ALLOWED_ORIGINS', '').split(',') if os.environ.get('ALLOWED_ORIGINS') else []

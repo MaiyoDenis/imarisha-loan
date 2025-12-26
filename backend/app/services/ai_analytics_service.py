@@ -26,6 +26,15 @@ CACHE_TIMEOUT = 300
 
 class AIAnalyticsService:
     
+    @staticmethod
+    def _get_month_expression(column):
+        """Helper to get database-agnostic month expression"""
+        try:
+            if db.engine.name == 'postgresql':
+                return func.date_trunc('month', column)
+        except Exception:
+            pass
+        return func.strftime('%Y-%m-01', column)
 
     @staticmethod
     def forecast_arrears_rate(months_ahead=12, branch_id=None):
@@ -50,7 +59,7 @@ class AIAnalyticsService:
                 }
             
             query = db.session.query(
-                func.strftime('%Y-%m-01', Loan.disbursement_date).label('month'),
+                AIAnalyticsService._get_month_expression(Loan.disbursement_date).label('month'),
                 func.count(Loan.id).label('total_loans'),
                 func.sum(case(
                     (Loan.status.in_(['arrears', 'defaulted']), 1),
@@ -372,7 +381,7 @@ class AIAnalyticsService:
             
             # Simple query without complex joins first
             query = db.session.query(
-                func.strftime('%Y-%m-01', Loan.disbursement_date).label('month'),
+                AIAnalyticsService._get_month_expression(Loan.disbursement_date).label('month'),
                 func.count(Loan.id).label('loan_count')
             ).filter(Loan.disbursement_date.isnot(None))
             

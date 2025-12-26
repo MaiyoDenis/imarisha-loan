@@ -30,15 +30,20 @@ def create_app(config_class=Config):
     jwt.init_app(app)
     
     # Enhanced CORS configuration
+    origins = [
+        "http://localhost:5173", 
+        "http://127.0.0.1:5173",
+        "https://imarisha-loans.vercel.app",
+        r"https://.*\.vercel\.app",
+        r"https://.*\.netlify\.app",
+        r"https://.*\.render\.com"
+    ]
+    
+    if app.config.get('ALLOWED_ORIGINS'):
+        origins.extend(app.config['ALLOWED_ORIGINS'])
+
     cors.init_app(app, resources={r"/*": {
-        "origins": [
-            "http://localhost:5173", 
-            "http://127.0.0.1:5173",
-            "https://imarisha-loans.vercel.app",
-            r"https://.*\.vercel\.app",
-            r"https://.*\.netlify\.app",
-            r"https://.*\.render\.com"
-        ],
+        "origins": origins,
         "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
         "allowed_headers": [
             "Content-Type", 

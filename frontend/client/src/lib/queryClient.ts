@@ -12,7 +12,14 @@ export async function apiRequest(
   url: string,
   data?: unknown
 ): Promise<Response> {
-  const res = await fetch(url, {
+  const baseUrl = import.meta.env.VITE_API_URL || "";
+  let finalUrl = url;
+  
+  if (baseUrl && url.startsWith("/api") && !url.startsWith("http")) {
+    finalUrl = baseUrl + url.replace("/api", "");
+  }
+
+  const res = await fetch(finalUrl, {
     method,
     headers: data ? { "Content-Type": "application/json" } : {},
     body: data ? JSON.stringify(data) : undefined,
@@ -28,7 +35,15 @@ export const getQueryFn = <T = unknown>({
   on401: "throw" | "returnNull";
 }) => {
   return async ({ queryKey }: QueryFunctionContext) => {
-    const res = await fetch(queryKey.join("/"), {
+    const baseUrl = import.meta.env.VITE_API_URL || "";
+    let path = queryKey.join("/");
+    let finalUrl = path;
+
+    if (baseUrl && path.startsWith("/api") && !path.startsWith("http")) {
+      finalUrl = baseUrl + path.replace("/api", "");
+    }
+
+    const res = await fetch(finalUrl, {
       credentials: "include",
     });
 

@@ -79,6 +79,10 @@ export const api = {
 
     // Dashboard
     getDashboardStats: () => fetchAPI("/dashboard/stats"),
+    getDashboardAIInsights: () => fetchAPI("/dashboard/ai-insights"),
+    getDashboardActivities: (period: string = "month", limit: number = 10) => {
+        return fetchAPI(`/dashboard/activities?period=${period}&limit=${limit}`);
+    },
     
     // Advanced Dashboards
     getExecutiveDashboard: (branchId?: number) => {
@@ -152,6 +156,14 @@ export const api = {
     getCohortAnalysis: (branchId?: number) => {
         const params = branchId ? `?branch_id=${branchId}` : "";
         return fetchAPI(`/ai-analytics/cohort-analysis${params}`);
+    },
+    getClvPrediction: (memberId: number | string) => fetchAPI(`/ai-analytics/clv-prediction/${memberId}`),
+    getSeasonalDemand: (productId?: number | string, monthsAhead: number = 12, branchId?: number) => {
+        const params = new URLSearchParams();
+        params.append("months_ahead", monthsAhead.toString());
+        if (productId) params.append("product_id", productId.toString());
+        if (branchId) params.append("branch_id", branchId.toString());
+        return fetchAPI(`/ai-analytics/seasonal-demand?${params.toString()}`);
     },
 
     // Branches
