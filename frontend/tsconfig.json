@@ -5,7 +5,7 @@
     "incremental": true,
     "tsBuildInfoFile": "./node_modules/typescript/tsbuildinfo",
     "noEmit": true,
-    "module": "Node16",
+    "module": "ESNext",
     "strict": true,
     "lib": ["esnext", "dom", "dom.iterable"],
     "allowJs": true,
@@ -14,7 +14,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
 
-    "moduleResolution": "node16",
+    "moduleResolution": "Bundler",
     "baseUrl": ".",
     "types": ["node", "vite/client"],
     "noImplicitAny": false,
