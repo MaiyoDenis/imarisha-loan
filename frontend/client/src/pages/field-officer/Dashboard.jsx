@@ -41,15 +41,15 @@ export function FieldOfficerDashboard() {
     return (<Layout>
     <div className="space-y-6 px-4 sm:px-6 lg:px-8 py-6 bg-gradient-to-br from-background via-background to-muted/20 min-h-screen">
       {/* Header */}
-      <div className="flex justify-between items-start gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start gap-6">
         <div className="flex-1">
-          <h1 className="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">
             Field Officer Dashboard
           </h1>
           <p className="text-muted-foreground mt-2">Track your groups, manage visits, and monitor performance</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button onClick={function () { return setShowExportData(true); }} className="gap-2" variant="outline" size="lg">
+        <div className="flex items-center gap-2 w-full md:w-auto">
+          <Button onClick={function () { return setShowExportData(true); }} className="flex-1 md:flex-none gap-2" variant="outline" size="lg">
             <Download className="h-5 w-5"/>
             Export
           </Button>

@@ -125,17 +125,18 @@ export function SchedulePage() {
 
   return (
     <Layout>
-      <div className="p-6 space-y-6 max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Schedule</h1>
-            <p className="text-muted-foreground">Manage your field visits and appointments</p>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Schedule</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">Manage your field visits and appointments</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
             <Button 
               variant={view === 'list' ? 'default' : 'outline'} 
               onClick={() => setView('list')} 
               size="sm"
+              className="flex-1 md:flex-none"
             >
               List View
             </Button>
@@ -143,10 +144,11 @@ export function SchedulePage() {
               variant={view === 'calendar' ? 'default' : 'outline'} 
               onClick={() => setView('calendar')} 
               size="sm"
+              className="flex-1 md:flex-none"
             >
               Calendar View
             </Button>
-            <Button size="sm" className="gap-2" onClick={() => setIsModalOpen(true)}>
+            <Button size="sm" className="w-full md:w-auto gap-2" onClick={() => setIsModalOpen(true)}>
               <CalendarIcon className="h-4 w-4"/>
               New Appointment
             </Button>
@@ -326,54 +328,58 @@ export function SchedulePage() {
                     </Button>
                   </div>
                 </div>
-                <div className="grid grid-cols-7 border-b bg-muted/50">
-                  {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-                    <div key={day} className="p-2 text-center text-sm font-medium text-muted-foreground">
-                      {day}
+                <div className="overflow-x-auto">
+                  <div className="min-w-[600px]">
+                    <div className="grid grid-cols-7 border-b bg-muted/50">
+                      {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                        <div key={day} className="p-2 text-center text-sm font-medium text-muted-foreground">
+                          {day}
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-                <div className="grid grid-cols-7 auto-rows-fr">
-                  {calendarDays.map((day) => {
-                    const dayEvents = filteredSchedule.filter((item) => 
-                      isSameDay(new Date(item.date), day)
-                    );
-                    return (
-                      <div 
-                        key={day.toString()} 
-                        className={`
-                          min-h-[100px] p-2 border-b border-r relative
-                          ${!isSameMonth(day, currentMonth) ? 'bg-muted/20 text-muted-foreground' : 'bg-background'}
-                          ${isToday(day) ? 'bg-primary/5' : ''}
-                        `}
-                        onClick={() => setDate(day)}
-                      >
-                        <div className={`
-                          text-sm font-medium mb-1
-                          ${isToday(day) ? 'text-primary' : ''}
-                        `}>
-                          {format(day, 'd')}
-                        </div>
-                        <div className="space-y-1">
-                          {dayEvents.map((event) => (
-                            <div 
-                              key={event.id} 
-                              className={`
-                                text-[10px] p-1 rounded truncate cursor-pointer
-                                ${event.status === 'completed' ? 'bg-green-100 text-green-800' :
-                                  event.status === 'pending' ? 'bg-blue-100 text-blue-800' :
-                                  event.status === 'in-progress' ? 'bg-amber-100 text-amber-800' :
-                                  'bg-gray-100 text-gray-800'}
-                              `}
-                              title={`${event.time} - ${event.groupName}`}
-                            >
-                              {event.time} {event.groupName}
+                    <div className="grid grid-cols-7 auto-rows-fr">
+                      {calendarDays.map((day) => {
+                        const dayEvents = filteredSchedule.filter((item) => 
+                          isSameDay(new Date(item.date), day)
+                        );
+                        return (
+                          <div 
+                            key={day.toString()} 
+                            className={`
+                              min-h-[100px] p-2 border-b border-r relative
+                              ${!isSameMonth(day, currentMonth) ? 'bg-muted/20 text-muted-foreground' : 'bg-background'}
+                              ${isToday(day) ? 'bg-primary/5' : ''}
+                            `}
+                            onClick={() => setDate(day)}
+                          >
+                            <div className={`
+                              text-sm font-medium mb-1
+                              ${isToday(day) ? 'text-primary' : ''}
+                            `}>
+                              {format(day, 'd')}
                             </div>
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })}
+                            <div className="space-y-1">
+                              {dayEvents.map((event) => (
+                                <div 
+                                  key={event.id} 
+                                  className={`
+                                    text-[10px] p-1 rounded truncate cursor-pointer
+                                    ${event.status === 'completed' ? 'bg-green-100 text-green-800' :
+                                      event.status === 'pending' ? 'bg-blue-100 text-blue-800' :
+                                      event.status === 'in-progress' ? 'bg-amber-100 text-amber-800' :
+                                      'bg-gray-100 text-gray-800'}
+                                  `}
+                                  title={`${event.time} - ${event.groupName}`}
+                                >
+                                  {event.time} {event.groupName}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
               </Card>
             )}

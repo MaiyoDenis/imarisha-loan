@@ -139,9 +139,9 @@ export default function OperationsDashboard() {
       </Layout>);
     }
     return (<Layout>
-      <div className="min-h-screen p-6">
+      <div className="min-h-screen p-4 md:p-6">
         <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-start mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-6 mb-8">
           <div>
             <h1 className="text-3xl md:text-4xl font-heading font-extrabold tracking-tight text-gradient">Operations Dashboard</h1>
             <p className="text-sm text-muted-foreground mt-1">Daily operations management and task tracking</p>
@@ -149,14 +149,14 @@ export default function OperationsDashboard() {
                 Last updated: {new Date(dashboard.timestamp).toLocaleString()}
               </p>)}
           </div>
-          <div className="flex gap-3">
-            <button onClick={handleRefresh} disabled={isRefreshing} className={"btn-neon px-4 py-2 rounded-lg ".concat(isRefreshing ? 'opacity-50 cursor-not-allowed' : '')}>
+          <div className="flex gap-3 w-full sm:w-auto">
+            <button onClick={handleRefresh} disabled={isRefreshing} className={"flex-1 sm:flex-none btn-neon px-4 py-2 rounded-lg flex items-center justify-center gap-2 ".concat(isRefreshing ? 'opacity-50 cursor-not-allowed' : '')}>
               <RefreshCw size={18} className={isRefreshing ? 'animate-spin' : ''}/>
               <span className="text-sm font-medium">
                 {isRefreshing ? 'Refreshing...' : 'Refresh'}
               </span>
             </button>
-            <button onClick={handleExport} className="btn-neon px-4 py-2 rounded-lg cursor-pointer">
+            <button onClick={handleExport} className="flex-1 sm:flex-none btn-neon px-4 py-2 rounded-lg cursor-pointer flex items-center justify-center gap-2">
               <Download size={18}/>
               <span className="text-sm font-medium">Export</span>
             </button>
@@ -176,10 +176,10 @@ export default function OperationsDashboard() {
         </div>
 
         {/* Pending Member Queue */}
-        <div className="mb-8 glass-card gradient-border hover-tilt p-6 relative overflow-hidden">
+        <div className="mb-8 glass-card gradient-border hover-tilt p-4 md:p-6 relative overflow-hidden">
           <span className="aura"></span>
           <h2 className="text-xl font-heading font-semibold text-foreground mb-4">Member Approval Queue</h2>
-          <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             <KPICard title="Total Pending" value={dashboard.member_queue.total_pending} status={dashboard.member_queue.total_pending > 10 ? 'warning' : 'normal'} className="min-h-[140px]"/>
             <KPICard title="Pending Amount" value={"KES ".concat(dashboard.member_queue.pending_amount.toLocaleString())} className="min-h-[140px]"/>
             <KPICard title="Avg Age" value={"".concat(dashboard.member_queue.average_age_days)} unit="days" className="min-h-[140px]"/>

@@ -45,13 +45,13 @@ export function MemberDashboardPage() {
     var m = member;
     return (<Layout>
       <div className="space-y-8 px-4 sm:px-6 lg:px-8 py-6">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4 flex-1">
-          <Button variant="ghost" size="icon" onClick={function () { return setLocation("/field-officer"); }} className="hover:bg-gray-100">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-4 flex-1 w-full">
+          <Button variant="ghost" size="icon" onClick={function () { return setLocation("/field-officer"); }} className="hover:bg-gray-100 flex-shrink-0">
             <ChevronLeft className="h-5 w-5"/>
           </Button>
           <div className="space-y-1 flex-1">
-            <h1 className="text-4xl font-bold tracking-tight">
+            <h1 className="text-2xl sm:text-4xl font-bold tracking-tight">
               {m.user.firstName} {m.user.lastName}
             </h1>
             <div className="flex items-center gap-4 text-muted-foreground flex-wrap">
@@ -73,14 +73,16 @@ export function MemberDashboardPage() {
             </div>
           </div>
         </div>
-        <div className="flex gap-2">
-          <Button onClick={function () { return setShowLoanForm(!showLoanForm); }} className="gap-2 bg-primary hover:bg-primary/80" size="lg">
+        <div className="flex flex-row gap-2 w-full sm:w-auto">
+          <Button onClick={function () { return setShowLoanForm(!showLoanForm); }} className="flex-1 sm:flex-none gap-2 bg-primary hover:bg-primary/80" size="lg">
             <CreditCard className="h-5 w-5"/>
-            {showLoanForm ? "Cancel" : "Apply Loan"}
+            <span className="hidden sm:inline">{showLoanForm ? "Cancel" : "Apply Loan"}</span>
+            <span className="sm:hidden">{showLoanForm ? "✕" : "Loan"}</span>
           </Button>
-          <Button onClick={function () { return setShowTransferForm(!showTransferForm); }} className="gap-2" variant="outline" size="lg">
+          <Button onClick={function () { return setShowTransferForm(!showTransferForm); }} className="flex-1 sm:flex-none gap-2" variant="outline" size="lg">
             <TrendingUp className="h-5 w-5"/>
-            {showTransferForm ? "Cancel" : "Transfer"}
+            <span className="hidden sm:inline">{showTransferForm ? "Cancel" : "Transfer"}</span>
+            <span className="sm:hidden">{showTransferForm ? "✕" : "Trans"}</span>
           </Button>
         </div>
       </div>
@@ -250,17 +252,19 @@ export function MemberDashboardPage() {
       )}
 
       <Tabs defaultValue="loans" className="w-full">
-        <TabsList className="bg-transparent p-1 rounded-lg border border-gray-200/20">
-          <TabsTrigger value="loans" className="data-[state=active]:bg-[#3E2723] data-[state=active]:text-white data-[state=active]:border-[#FFD700] data-[state=active]:border">
-            Active Loans ({m.activeLoans.length})
-          </TabsTrigger>
-          <TabsTrigger value="history" className="data-[state=active]:bg-[#3E2723] data-[state=active]:text-white data-[state=active]:border-[#FFD700] data-[state=active]:border">
-            Loan History
-          </TabsTrigger>
-          <TabsTrigger value="transactions" className="data-[state=active]:bg-[#3E2723] data-[state=active]:text-white data-[state=active]:border-[#FFD700] data-[state=active]:border">
-            Recent Transactions
-          </TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto pb-2 scrollbar-hide">
+          <TabsList className="inline-flex w-max min-w-full bg-transparent p-1 rounded-lg border border-gray-200/20 h-auto">
+            <TabsTrigger value="loans" className="data-[state=active]:bg-[#3E2723] data-[state=active]:text-white data-[state=active]:border-[#FFD700] data-[state=active]:border px-4 py-2">
+              Active Loans ({m.activeLoans.length})
+            </TabsTrigger>
+            <TabsTrigger value="history" className="data-[state=active]:bg-[#3E2723] data-[state=active]:text-white data-[state=active]:border-[#FFD700] data-[state=active]:border px-4 py-2">
+              Loan History
+            </TabsTrigger>
+            <TabsTrigger value="transactions" className="data-[state=active]:bg-[#3E2723] data-[state=active]:text-white data-[state=active]:border-[#FFD700] data-[state=active]:border px-4 py-2">
+              Recent Transactions
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="loans" className="space-y-4 mt-6">
           {m.activeLoans.length === 0 ? (<Card className="border-dashed !bg-transparent">
@@ -282,7 +286,7 @@ export function MemberDashboardPage() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-4 sm:text-right">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:text-right">
                       <div className="bg-transparent p-3 rounded-lg border border-gray-200/20 sm:p-0 sm:border-0">
                         <p className="text-xs text-muted-foreground mb-1">Principal</p>
                         <p className="font-bold text-lg">

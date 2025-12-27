@@ -142,14 +142,14 @@ export default function BranchManagerDashboard() {
     return (<Layout>
       <div className="space-y-8 p-4 sm:p-6 lg:p-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight">Branch Dashboard</h1>
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Branch Dashboard</h1>
             <p className="text-muted-foreground mt-2">
               {(user === null || user === void 0 ? void 0 : user.branch_name) || 'Branch'} Management & Analytics
             </p>
           </div>
-          <Button className="gap-2" onClick={handleExportReport}>
+          <Button className="w-full md:w-auto gap-2" onClick={handleExportReport}>
             <Download className="h-4 w-4"/>
             Export Full Report
           </Button>
@@ -220,15 +220,17 @@ export default function BranchManagerDashboard() {
         </div>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="users">Staff ({totalUsers})</TabsTrigger>
-            <TabsTrigger value="groups">Groups ({branchGroups.length})</TabsTrigger>
-            <TabsTrigger value="loans">Loans ({(branchStats === null || branchStats === void 0 ? void 0 : branchStats.totalLoans) || 0})</TabsTrigger>
-            <TabsTrigger value="products">Products ({products.length})</TabsTrigger>
-            <TabsTrigger value="store">Store ({suppliers.length})</TabsTrigger>
-          </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <div className="overflow-x-auto pb-2 scrollbar-hide">
+            <TabsList className="inline-flex w-max min-w-full lg:grid lg:w-full lg:grid-cols-6 h-auto p-1">
+              <TabsTrigger value="overview" className="px-4 py-2">Overview</TabsTrigger>
+              <TabsTrigger value="users" className="px-4 py-2">Staff ({totalUsers})</TabsTrigger>
+              <TabsTrigger value="groups" className="px-4 py-2">Groups ({branchGroups.length})</TabsTrigger>
+              <TabsTrigger value="loans" className="px-4 py-2">Loans ({(branchStats === null || branchStats === void 0 ? void 0 : branchStats.totalLoans) || 0})</TabsTrigger>
+              <TabsTrigger value="products" className="px-4 py-2">Products ({products.length})</TabsTrigger>
+              <TabsTrigger value="store" className="px-4 py-2">Store ({suppliers.length})</TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-4 mt-6">
@@ -286,19 +288,21 @@ export default function BranchManagerDashboard() {
 
           {/* Users Tab */}
           <TabsContent value="users" className="space-y-4 mt-6">
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground"/>
                 <Input placeholder="Search staff by name or username..." className="pl-10" value={searchTerm} onChange={function (e) { return setSearchTerm(e.target.value); }}/>
               </div>
-              <Button variant="outline" className="gap-2">
-                <Filter className="h-4 w-4"/>
-                Filter
-              </Button>
-              <Button variant="outline" className="gap-2" onClick={handleExportStaff}>
-                <Download className="h-4 w-4"/>
-                Export
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" className="flex-1 sm:flex-none gap-2">
+                  <Filter className="h-4 w-4"/>
+                  Filter
+                </Button>
+                <Button variant="outline" className="flex-1 sm:flex-none gap-2" onClick={handleExportStaff}>
+                  <Download className="h-4 w-4"/>
+                  Export
+                </Button>
+              </div>
             </div>
 
             {filteredUsers.length === 0 ? (<Card>
@@ -306,7 +310,8 @@ export default function BranchManagerDashboard() {
                   <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4"/>
                   <p className="text-muted-foreground">No staff found</p>
                 </CardContent>
-              </Card>) : (<div className="rounded-md border">
+              </Card>) : (<div className="rounded-md border overflow-hidden">
+                <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -407,7 +412,7 @@ export default function BranchManagerDashboard() {
                 <CardTitle>Loan Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="text-center p-4 bg-primary/10 rounded-lg">
                   <p className="text-sm text-muted-foreground">Total Loans</p>
                   <p className="text-2xl font-bold text-foreground">{(branchStats === null || branchStats === void 0 ? void 0 : branchStats.totalLoans) || 0}</p>

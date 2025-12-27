@@ -50,8 +50,8 @@ export default function ITSupportDashboard() {
 
   return (
     <Layout>
-      <div className="p-8 max-w-7xl mx-auto space-y-8">
-        <div className="flex items-center justify-between">
+      <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <h1 className="text-3xl font-bold tracking-tight">IT Support Dashboard</h1>
             <div className="flex items-center gap-2">
                 <span className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${status?.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
@@ -131,7 +131,7 @@ export default function ITSupportDashboard() {
 
                 <div className="space-y-4 pt-4 border-t">
                      <h4 className="text-sm font-medium">Renew Subscription</h4>
-                     <div className="flex items-end gap-4">
+                     <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-4">
                         <div className="space-y-2 flex-1">
                             <Label>Duration (Days)</Label>
                             <Input 
@@ -142,7 +142,7 @@ export default function ITSupportDashboard() {
                             />
                         </div>
                         <Button onClick={handleRenew} disabled={loading} className="flex-1">
-                            {loading ? "Processing..." : "Add Days to Subscription"}
+                            {loading ? "Processing..." : "Add Days"}
                         </Button>
                      </div>
                 </div>

@@ -61,27 +61,27 @@ export function GroupsPage() {
   return (
     <Layout>
       <div className="space-y-8 px-4 sm:px-6 lg:px-8 py-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">
               Groups
             </h1>
             <p className="text-muted-foreground mt-2">
               Manage your lending groups and monitor their performance
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 w-full md:w-auto">
             <Button 
               variant="outline" 
               onClick={() => setShowExport(true)}
-              className="gap-2"
+              className="flex-1 md:flex-none gap-2"
             >
               <Download className="h-4 w-4" />
               Export
             </Button>
             <Button 
               onClick={() => setShowAddGroup(true)}
-              className="gap-2 bg-primary hover:bg-primary/80 text-white shadow-lg"
+              className="flex-1 md:flex-none gap-2 bg-primary hover:bg-primary/80 text-white shadow-lg"
             >
               <Plus className="h-4 w-4" />
               New Group

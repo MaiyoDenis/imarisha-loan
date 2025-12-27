@@ -88,9 +88,9 @@ function CustomerDashboardView({ memberId }) {
     return (
         <Layout>
             <div className="space-y-8 px-4 sm:px-6 lg:px-8 py-6">
-                <div className="flex items-center justify-between gap-4">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                     <div className="space-y-1 flex-1">
-                        <h1 className="text-4xl font-bold tracking-tight">
+                        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
                             Welcome, {m.user.firstName}!
                         </h1>
                         <div className="flex items-center gap-4 text-muted-foreground flex-wrap">
@@ -107,12 +107,12 @@ function CustomerDashboardView({ memberId }) {
                             </div>
                         </div>
                     </div>
-                    <div className="flex gap-2">
-                        <Button onClick={() => setShowLoanForm(!showLoanForm)} className="gap-2 bg-primary hover:bg-primary/80" size="lg">
+                    <div className="flex flex-row gap-2 w-full md:w-auto">
+                        <Button onClick={() => setShowLoanForm(!showLoanForm)} className="flex-1 md:flex-none gap-2 bg-primary hover:bg-primary/80" size="lg">
                             <CreditCard className="h-5 w-5"/>
                             {showLoanForm ? "Cancel" : "Apply for Loan"}
                         </Button>
-                        <Button onClick={() => setShowTransferForm(!showTransferForm)} className="gap-2" variant="outline" size="lg">
+                        <Button onClick={() => setShowTransferForm(!showTransferForm)} className="flex-1 md:flex-none gap-2" variant="outline" size="lg">
                             <TrendingUp className="h-5 w-5"/>
                             {showTransferForm ? "Cancel" : "Transfer"}
                         </Button>
@@ -281,12 +281,14 @@ function CustomerDashboardView({ memberId }) {
                 )}
 
                 <Tabs defaultValue="loans" className="w-full">
-                    <TabsList className="bg-transparent p-1 rounded-lg border border-border">
-                        <TabsTrigger value="loans">Active Loans ({m.activeLoans.length})</TabsTrigger>
-                        <TabsTrigger value="history">Loan History</TabsTrigger>
-                        <TabsTrigger value="products">Product Catalog</TabsTrigger>
-                        <TabsTrigger value="transactions">Recent Transactions</TabsTrigger>
-                    </TabsList>
+                    <div className="overflow-x-auto pb-2 scrollbar-hide">
+                        <TabsList className="inline-flex w-max min-w-full bg-transparent p-1 rounded-lg border border-border h-auto">
+                            <TabsTrigger value="loans" className="px-4 py-2">Active Loans ({m.activeLoans.length})</TabsTrigger>
+                            <TabsTrigger value="history" className="px-4 py-2">Loan History</TabsTrigger>
+                            <TabsTrigger value="products" className="px-4 py-2">Product Catalog</TabsTrigger>
+                            <TabsTrigger value="transactions" className="px-4 py-2">Recent Transactions</TabsTrigger>
+                        </TabsList>
+                    </div>
                     <TabsContent value="loans" className="mt-6">
                         {m.activeLoans.length === 0 ? (
                             <div className="text-center py-12 border-2 border-dashed rounded-xl">
@@ -368,16 +370,16 @@ function CustomerDashboardView({ memberId }) {
                     <TabsContent value="history" className="mt-6">
                         <Card className="border-2 !bg-transparent mb-6">
                             <CardContent className="pt-6 space-y-6">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="bg-transparent p-6 rounded-lg border border-primary/30">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="bg-transparent p-4 sm:p-6 rounded-lg border border-primary/30">
                                         <p className="text-xs text-muted-foreground mb-2">Total Borrowed</p>
-                                        <p className="text-3xl font-bold text-primary">
+                                        <p className="text-2xl sm:text-3xl font-bold text-primary">
                                             KES {new Intl.NumberFormat('en-KE').format(parseFloat(m.totalBorrowed))}
                                         </p>
                                     </div>
-                                    <div className="bg-transparent p-6 rounded-lg border border-green-200">
+                                    <div className="bg-transparent p-4 sm:p-6 rounded-lg border border-green-200">
                                         <p className="text-xs text-muted-foreground mb-2">Total Repaid</p>
-                                        <p className="text-3xl font-bold text-secondary">
+                                        <p className="text-2xl sm:text-3xl font-bold text-secondary">
                                             KES {new Intl.NumberFormat('en-KE').format(parseFloat(m.totalRepaid))}
                                         </p>
                                     </div>

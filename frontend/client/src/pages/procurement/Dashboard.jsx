@@ -262,7 +262,7 @@ export default function ProcurementOfficerDashboard() {
         }
     };
     return (<Layout>
-      <div className="p-8 space-y-8">
+      <div className="p-4 md:p-8 space-y-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-4xl font-heading font-extrabold tracking-tight text-gradient">Procurement Officer</h1>
@@ -316,15 +316,17 @@ export default function ProcurementOfficerDashboard() {
           </Card>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="pending-transactions">Transactions ({pendingTransactions.length})</TabsTrigger>
-            <TabsTrigger value="pending-loans">Pending Loans ({pendingLoans.length})</TabsTrigger>
-            <TabsTrigger value="under-review">Under Review ({underReviewLoans.length})</TabsTrigger>
-            <TabsTrigger value="approved">Approved ({approvedLoans.length})</TabsTrigger>
-            <TabsTrigger value="stock-alerts">Stock Alerts ({lowStockProducts.length})</TabsTrigger>
-            <TabsTrigger value="suppliers">Suppliers</TabsTrigger>
-          </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <div className="overflow-x-auto pb-2 scrollbar-hide">
+            <TabsList className="inline-flex w-max min-w-full md:grid md:w-full md:grid-cols-6 h-auto p-1">
+              <TabsTrigger value="pending-transactions" className="px-4 py-2 text-xs md:text-sm">Transactions ({pendingTransactions.length})</TabsTrigger>
+              <TabsTrigger value="pending-loans" className="px-4 py-2 text-xs md:text-sm">Pending Loans ({pendingLoans.length})</TabsTrigger>
+              <TabsTrigger value="under-review" className="px-4 py-2 text-xs md:text-sm">Under Review ({underReviewLoans.length})</TabsTrigger>
+              <TabsTrigger value="approved" className="px-4 py-2 text-xs md:text-sm">Approved ({approvedLoans.length})</TabsTrigger>
+              <TabsTrigger value="stock-alerts" className="px-4 py-2 text-xs md:text-sm">Stock Alerts ({lowStockProducts.length})</TabsTrigger>
+              <TabsTrigger value="suppliers" className="px-4 py-2 text-xs md:text-sm">Suppliers</TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="pending-transactions" className="space-y-4 mt-6">
              {pendingTransactions.length === 0 ? (
@@ -336,6 +338,7 @@ export default function ProcurementOfficerDashboard() {
                 </Card>
              ) : (
                 <div className="rounded-md border border-border bg-card overflow-hidden">
+                <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -389,6 +392,7 @@ export default function ProcurementOfficerDashboard() {
                     ))}
                   </TableBody>
                 </Table>
+                </div>
               </div>
              )}
           </TabsContent>
@@ -406,6 +410,7 @@ export default function ProcurementOfficerDashboard() {
                   <p className="text-muted-foreground">No pending loans</p>
                 </CardContent>
               </Card>) : (<div className="rounded-md border border-border bg-card overflow-hidden">
+                <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -452,6 +457,7 @@ export default function ProcurementOfficerDashboard() {
                       </TableRow>); })}
                   </TableBody>
                 </Table>
+                </div>
               </div>)}
           </TabsContent>
 
@@ -463,6 +469,7 @@ export default function ProcurementOfficerDashboard() {
                   <p className="text-muted-foreground">No loans under review</p>
                 </CardContent>
               </Card>) : (<div className="rounded-md border border-border bg-card overflow-hidden">
+                <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -505,6 +512,7 @@ export default function ProcurementOfficerDashboard() {
                       </TableRow>); })}
                   </TableBody>
                 </Table>
+                </div>
               </div>)}
           </TabsContent>
 
@@ -516,6 +524,7 @@ export default function ProcurementOfficerDashboard() {
                   <p className="text-muted-foreground">No approved loans</p>
                 </CardContent>
               </Card>) : (<div className="rounded-md border border-border bg-card overflow-hidden">
+                <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -559,6 +568,7 @@ export default function ProcurementOfficerDashboard() {
                       </TableRow>); })}
                   </TableBody>
                 </Table>
+                </div>
               </div>)}
           </TabsContent>
 
@@ -572,10 +582,10 @@ export default function ProcurementOfficerDashboard() {
               </Card>) : (<div className="space-y-4">
                 {lowStockProducts.map(function (item) { return (<Card key={item.product.id} className={"border-l-4 ".concat(item.status === 'critical' ? 'border-l-red-500' : 'border-l-yellow-500')}>
                     <CardContent className="pt-6">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
+                      <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
+                        <div className="flex-1 w-full">
                           <h3 className="font-semibold text-lg">{item.product.name}</h3>
-                          <div className="grid grid-cols-3 gap-4 mt-4">
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
                             <div>
                               <p className="text-sm text-muted-foreground">Current Stock</p>
                               <p className="text-2xl font-bold">{item.product.stockQuantity}</p>
@@ -592,7 +602,7 @@ export default function ProcurementOfficerDashboard() {
                             </div>
                           </div>
                         </div>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" className="w-full sm:w-auto">
                           <Plus className="h-4 w-4 mr-1"/> Restock
                         </Button>
                       </div>
@@ -629,11 +639,11 @@ export default function ProcurementOfficerDashboard() {
                     <CardContent className="pt-6">
                       {supplier.email && <p className="text-sm text-muted-foreground mb-2">{supplier.email}</p>}
                       {supplier.location && <p className="text-sm text-muted-foreground mb-4">{supplier.location}</p>}
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" className="flex-1">
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <Button variant="outline" size="sm" className="w-full sm:flex-1">
                           <Edit className="h-4 w-4"/>
                         </Button>
-                        <Button variant="outline" size="sm" className="flex-1">
+                        <Button variant="outline" size="sm" className="w-full sm:flex-1">
                           View Details
                         </Button>
                       </div>

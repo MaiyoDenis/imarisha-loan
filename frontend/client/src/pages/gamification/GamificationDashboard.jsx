@@ -112,10 +112,10 @@ export const GamificationDashboard = () => {
 
     return (
         <Layout>
-            <div className="min-h-screen p-6 bg-background">
+            <div className="min-h-screen p-4 md:p-6 bg-background">
                 <div className="max-w-7xl mx-auto">
                     <div className="mb-8">
-                        <h1 className="text-4xl font-bold tracking-tight text-foreground">Gamification Dashboard</h1>
+                        <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-gradient">Gamification Dashboard</h1>
                         <p className="text-muted-foreground mt-2">Earn points, unlock achievements, and compete with others!</p>
                     </div>
 

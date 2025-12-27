@@ -236,29 +236,29 @@ export default function AdminDashboard() {
     };
 
     return (<Layout>
-      <div className="min-h-screen p-6 bg-background">
+      <div className="min-h-screen p-3 md:p-6 bg-background">
         <div className="max-w-7xl mx-auto">
           {/* Main Dashboard Header */}
-          <div className="flex justify-between items-start mb-8">
-            <div>
-              <h1 className="text-4xl font-bold tracking-tight text-foreground">Reports & Analytics</h1>
+          <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-8">
+            <div className="flex-1">
+              <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">Reports & Analytics</h1>
               <p className="text-muted-foreground mt-2">Generate insights and monitor performance across your organization.</p>
               {(dashboard === null || dashboard === void 0 ? void 0 : dashboard.timestamp) && (<p className="text-xs text-muted-foreground mt-2">
                   Last updated: {new Date(dashboard.timestamp).toLocaleString()}
                 </p>)}
             </div>
-            <div className="flex flex-col gap-3">
-              <div className="flex gap-3">
-                <button onClick={handleRefresh} disabled={isRefreshing} className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/80 transition disabled:opacity-50">
-                  <RefreshCw size={18} className={isRefreshing ? 'animate-spin' : ''}/>
+            <div className="flex flex-col sm:flex-row md:flex-col gap-3 w-full md:w-auto">
+              <div className="flex flex-row gap-3 w-full">
+                <button onClick={handleRefresh} disabled={isRefreshing} className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary/80 transition disabled:opacity-50 text-sm">
+                  <RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''}/>
                   {isRefreshing ? 'Refreshing...' : 'Refresh'}
                 </button>
-                <button onClick={handleExport} className="flex items-center gap-2 px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/80 transition">
-                  <Download size={18}/>
+                <button onClick={handleExport} className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/80 transition text-sm">
+                  <Download size={16}/>
                   Export
                 </button>
               </div>
-              <select value={sectionFilter} onChange={function (e) { return setSectionFilter(e.target.value); }} className="px-4 py-2 border border-border rounded-lg bg-card text-foreground font-medium hover:border-primary/40 transition focus:outline-none focus:ring-2 focus:ring-primary">
+              <select value={sectionFilter} onChange={function (e) { return setSectionFilter(e.target.value); }} className="w-full px-3 py-2 border border-border rounded-lg bg-card text-foreground text-sm font-medium hover:border-primary/40 transition focus:outline-none focus:ring-2 focus:ring-primary">
                 <option value="all">All Sections</option>
                 <option value="product">Product Inventory Overview</option>
                 <option value="lending">Lending Analytics</option>
@@ -392,7 +392,7 @@ export default function AdminDashboard() {
               </div>
 
               {/* Growth Metrics Chart */}
-              <div className="mt-6 bg-card rounded-lg border border-border p-6">
+              <div className="mt-6 bg-card rounded-lg border border-border p-3 md:p-6">
                 <h3 className="text-lg font-semibold text-foreground mb-4">Growth Comparison</h3>
                 <div className="h-[300px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
@@ -423,8 +423,8 @@ export default function AdminDashboard() {
             </div>)}
 
           {/* Top Products */}
-          {(sectionFilter === 'all' || sectionFilter === 'topproducts') && dashboard.top_products && dashboard.top_products.length > 0 && (<div className="mb-8 bg-card rounded-lg border border-border p-6">
-              <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
+          {(sectionFilter === 'all' || sectionFilter === 'topproducts') && dashboard.top_products && dashboard.top_products.length > 0 && (<div className="mb-8 bg-card rounded-lg border border-border p-3 md:p-6">
+              <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2 text-xl md:text-2xl">
                 <ShoppingCart className="text-destructive" size={28}/>
                 Top Performing Products
               </h2>
@@ -459,8 +459,8 @@ export default function AdminDashboard() {
             </div>)}
 
           {/* Branch Comparison */}
-          {(sectionFilter === 'all' || sectionFilter === 'branch') && dashboard.branch_comparison && dashboard.branch_comparison.length > 0 && (<div className="bg-card rounded-lg border border-border p-6">
-              <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
+          {(sectionFilter === 'all' || sectionFilter === 'branch') && dashboard.branch_comparison && dashboard.branch_comparison.length > 0 && (<div className="bg-card rounded-lg border border-border p-3 md:p-6">
+              <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2 text-xl md:text-2xl">
                 <Target className="text-primary" size={28}/>
                 Branch Comparison
               </h2>

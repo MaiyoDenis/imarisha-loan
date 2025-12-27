@@ -181,7 +181,7 @@ export default function Store() {
         return "text-red-500";
     };
     return (<Layout>
-      <div className="p-8 space-y-8">
+      <div className="p-4 md:p-8 space-y-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-4xl font-heading font-extrabold tracking-tight text-gradient">Store & Inventory</h1>
@@ -193,13 +193,15 @@ export default function Store() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="products">All Products</TabsTrigger>
-            <TabsTrigger value="suppliers">Suppliers</TabsTrigger>
-            <TabsTrigger value="low-stock">Low Stock ({lowStockProducts.length})</TabsTrigger>
-            <TabsTrigger value="critical-stock">Critical ({criticalStockProducts.length})</TabsTrigger>
-            <TabsTrigger value="movements">Movements</TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto pb-2 scrollbar-hide">
+            <TabsList className="inline-flex w-max min-w-full md:grid md:w-full md:grid-cols-5 h-auto p-1">
+              <TabsTrigger value="products">All Products</TabsTrigger>
+              <TabsTrigger value="suppliers">Suppliers</TabsTrigger>
+              <TabsTrigger value="low-stock">Low Stock ({lowStockProducts.length})</TabsTrigger>
+              <TabsTrigger value="critical-stock">Critical ({criticalStockProducts.length})</TabsTrigger>
+              <TabsTrigger value="movements">Movements</TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="products" className="space-y-4 mt-6">
             <Card>
@@ -211,7 +213,9 @@ export default function Store() {
                 <CardDescription>Manage inventory for all loan products</CardDescription>
               </CardHeader>
               <CardContent>
-                {loanProducts.length === 0 ? (<p className="text-muted-foreground text-center py-8">No products found</p>) : (<Table>
+                {loanProducts.length === 0 ? (<p className="text-muted-foreground text-center py-8">No products found</p>) : (
+                  <div className="overflow-x-auto">
+                    <Table>
                     <TableHeader>
                       <TableRow>
                         <TableHead>Product Name</TableHead>
@@ -246,7 +250,8 @@ export default function Store() {
                         </TableRow>
                       ))}
                     </TableBody>
-                  </Table>)}
+                  </Table>
+                </div>)}
               </CardContent>
             </Card>
           </TabsContent>
@@ -306,8 +311,8 @@ export default function Store() {
                         <p className="text-xs text-muted-foreground mt-1">{supplier.totalSupplies} products supplied</p>
                       </div>
 
-                      <div className="flex gap-2 pt-4">
-                        <Button variant="outline" size="sm" className="flex-1" onClick={function () {
+                      <div className="flex flex-col sm:flex-row gap-2 pt-4">
+                        <Button variant="outline" size="sm" className="w-full sm:flex-1" onClick={function () {
                     setSelectedSupplier(supplier);
                     setSupplierForm({
                         name: supplier.name,
@@ -321,13 +326,14 @@ export default function Store() {
                 }}>
                           <Edit className="h-4 w-4"/>
                         </Button>
-                        <Button variant="outline" size="sm" className="flex-1" onClick={function () {
+                        <Button variant="outline" size="sm" className="w-full sm:flex-1" onClick={function () {
                     setSelectedSupplier(supplier);
                     setRatingValue(supplier.rating.toString());
+                    // Open rating dialog logic here if any, or just use it as a placeholder
                 }}>
-                          <Star className="h-4 w-4"/>
+                           Rate
                         </Button>
-                        <Button variant="destructive" size="sm" className="flex-1" onClick={function () {
+                        <Button variant="destructive" size="sm" className="w-full sm:flex-1" onClick={function () {
                     setSelectedSupplier(supplier);
                     setIsDeleteOpen(true);
                 }}>
@@ -349,7 +355,9 @@ export default function Store() {
                 <CardDescription>Products approaching minimum stock levels</CardDescription>
               </CardHeader>
               <CardContent>
-                {lowStockProducts.length === 0 ? (<p className="text-muted-foreground text-center py-8">All products have adequate stock</p>) : (<Table>
+                {lowStockProducts.length === 0 ? (<p className="text-muted-foreground text-center py-8">All products have adequate stock</p>) : (
+                  <div className="overflow-x-auto">
+                    <Table>
                     <TableHeader>
                       <TableRow>
                         <TableHead>Product</TableHead>
@@ -370,7 +378,8 @@ export default function Store() {
                           </TableCell>
                         </TableRow>); })}
                     </TableBody>
-                  </Table>)}
+                  </Table>
+                </div>)}
               </CardContent>
             </Card>
           </TabsContent>
@@ -385,7 +394,9 @@ export default function Store() {
                 <CardDescription>Products at critical stock levels - immediate restock required</CardDescription>
               </CardHeader>
               <CardContent>
-                {criticalStockProducts.length === 0 ? (<p className="text-muted-foreground text-center py-8">No critical stock alerts</p>) : (<Table>
+                {criticalStockProducts.length === 0 ? (<p className="text-muted-foreground text-center py-8">No critical stock alerts</p>) : (
+                  <div className="overflow-x-auto">
+                    <Table>
                     <TableHeader>
                       <TableRow>
                         <TableHead>Product</TableHead>
@@ -404,7 +415,8 @@ export default function Store() {
                           </TableCell>
                         </TableRow>); })}
                     </TableBody>
-                  </Table>)}
+                  </Table>
+                </div>)}
               </CardContent>
             </Card>
           </TabsContent>
@@ -469,7 +481,7 @@ export default function Store() {
             e.preventDefault();
             createSupplierMutation.mutate(supplierForm);
         }} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Supplier Name *</Label>
                   <Input id="name" value={supplierForm.name} onChange={function (e) { return setSupplierForm(__assign(__assign({}, supplierForm), { name: e.target.value })); }} required/>
@@ -479,7 +491,7 @@ export default function Store() {
                   <Input id="phone" value={supplierForm.phone} onChange={function (e) { return setSupplierForm(__assign(__assign({}, supplierForm), { phone: e.target.value })); }} required/>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input id="email" type="email" value={supplierForm.email} onChange={function (e) { return setSupplierForm(__assign(__assign({}, supplierForm), { email: e.target.value })); }}/>
@@ -489,7 +501,7 @@ export default function Store() {
                   <Input id="location" value={supplierForm.location} onChange={function (e) { return setSupplierForm(__assign(__assign({}, supplierForm), { location: e.target.value })); }}/>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="companyName">Company Name</Label>
                   <Input id="companyName" value={supplierForm.companyName} onChange={function (e) { return setSupplierForm(__assign(__assign({}, supplierForm), { companyName: e.target.value })); }}/>
@@ -519,7 +531,7 @@ export default function Store() {
             e.preventDefault();
             updateSupplierMutation.mutate(supplierForm);
         }} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-name">Supplier Name</Label>
                   <Input id="edit-name" value={supplierForm.name} onChange={function (e) { return setSupplierForm(__assign(__assign({}, supplierForm), { name: e.target.value })); }}/>
@@ -529,7 +541,7 @@ export default function Store() {
                   <Input id="edit-phone" value={supplierForm.phone} onChange={function (e) { return setSupplierForm(__assign(__assign({}, supplierForm), { phone: e.target.value })); }}/>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-email">Email</Label>
                   <Input id="edit-email" type="email" value={supplierForm.email} onChange={function (e) { return setSupplierForm(__assign(__assign({}, supplierForm), { email: e.target.value })); }}/>

@@ -141,9 +141,9 @@ export default function RiskDashboard() {
         { name: 'Critical', value: dashboard.risk_distribution.critical_risk.count, color: '#c62828' }
     ];
     return (<Layout>
-      <div className="min-h-screen p-6">
+      <div className="min-h-screen p-4 md:p-6">
         <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-start mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-6 mb-8">
           <div>
             <h1 className="text-3xl md:text-4xl font-heading font-extrabold tracking-tight text-gradient">Risk Management Dashboard</h1>
             <p className="text-sm text-muted-foreground mt-1">Monitor portfolio risk and early warning indicators</p>
@@ -151,14 +151,14 @@ export default function RiskDashboard() {
                 Last updated: {new Date(dashboard.timestamp).toLocaleString()}
               </p>)}
           </div>
-          <div className="flex gap-3">
-            <button onClick={handleRefresh} disabled={isRefreshing} className={"btn-neon px-4 py-2 rounded-lg ".concat(isRefreshing ? 'opacity-50 cursor-not-allowed' : '')}>
+          <div className="flex gap-3 w-full sm:w-auto">
+            <button onClick={handleRefresh} disabled={isRefreshing} className={"flex-1 sm:flex-none btn-neon px-4 py-2 rounded-lg flex items-center justify-center gap-2 ".concat(isRefreshing ? 'opacity-50 cursor-not-allowed' : '')}>
               <RefreshCw size={18} className={isRefreshing ? 'animate-spin' : ''}/>
               <span className="text-sm font-medium">
                 {isRefreshing ? 'Refreshing...' : 'Refresh'}
               </span>
             </button>
-            <button onClick={handleExport} className="btn-neon px-4 py-2 rounded-lg cursor-pointer">
+            <button onClick={handleExport} className="flex-1 sm:flex-none btn-neon px-4 py-2 rounded-lg cursor-pointer flex items-center justify-center gap-2">
               <Download size={18}/>
               <span className="text-sm font-medium">Export</span>
             </button>
@@ -187,7 +187,7 @@ export default function RiskDashboard() {
         </div>
 
         {/* Risk Distribution Chart */}
-        <div className="mb-8 glass-card gradient-border hover-tilt p-6 relative overflow-hidden">
+        <div className="mb-8 glass-card gradient-border hover-tilt p-4 md:p-6 relative overflow-hidden">
           <span className="aura"></span>
           <h3 className="font-heading font-semibold text-foreground mb-4">Member Risk Distribution</h3>
           <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
@@ -208,16 +208,16 @@ export default function RiskDashboard() {
         {/* Portfolio Concentration */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* By Product */}
-          <div className="glass-card gradient-border hover-tilt p-6 relative overflow-hidden">
+          <div className="glass-card gradient-border hover-tilt p-4 md:p-6 relative overflow-hidden">
             <span className="aura"></span>
             <h3 className="font-heading font-semibold text-foreground mb-4">Concentration by Product</h3>
             <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
             <ResponsiveContainer width="100%" height="100%" debounce={100}>
               <BarChart data={dashboard.portfolio_concentration.by_product || []}>
                 <CartesianGrid strokeDasharray="3 3"/>
-                <XAxis dataKey="product"/>
-                <YAxis yAxisId="left"/>
-                <YAxis yAxisId="right" orientation="right"/>
+                <XAxis dataKey="product" className="text-[10px] md:text-xs" />
+                <YAxis yAxisId="left" className="text-[10px] md:text-xs" />
+                <YAxis yAxisId="right" orientation="right" className="text-[10px] md:text-xs" />
                 <Tooltip />
                 <Bar yAxisId="left" dataKey="amount" fill="#3b82f6"/>
                 <Bar yAxisId="right" dataKey="percentage" fill="#10b981"/>
@@ -227,16 +227,16 @@ export default function RiskDashboard() {
           </div>
 
           {/* By Location */}
-          <div className="glass-card gradient-border hover-tilt p-6 relative overflow-hidden">
+          <div className="glass-card gradient-border hover-tilt p-4 md:p-6 relative overflow-hidden">
             <span className="aura"></span>
             <h3 className="font-heading font-semibold text-foreground mb-4">Concentration by Location</h3>
             <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
             <ResponsiveContainer width="100%" height="100%" debounce={100}>
               <BarChart data={dashboard.portfolio_concentration.by_location || []}>
                 <CartesianGrid strokeDasharray="3 3"/>
-                <XAxis dataKey="location"/>
-                <YAxis yAxisId="left"/>
-                <YAxis yAxisId="right" orientation="right"/>
+                <XAxis dataKey="location" className="text-[10px] md:text-xs" />
+                <YAxis yAxisId="left" className="text-[10px] md:text-xs" />
+                <YAxis yAxisId="right" orientation="right" className="text-[10px] md:text-xs" />
                 <Tooltip />
                 <Bar yAxisId="left" dataKey="amount" fill="#8b5cf6"/>
                 <Bar yAxisId="right" dataKey="percentage" fill="#ec4899"/>
@@ -247,7 +247,7 @@ export default function RiskDashboard() {
         </div>
 
         {/* Scenario Analysis */}
-        <div className="mb-8 glass-card gradient-border hover-tilt p-6 relative overflow-hidden">
+        <div className="mb-8 glass-card gradient-border hover-tilt p-4 md:p-6 relative overflow-hidden">
           <span className="aura"></span>
           <h3 className="font-heading font-semibold text-foreground mb-4">Stress Testing Scenarios</h3>
           <div style={{ width: "100%", height: "300px", minWidth: 0, overflow: "hidden" }}>
@@ -259,8 +259,8 @@ export default function RiskDashboard() {
             { scenario: 'Stress 20%', npl: dashboard.scenario_analysis.stress_20pct.npl_rate }
         ]}>
               <CartesianGrid strokeDasharray="3 3"/>
-              <XAxis dataKey="scenario"/>
-              <YAxis />
+              <XAxis dataKey="scenario" className="text-[10px] md:text-xs" />
+              <YAxis className="text-[10px] md:text-xs" />
               <Tooltip />
               <Bar dataKey="npl" fill="#ef4444"/>
             </BarChart>
@@ -269,7 +269,7 @@ export default function RiskDashboard() {
         </div>
 
         {/* Early Warnings */}
-        {dashboard.early_warnings.length > 0 && (<div className="glass-card gradient-border hover-tilt p-6">
+        {dashboard.early_warnings.length > 0 && (<div className="glass-card gradient-border hover-tilt p-4 md:p-6">
             <h2 className="text-xl font-heading font-semibold text-foreground mb-4 flex items-center gap-2">
               <AlertTriangle size={24} className="text-accent"/>
               Early Warning Indicators
