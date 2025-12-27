@@ -337,3 +337,72 @@
 2025-12-26 18:59:11,424 - app.routes.dashboard - INFO - Collection Rate: 0 (Repaid: 0, Processed: 0)
 2025-12-26 18:59:11,434 - app.routes.dashboard - INFO - Average Loan: 15000.0000000000000000
 2025-12-26 18:59:11,448 - app.routes.dashboard - INFO - Growth: 0 (Current: 1, Prev: 0)
+2025-12-27 02:30:19,785 - prophet.plot - ERROR - Importing plotly failed. Interactive plots will not work.
+2025-12-27 02:30:19,894 - root - INFO - MFA Service initialized successfully
+2025-12-27 02:30:19,897 - root - INFO - Audit Service initialized successfully
+2025-12-27 02:30:19,907 - root - INFO - Notification Service: Redis connection established
+2025-12-27 02:30:19,909 - root - INFO - Initialized 18 notification templates
+2025-12-27 02:30:19,911 - root - INFO - Notification Service initialized successfully
+2025-12-27 02:30:19,912 - root - INFO - Payment Service initialized in sandbox mode
+2025-12-27 02:30:19,914 - root - INFO - Risk Service initialized successfully
+2025-12-27 02:30:19,921 - root - INFO - Redis connected successfully for dashboard service using REDIS_URL
+2025-12-27 02:30:19,922 - root - INFO - Dashboard Service initialized successfully
+2025-12-27 02:30:19,926 - root - INFO - Currency Service: Redis connection established
+2025-12-27 02:30:19,926 - root - INFO - Currency Service initialized successfully
+2025-12-27 02:30:19,927 - root - INFO - USSD Service initialized with code: *123#
+2025-12-27 02:30:19,928 - root - INFO - BI Integration Service initialized
+2025-12-27 02:30:19,930 - root - INFO - KYC Service initialized
+2025-12-27 02:30:19,931 - root - INFO - AML Service initialized
+2025-12-27 02:30:19,932 - root - INFO - GDPR Service initialized
+2025-12-27 02:30:19,933 - root - INFO - Voice Assistant initialized
+2025-12-27 02:30:19,935 - root - INFO - Voice Analytics initialized
+2025-12-27 02:30:19,936 - root - INFO - Demand Forecasting initialized
+2025-12-27 02:30:19,936 - root - INFO - Inventory Optimization initialized
+2025-12-27 02:30:19,937 - root - INFO - ETL Service initialized
+2025-12-27 02:30:25,369 - app - INFO - Application initialized successfully
+2025-12-27 02:31:14,788 - prophet.plot - ERROR - Importing plotly failed. Interactive plots will not work.
+2025-12-27 02:31:14,794 - root - INFO - MFA Service initialized successfully
+2025-12-27 02:31:14,795 - root - INFO - Audit Service initialized successfully
+2025-12-27 02:31:14,797 - root - INFO - Notification Service: Redis connection established
+2025-12-27 02:31:14,797 - root - INFO - Initialized 18 notification templates
+2025-12-27 02:31:14,797 - root - INFO - Notification Service initialized successfully
+2025-12-27 02:31:14,798 - root - INFO - Payment Service initialized in sandbox mode
+2025-12-27 02:31:14,798 - root - INFO - Risk Service initialized successfully
+2025-12-27 02:31:14,800 - root - INFO - Redis connected successfully for dashboard service using REDIS_URL
+2025-12-27 02:31:14,800 - root - INFO - Dashboard Service initialized successfully
+2025-12-27 02:31:14,802 - root - INFO - Currency Service: Redis connection established
+2025-12-27 02:31:14,802 - root - INFO - Currency Service initialized successfully
+2025-12-27 02:31:14,803 - root - INFO - USSD Service initialized with code: *123#
+2025-12-27 02:31:14,803 - root - INFO - BI Integration Service initialized
+2025-12-27 02:31:14,804 - root - INFO - KYC Service initialized
+2025-12-27 02:31:14,805 - root - INFO - AML Service initialized
+2025-12-27 02:31:14,805 - root - INFO - GDPR Service initialized
+2025-12-27 02:31:14,806 - root - INFO - Voice Assistant initialized
+2025-12-27 02:31:14,807 - root - INFO - Voice Analytics initialized
+2025-12-27 02:31:14,807 - root - INFO - Demand Forecasting initialized
+2025-12-27 02:31:14,808 - root - INFO - Inventory Optimization initialized
+2025-12-27 02:31:14,808 - root - INFO - ETL Service initialized
+2025-12-27 02:31:15,419 - app - INFO - Application initialized successfully
+2025-12-27 02:32:29,589 - prophet.plot - ERROR - Importing plotly failed. Interactive plots will not work.
+2025-12-27 02:32:29,598 - root - INFO - MFA Service initialized successfully
+2025-12-27 02:32:29,600 - root - INFO - Audit Service initialized successfully
+2025-12-27 02:32:29,603 - root - INFO - Notification Service: Redis connection established
+2025-12-27 02:32:29,605 - root - INFO - Initialized 18 notification templates
+2025-12-27 02:32:29,605 - root - INFO - Notification Service initialized successfully
+2025-12-27 02:32:29,606 - root - INFO - Payment Service initialized in sandbox mode
+2025-12-27 02:32:29,607 - root - INFO - Risk Service initialized successfully
+2025-12-27 02:32:29,609 - root - INFO - Redis connected successfully for dashboard service using REDIS_URL
+2025-12-27 02:32:29,610 - root - INFO - Dashboard Service initialized successfully
+2025-12-27 02:32:29,614 - root - INFO - Currency Service: Redis connection established
+2025-12-27 02:32:29,614 - root - INFO - Currency Service initialized successfully
+2025-12-27 02:32:29,616 - root - INFO - USSD Service initialized with code: *123#
+2025-12-27 02:32:29,617 - root - INFO - BI Integration Service initialized
+2025-12-27 02:32:29,621 - root - INFO - KYC Service initialized
+2025-12-27 02:32:29,622 - root - INFO - AML Service initialized
+2025-12-27 02:32:29,623 - root - INFO - GDPR Service initialized
+2025-12-27 02:32:29,627 - root - INFO - Voice Assistant initialized
+2025-12-27 02:32:29,628 - root - INFO - Voice Analytics initialized
+2025-12-27 02:32:29,629 - root - INFO - Demand Forecasting initialized
+2025-12-27 02:32:29,629 - root - INFO - Inventory Optimization initialized
+2025-12-27 02:32:29,631 - root - INFO - ETL Service initialized
+2025-12-27 02:32:30,816 - app - INFO - Application initialized successfully

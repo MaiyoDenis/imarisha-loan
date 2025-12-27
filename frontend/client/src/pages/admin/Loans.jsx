@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,10 +17,38 @@ export default function Loans() {
     var [selectedLoan, setSelectedLoan] = useState(null);
     var [isDetailsOpen, setIsDetailsOpen] = useState(false);
     var [isScheduleOpen, setIsScheduleOpen] = useState(false);
+    var queryClient = useQueryClient();
+    var toast = useToast().toast;
+
     var _a = useQuery({
         queryKey: ["loans"],
         queryFn: function () { return api.getLoans(); },
     }), _b = _a.data, loans = _b === void 0 ? [] : _b, isLoading = _a.isLoading;
+
+    var approveMutation = useMutation({
+        mutationFn: function (id) { return api.approveLoan(id); },
+        onSuccess: function () {
+            queryClient.invalidateQueries({ queryKey: ["loans"] });
+            toast({ title: "Success", description: "Loan approved successfully" });
+        },
+    });
+
+    var rejectMutation = useMutation({
+        mutationFn: function (id) { return api.rejectLoan(id, "Rejected by administrator"); },
+        onSuccess: function () {
+            queryClient.invalidateQueries({ queryKey: ["loans"] });
+            queryClient.invalidateQueries({ queryKey: ["loan-products"] });
+            toast({ title: "Success", description: "Loan rejected and stock restored" });
+        },
+    });
+
+    var disburseMutation = useMutation({
+        mutationFn: function (id) { return api.disburseLoan(id); },
+        onSuccess: function () {
+            queryClient.invalidateQueries({ queryKey: ["loans"] });
+            toast({ title: "Success", description: "Loan disbursed successfully" });
+        },
+    });
     var getStatusIcon = function (status) {
         switch (status) {
             case "active": return <Clock className="mr-1 h-3 w-3"/>;
@@ -123,9 +152,27 @@ export default function Loans() {
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             {loan.status === "pending" && (<>
-                                <DropdownMenuItem className="text-secondary">Approve Loan</DropdownMenuItem>
-                                <DropdownMenuItem className="text-destructive">Reject Loan</DropdownMenuItem>
+                                <DropdownMenuItem 
+                                    className="text-secondary"
+                                    onClick={() => approveMutation.mutate(loan.id)}
+                                >
+                                    Approve Loan
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                    className="text-destructive"
+                                    onClick={() => rejectMutation.mutate(loan.id)}
+                                >
+                                    Reject Loan
+                                </DropdownMenuItem>
                               </>)}
+                            {loan.status === "approved" && (
+                                <DropdownMenuItem 
+                                    className="text-primary"
+                                    onClick={() => disburseMutation.mutate(loan.id)}
+                                >
+                                    Disburse Loan
+                                </DropdownMenuItem>
+                            )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>

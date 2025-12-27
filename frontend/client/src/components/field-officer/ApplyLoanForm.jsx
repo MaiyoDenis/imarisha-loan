@@ -5,17 +5,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AlertCircle, CheckCircle, CreditCard, TrendingUp, AlertTriangle } from "lucide-react";
+import { AlertCircle, CheckCircle, CreditCard, TrendingUp, AlertTriangle, Plus, Trash2, ShoppingCart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 export function ApplyLoanForm(_a) {
-    var memberId = _a.memberId, onSuccess = _a.onSuccess;
-    var _b = useState(""), amount = _b[0], setAmount = _b[1];
+    var memberId = _a.memberId, onSuccess = _a.onSuccess, _title = _a.title;
+    var title = _title || "Apply Product Loan";
     var _c = useState(""), loanTypeId = _c[0], setLoanTypeId = _c[1];
+    var _items = useState([]), selectedItems = _items[0], setSelectedItems = _items[1];
     var toast = useToast().toast;
     var queryClient = useQueryClient();
     var loanTypes = useQuery({
-        queryKey: ["loanTypes"],
+        queryKey: ["loan-types"],
         queryFn: function () { return api.getLoanTypes(); },
+    }).data;
+    var products = useQuery({
+        queryKey: ["loan-products"],
+        queryFn: function () { return api.getLoanProducts(); },
     }).data;
     var memberDashboard = useQuery({
         queryKey: ["memberDashboard", memberId],
@@ -24,9 +29,10 @@ export function ApplyLoanForm(_a) {
     }).data;
     var mutation = useMutation({
         mutationFn: function (data) {
-            return api.applyLoanForMember(memberId, {
-                amount: parseFloat(data.amount),
+            return api.post('/loans', {
+                memberId: memberId,
                 loanTypeId: data.loanTypeId,
+                items: data.items
             });
         },
         onSuccess: function () {
@@ -34,9 +40,10 @@ export function ApplyLoanForm(_a) {
                 title: "Success",
                 description: "Loan application created successfully",
             });
-            setAmount("");
+            setSelectedItems([]);
             setLoanTypeId("");
             queryClient.invalidateQueries({ queryKey: ["memberDashboard", memberId] });
+            queryClient.invalidateQueries({ queryKey: ["loan-products"] });
             onSuccess === null || onSuccess === void 0 ? void 0 : onSuccess();
         },
         onError: function (error) {
@@ -47,19 +54,61 @@ export function ApplyLoanForm(_a) {
             });
         },
     });
+
+    var addItem = function () {
+        setSelectedItems([...selectedItems, { productId: "", quantity: 1 }]);
+    };
+
+    var removeItem = function (index) {
+        var newItems = [...selectedItems];
+        newItems.splice(index, 1);
+        setSelectedItems(newItems);
+    };
+
+    var updateItem = function (index, field, value) {
+        var newItems = [...selectedItems];
+        newItems[index][field] = value;
+        setSelectedItems(newItems);
+    };
+
+    var calculateTotalPrinciple = function () {
+        return selectedItems.reduce(function (total, item) {
+            var product = products === null || products === void 0 ? void 0 : products.find(function (p) { return p.id === parseInt(item.productId); });
+            if (product) {
+                return total + (parseFloat(product.sellingPrice) * parseInt(item.quantity));
+            }
+            return total;
+        }, 0);
+    };
+
     var handleSubmit = function (e) {
         e.preventDefault();
-        if (!amount || !loanTypeId) {
+        var principle = calculateTotalPrinciple();
+        if (selectedItems.length === 0 || !loanTypeId) {
             toast({
                 title: "Error",
-                description: "Please fill in all fields",
+                description: "Please select a loan type and at least one product",
                 variant: "destructive",
             });
             return;
         }
+        
+        var invalidItems = selectedItems.filter(item => !item.productId || parseInt(item.quantity) <= 0);
+        if (invalidItems.length > 0) {
+            toast({
+                title: "Error",
+                description: "Please ensure all items have a selected product and valid quantity",
+                variant: "destructive",
+            });
+            return;
+        }
+
         mutation.mutate({
-            amount: amount,
             loanTypeId: parseInt(loanTypeId),
+            items: selectedItems.map(item => ({
+                productId: parseInt(item.productId),
+                quantity: parseInt(item.quantity)
+            }))
         });
     };
     var selectedLoanType = loanTypes === null || loanTypes === void 0 ? void 0 : loanTypes.find(function (lt) { return lt.id === parseInt(loanTypeId); });
@@ -67,16 +116,18 @@ export function ApplyLoanForm(_a) {
     var maxLoanLimit = (memberDashboard === null || memberDashboard === void 0 ? void 0 : memberDashboard.maxLoanLimit) ? parseFloat(memberDashboard.maxLoanLimit) : 0;
     var availableLoan = (memberDashboard === null || memberDashboard === void 0 ? void 0 : memberDashboard.availableLoan) ? parseFloat(memberDashboard.availableLoan) : 0;
     var totalOutstanding = (memberDashboard === null || memberDashboard === void 0 ? void 0 : memberDashboard.totalOutstanding) ? parseFloat(memberDashboard.totalOutstanding) : 0;
+    var currentPrinciple = calculateTotalPrinciple();
+
     return (<Card className="!bg-transparent">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-foreground">
           <CreditCard className="h-5 w-5"/>
-          Apply Loan on Behalf of Customer
+          {title}
         </CardTitle>
-        <CardDescription>Submit a new loan application for this customer</CardDescription>
+        <CardDescription className="text-muted-foreground">Select products to calculate loan principle automatically</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        {memberDashboard && memberDashboard.status !== 'active' && (<div className="p-4 bg-red-50 border border-red-300 rounded-lg flex items-start gap-3">
+        {memberDashboard && memberDashboard.status !== 'active' && (<div className="p-4 bg-red-50/50 border border-red-300 rounded-lg flex items-start gap-3">
             <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0"/>
             <div>
               <p className="font-semibold text-red-900">Account Not Active</p>
@@ -86,7 +137,6 @@ export function ApplyLoanForm(_a) {
             </div>
           </div>)}
         
-        {/* Member Financial Summary */}
         {memberDashboard && (<div className="bg-transparent p-4 rounded-lg border border-blue-200">
             <h3 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
               <TrendingUp className="h-5 w-5"/>
@@ -112,61 +162,92 @@ export function ApplyLoanForm(_a) {
                 </p>
               </div>
             </div>
-            {availableLoan <= 0 && (<div className="mt-3 p-2 bg-red-100 border border-red-300 rounded text-red-800 text-sm flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4"/>
-                Member has reached their loan limit or has outstanding loans.
-              </div>)}
           </div>)}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="loanType">Loan Type</Label>
-            <select id="loanType" value={loanTypeId} onChange={function (e) { return setLoanTypeId(e.target.value); }} className="w-full px-3 py-2 border border-input rounded-md bg-background">
+            <Label htmlFor="loanType" className="text-foreground">Loan Type</Label>
+            <select id="loanType" value={loanTypeId} onChange={function (e) { return setLoanTypeId(e.target.value); }} className="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground">
               <option value="">Select a loan type</option>
               {loanTypes === null || loanTypes === void 0 ? void 0 : loanTypes.map(function (type) { return (<option key={type.id} value={type.id}>
                   {type.name} ({type.interestRate}% interest)
                 </option>); })}
             </select>
+            {selectedLoanType && (<div className="text-xs text-muted-foreground mt-1 flex gap-4">
+                <span>Min: KES {parseFloat(selectedLoanType.minAmount).toLocaleString()}</span>
+                <span>Max: KES {parseFloat(selectedLoanType.maxAmount).toLocaleString()}</span>
+                <span>Duration: {selectedLoanType.durationMonths} months</span>
+              </div>)}
           </div>
 
-          {selectedLoanType && (<div className="text-sm bg-transparent border border-blue-200 p-3 rounded-md text-blue-900">
-              <p>Min: KES {parseFloat(selectedLoanType.minAmount).toLocaleString()}</p>
-              <p>Max: KES {parseFloat(selectedLoanType.maxAmount).toLocaleString()}</p>
-              <p>Duration: {selectedLoanType.durationMonths} months</p>
-            </div>)}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Label className="text-lg font-semibold text-foreground flex items-center gap-2">
+                <ShoppingCart className="h-5 w-5"/>
+                Selected Products
+              </Label>
+              <Button type="button" variant="outline" size="sm" onClick={addItem} className="flex items-center gap-1 border-primary text-primary hover:bg-primary/10">
+                <Plus className="h-4 w-4"/>
+                Add Product
+              </Button>
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="amount">
-              Loan Amount (KES)
-              {availableLoan > 0 && (<span className="text-sm text-muted-foreground ml-2">
-                  (Max available: KES {availableLoan.toLocaleString()})
-                </span>)}
-            </Label>
-            <Input id="amount" type="number" placeholder="Enter loan amount" value={amount} onChange={function (e) { return setAmount(e.target.value); }} min={selectedLoanType ? Math.max(0, parseFloat(selectedLoanType.minAmount)) : 0} max={Math.min(selectedLoanType ? parseFloat(selectedLoanType.maxAmount) : Infinity, availableLoan > 0 ? availableLoan : Infinity)}/>
-            {availableLoan > 0 && amount && parseFloat(amount) > availableLoan && (<p className="text-sm text-red-600 flex items-center gap-1">
-                <AlertTriangle className="h-4 w-4"/>
-                Amount exceeds available loan limit
-              </p>)}
+            <div className="space-y-3">
+              {selectedItems.map(function (item, index) { 
+                var selectedProduct = products?.find(p => p.id === parseInt(item.productId));
+                return (
+                <div key={index} className="flex gap-3 items-end p-3 bg-muted/30 rounded-lg border border-border">
+                  <div className="flex-1 space-y-1">
+                    <Label className="text-xs text-muted-foreground">Product</Label>
+                    <select value={item.productId} onChange={function (e) { return updateItem(index, "productId", e.target.value); }} className="w-full px-2 py-1.5 border border-input rounded-md bg-background text-sm text-foreground">
+                      <option value="">Select Product</option>
+                      {products === null || products === void 0 ? void 0 : products.map(function (p) { return (<option key={p.id} value={p.id} disabled={p.stockQuantity <= 0}>
+                          {p.name} - KES {parseFloat(p.sellingPrice).toLocaleString()} ({p.stockQuantity} in stock)
+                        </option>); })}
+                    </select>
+                  </div>
+                  <div className="w-24 space-y-1">
+                    <Label className="text-xs text-muted-foreground">Quantity</Label>
+                    <Input type="number" value={item.quantity} onChange={function (e) { return updateItem(index, "quantity", e.target.value); }} min="1" max={selectedProduct ? selectedProduct.stockQuantity : undefined} className="h-9"/>
+                  </div>
+                  <Button type="button" variant="ghost" size="icon" onClick={function () { return removeItem(index); }} className="text-destructive hover:bg-destructive/10">
+                    <Trash2 className="h-4 w-4"/>
+                  </Button>
+                </div>
+              ); })}
+              
+              {selectedItems.length === 0 && (
+                <div className="text-center py-6 border border-dashed border-border rounded-lg text-muted-foreground">
+                  No products selected. Click "Add Product" to start.
+                </div>
+              )}
+            </div>
           </div>
 
-          {mutation.isPending && (<div className="flex items-center gap-2 text-primary">
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"/>
-              <span>Processing...</span>
-            </div>)}
+          <div className="p-4 bg-primary/5 rounded-lg border border-primary/20 space-y-2">
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-muted-foreground">Principle Amount:</span>
+              <span className="font-bold text-foreground text-lg">KES {currentPrinciple.toLocaleString()}</span>
+            </div>
+            {selectedLoanType && (
+              <div className="flex justify-between items-center text-xs text-muted-foreground italic border-t border-primary/10 pt-2">
+                <span>Calculated based on {selectedItems.length} item(s)</span>
+                {currentPrinciple > 0 && currentPrinciple < parseFloat(selectedLoanType.minAmount) && (
+                  <span className="text-destructive font-medium">Below minimum loan amount</span>
+                )}
+                {currentPrinciple > parseFloat(selectedLoanType.maxAmount) && (
+                  <span className="text-destructive font-medium">Above maximum loan amount</span>
+                )}
+                {availableLoan > 0 && currentPrinciple > availableLoan && (
+                  <span className="text-destructive font-medium">Exceeds available limit</span>
+                )}
+              </div>
+            )}
+          </div>
 
-          {mutation.isSuccess && (<div className="flex items-center gap-2 text-secondary">
-              <CheckCircle className="h-5 w-5"/>
-              <span>Loan application created successfully</span>
-            </div>)}
-
-          {mutation.isError && (<div className="flex items-center gap-2 text-destructive">
-              <AlertCircle className="h-5 w-5"/>
-              <span>{mutation.error.message}</span>
-            </div>)}
-
-          <div className="flex gap-2 pt-4">
-            <Button type="submit" disabled={mutation.isPending || (memberDashboard && memberDashboard.status !== 'active')} className="flex-1">
-              Apply Loan
+          <div className="flex gap-2 pt-2">
+            <Button type="submit" disabled={mutation.isPending || (memberDashboard && memberDashboard.status !== 'active') || currentPrinciple <= 0} className="w-full h-11 text-lg">
+              {mutation.isPending ? "Processing..." : "Submit Loan Application"}
             </Button>
           </div>
         </form>

@@ -2,7 +2,7 @@ import os
 import random
 from faker import Faker
 from app import create_app, db, bcrypt
-from app.models import User, Branch, Role, Group, Member, LoanType
+from app.models import User, Branch, Role, Group, Member, LoanType, ProductCategory
 from decimal import Decimal
 
 fake = Faker()
@@ -14,6 +14,24 @@ app.app_context().push()
 def seed_data():
     """Populates the database with initial data."""
     print("Seeding database...")
+
+    # 0. Product Categories
+    categories = [
+        {'id': 1, 'name': 'Energy', 'description': 'Solar lamps, home systems, etc.'},
+        {'id': 2, 'name': 'Electronics', 'description': 'Phones, tablets, etc.'},
+        {'id': 3, 'name': 'Agriculture', 'description': 'Irrigation pumps, tools, etc.'}
+    ]
+    for cat_data in categories:
+        existing = ProductCategory.query.get(cat_data['id'])
+        if not existing:
+            category = ProductCategory(
+                id=cat_data['id'],
+                name=cat_data['name'],
+                description=cat_data['description']
+            )
+            db.session.add(category)
+            print(f"Created category: {cat_data['name']}")
+    db.session.commit()
 
     # 1. Roles
     roles = ['admin', 'branch_manager', 'loan_officer', 'field_officer', 'procurement_officer', 'customer']

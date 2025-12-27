@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from app.models import Transaction, Member, SavingsAccount, DrawdownAccount, Loan
 from app import db
+from app.services.loan_service import loan_service
 import uuid
 from decimal import Decimal
 
@@ -214,6 +215,11 @@ def approve_transaction(transaction_id):
     # If deposit, add funds. If withdrawal, funds already deducted in create_transaction, so just confirm.
     if transaction.transaction_type == 'deposit':
         account.balance += transaction.amount
+        
+        # Auto-repay loans if deposited to drawdown
+        if transaction.account_type == 'drawdown':
+            db.session.flush() # Ensure balance is updated
+            loan_service.auto_repay_from_drawdown(transaction.member_id)
     
     transaction.status = 'confirmed'
     transaction.confirmed_by = user_id

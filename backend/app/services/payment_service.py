@@ -11,7 +11,8 @@ from flask import current_app
 import json
 import uuid
 import redis
-from app.models import Transaction, Member, SavingsAccount, Loan
+from decimal import Decimal
+from app.models import Transaction, Member, SavingsAccount, Loan, User
 from app import db
 from app.services.notification_service import notification_service, NotificationChannel, NotificationPriority
 
@@ -175,27 +176,39 @@ class PaymentService:
             logging.error(f"Error handling callback: {str(e)}")
             raise
 
-    def _process_deposit(self, member: Member, amount: float, receipt: str):
+    def _process_deposit(self, member: Member, amount: float, receipt: str, account_type: str = 'savings'):
         """Process successful deposit"""
         try:
-            # Add to savings
-            savings = SavingsAccount.query.filter_by(member_id=member.id).first()
-            if not savings:
-                savings = SavingsAccount(member_id=member.id, account_number=f"SAV-{member.member_code}")
-                db.session.add(savings)
+            from app.models import DrawdownAccount
+            from app.services.loan_service import loan_service
             
-            balance_before = savings.balance
-            savings.balance += amount
+            account = None
+            if account_type == 'savings':
+                account = SavingsAccount.query.filter_by(member_id=member.id).first()
+                if not account:
+                    account = SavingsAccount(member_id=member.id, account_number=f"SAV-{member.member_code}")
+                    db.session.add(account)
+            elif account_type == 'drawdown':
+                account = DrawdownAccount.query.filter_by(member_id=member.id).first()
+                if not account:
+                    account = DrawdownAccount(member_id=member.id, account_number=f"DRD-{member.member_code}")
+                    db.session.add(account)
+            
+            if not account:
+                return
+                
+            balance_before = account.balance
+            account.balance += amount
             
             # Create transaction record
             transaction = Transaction(
                 transaction_id=str(uuid.uuid4()),
                 member_id=member.id,
-                account_type='savings',
+                account_type=account_type,
                 transaction_type='deposit',
                 amount=amount,
                 balance_before=balance_before,
-                balance_after=savings.balance,
+                balance_after=account.balance,
                 reference=f"M-Pesa Deposit",
                 mpesa_code=receipt,
                 status='confirmed',
@@ -203,6 +216,12 @@ class PaymentService:
             )
             
             db.session.add(transaction)
+            db.session.flush()
+            
+            # Auto-repay if drawdown
+            if account_type == 'drawdown':
+                loan_service.auto_repay_from_drawdown(member.id)
+                
             db.session.commit()
             
             # Send notification
@@ -212,7 +231,7 @@ class PaymentService:
                 variables={
                     "amount": amount,
                     "phone_number": member.user.phone,
-                    "balance": savings.balance
+                    "balance": str(account.balance)
                 },
                 channel=NotificationChannel.SMS
             )
@@ -341,7 +360,7 @@ class PaymentService:
                 transaction = Transaction(
                     transaction_id=str(uuid.uuid4()),
                     member_id=member.id,
-                    account_type='savings',
+                    account_type='savings', # Defaults to savings if unmatched
                     transaction_type='deposit',
                     amount=amount,
                     status='confirmed',
@@ -354,6 +373,26 @@ class PaymentService:
                 transaction.status = 'confirmed'
                 transaction.confirmed_at = datetime.utcnow()
                 transaction.mpesa_code = receipt_number
+            
+            db.session.flush()
+            
+            # Update account balance
+            from app.models import DrawdownAccount
+            account = None
+            if transaction.account_type == 'savings':
+                account = SavingsAccount.query.filter_by(member_id=member.id).first()
+            elif transaction.account_type == 'drawdown':
+                account = DrawdownAccount.query.filter_by(member_id=member.id).first()
+                
+            if account:
+                transaction.balance_before = account.balance
+                account.balance += Decimal(str(amount))
+                transaction.balance_after = account.balance
+                
+                # Auto-repay if drawdown
+                if transaction.account_type == 'drawdown':
+                    from app.services.loan_service import loan_service
+                    loan_service.auto_repay_from_drawdown(member.id)
             
             db.session.commit()
             

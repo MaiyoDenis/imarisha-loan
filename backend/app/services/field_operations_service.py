@@ -137,8 +137,17 @@ class FieldOperationsService:
             return False
 
     @staticmethod
-    def create_mobile_application(user_id, member_id, loan_type_id, amount):
+    def create_mobile_application(user_id, member_id, loan_type_id, amount=None, items=None):
         try:
+            # If items provided, calculate amount
+            if items:
+                from app.models import LoanProduct
+                amount = 0
+                for item in items:
+                    product = LoanProduct.query.get(item.get('productId'))
+                    if product:
+                        amount += float(product.selling_price) * int(item.get('quantity', 1))
+            
             app = MobileLoanApplication(
                 user_id=user_id,
                 member_id=member_id,
@@ -147,6 +156,9 @@ class FieldOperationsService:
                 application_status='draft',
                 current_step=1
             )
+            if items:
+                app.form_data = {'items': items}
+                
             db.session.add(app)
             db.session.commit()
             

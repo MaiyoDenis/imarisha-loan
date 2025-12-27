@@ -36,9 +36,10 @@ const GamificationDashboard = lazy(() => import("@/pages/gamification/Gamificati
 const FieldOperationsPage = lazy(() => import("@/pages/field-operations/Dashboard").then(module => ({ default: module.FieldOperationsPage })));
 const MobileFeaturesDashboard = lazy(() => import("@/pages/mobile-features/MobileFeaturesDashboard").then(module => ({ default: module.MobileFeaturesDashboard })));
 const FieldOfficerDashboard = lazy(() => import("@/pages/field-officer/Dashboard").then(module => ({ default: module.FieldOfficerDashboard })));
+const FieldOfficerGroupsPage = lazy(() => import("@/pages/field-officer/GroupsPage").then(module => ({ default: module.GroupsPage })));
 const GroupMembersPage = lazy(() => import("@/pages/field-officer/Groups").then(module => ({ default: module.GroupMembersPage })));
 const MemberDashboardPage = lazy(() => import("@/pages/field-officer/Members").then(module => ({ default: module.MemberDashboardPage })));
-const SchedulePage = lazy(() => import("@/pages/field-officer/Schedule").then(module => ({ default: module.SchedulePage })));
+const SchedulePage = lazy(() => import("@/pages/field-officer/SchedulePage").then(module => ({ default: module.SchedulePage })));
 const LoanProductList = lazy(() => import("@/pages/admin/LoanProductList"));
 const PermissionsManager = lazy(() => import("@/pages/admin/Permissions"));
 const ProductManagement = lazy(() => import("@/pages/admin/Products"));
@@ -194,6 +195,13 @@ function Router() {
             {(params) => (
               <ProtectedRoute allowedRoles={["admin", "field_officer"]} fallbackPath="/dashboard">
                 <SchedulePage />
+              </ProtectedRoute>
+            )}
+          </Route>
+          <Route path="/field-officer/groups">
+            {(params) => (
+              <ProtectedRoute allowedRoles={["admin", "field_officer"]} fallbackPath="/dashboard">
+                <FieldOfficerGroupsPage />
               </ProtectedRoute>
             )}
           </Route>

@@ -62,7 +62,8 @@ def create_application():
         user_id=user_id,
         member_id=data.get('memberId'),
         loan_type_id=data.get('loanTypeId'),
-        amount=data.get('amount')
+        amount=data.get('amount'),
+        items=data.get('items')
     )
     
     return jsonify(result or {'error': 'Failed to create application'}), 200 if result else 400

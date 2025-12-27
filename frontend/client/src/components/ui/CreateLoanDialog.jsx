@@ -7,13 +7,13 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { api } from "@/lib/api";
-import { Plus } from "lucide-react";
+import { Plus, Trash2, ShoppingCart } from "lucide-react";
+
 export function CreateLoanDialog() {
     var _a = useState(false), open = _a[0], setOpen = _a[1];
     var _b = useState(""), memberId = _b[0], setMemberId = _b[1];
-    var _c = useState(""), productId = _c[0], setProductId = _c[1];
     var _d = useState(""), loanTypeId = _d[0], setLoanTypeId = _d[1];
-    var _e = useState(""), amount = _e[0], setAmount = _e[1];
+    var _items = useState([]), selectedItems = _items[0], setSelectedItems = _items[1];
     var queryClient = useQueryClient();
     var toast = useToast().toast;
     var _f = useQuery({
@@ -24,18 +24,19 @@ export function CreateLoanDialog() {
         queryKey: ["loan-types"],
         queryFn: api.getLoanTypes,
     }).data, loanTypes = _g === void 0 ? [] : _g;
+
     var createLoanMutation = useMutation({
         mutationFn: api.createLoan,
         onSuccess: function () {
             queryClient.invalidateQueries({ queryKey: ["loans"] });
+            queryClient.invalidateQueries({ queryKey: ["loan-products"] });
             setOpen(false);
             setMemberId("");
-            setProductId("");
+            setSelectedItems([]);
             setLoanTypeId("");
-            setAmount("");
             toast({
                 title: "Success",
-                description: "Loan application submitted successfully",
+                description: "Product loan application submitted successfully",
             });
         },
         onError: function (error) {
@@ -46,42 +47,75 @@ export function CreateLoanDialog() {
             });
         },
     });
+
+    var addItem = function () {
+        setSelectedItems([...selectedItems, { productId: "", quantity: 1 }]);
+    };
+
+    var removeItem = function (index) {
+        var newItems = [...selectedItems];
+        newItems.splice(index, 1);
+        setSelectedItems(newItems);
+    };
+
+    var updateItem = function (index, field, value) {
+        var newItems = [...selectedItems];
+        newItems[index][field] = value;
+        setSelectedItems(newItems);
+    };
+
+    var calculateTotalPrinciple = function () {
+        return selectedItems.reduce(function (total, item) {
+            var product = products === null || products === void 0 ? void 0 : products.find(function (p) { return p.id === parseInt(item.productId); });
+            if (product) {
+                return total + (parseFloat(product.sellingPrice) * parseInt(item.quantity));
+            }
+            return total;
+        }, 0);
+    };
+
     var handleSubmit = function (e) {
         e.preventDefault();
+        if (selectedItems.length === 0) {
+            toast({ title: "Error", description: "Select at least one product", variant: "destructive" });
+            return;
+        }
         createLoanMutation.mutate({
             memberId: parseInt(memberId),
-            productId: parseInt(productId),
             loanTypeId: parseInt(loanTypeId),
-            amount: parseFloat(amount),
+            items: selectedItems.map(item => ({
+                productId: parseInt(item.productId),
+                quantity: parseInt(item.quantity)
+            }))
         });
     };
+
+    var currentPrinciple = calculateTotalPrinciple();
+
     return (<Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="shadow-lg shadow-primary/20">
-          <Plus className="mr-2 h-4 w-4"/> Apply for Loan
+          <Plus className="mr-2 h-4 w-4"/> Apply for Product Loan
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>New Loan Application</DialogTitle>
+          <DialogTitle>New Product Loan Application</DialogTitle>
           <DialogDescription>
-            Submit a new loan application for a member.
+            Select products and quantities. Total principle is calculated automatically.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="memberId" className="text-right">
-                Member ID
-              </Label>
-              <Input id="memberId" type="number" value={memberId} onChange={function (e) { return setMemberId(e.target.value); }} className="col-span-3" required/>
+            <div className="space-y-2">
+              <Label htmlFor="memberId">Member ID</Label>
+              <Input id="memberId" type="number" value={memberId} onChange={function (e) { return setMemberId(e.target.value); }} required/>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="loanType" className="text-right">
-                Loan Type
-              </Label>
+
+            <div className="space-y-2">
+              <Label htmlFor="loanType">Loan Type</Label>
               <Select onValueChange={setLoanTypeId} value={loanTypeId}>
-                <SelectTrigger className="col-span-3">
+                <SelectTrigger>
                   <SelectValue placeholder="Select loan type"/>
                 </SelectTrigger>
                 <SelectContent>
@@ -93,32 +127,49 @@ export function CreateLoanDialog() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="product" className="text-right">
-                Loan Product
-              </Label>
-              <Select onValueChange={setProductId} value={productId}>
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select loan product"/>
-                </SelectTrigger>
-                <SelectContent>
-                  {products.map(function (product) {
-            return (<SelectItem key={product.id} value={product.id.toString()}>
-                      {product.name} - {product.stockQuantity} in stock
-                    </SelectItem>);
-        })}
-                </SelectContent>
-              </Select>
+
+            <div className="space-y-4 pt-2">
+              <div className="flex items-center justify-between">
+                <Label className="flex items-center gap-2 font-semibold">
+                  <ShoppingCart className="h-4 w-4"/>
+                  Selected Products
+                </Label>
+                <Button type="button" variant="outline" size="sm" onClick={addItem}>
+                  <Plus className="h-4 w-4 mr-1"/> Add Item
+                </Button>
+              </div>
+
+              <div className="space-y-3">
+                {selectedItems.map(function (item, index) { return (<div key={index} className="flex gap-2 items-end p-2 border rounded-md">
+                    <div className="flex-1">
+                      <Select value={item.productId} onValueChange={function (val) { return updateItem(index, "productId", val); }}>
+                        <SelectTrigger className="h-9">
+                          <SelectValue placeholder="Product"/>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {products.map(function (p) { return (<SelectItem key={p.id} value={p.id.toString()} disabled={p.stockQuantity <= 0}>
+                              {p.name} (KES {parseFloat(p.sellingPrice).toLocaleString()})
+                            </SelectItem>); })}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="w-20">
+                      <Input type="number" value={item.quantity} onChange={function (e) { return updateItem(index, "quantity", e.target.value); }} min="1" className="h-9"/>
+                    </div>
+                    <Button type="button" variant="ghost" size="icon" onClick={function () { return removeItem(index); }} className="h-9 w-9 text-destructive">
+                      <Trash2 className="h-4 w-4"/>
+                    </Button>
+                  </div>); })}
+              </div>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="amount" className="text-right">
-                Amount
-              </Label>
-              <Input id="amount" type="number" value={amount} onChange={function (e) { return setAmount(e.target.value); }} className="col-span-3" required/>
+
+            <div className="p-3 bg-muted rounded-md flex justify-between items-center">
+              <span className="text-sm font-medium">Total Principle:</span>
+              <span className="text-lg font-bold">KES {currentPrinciple.toLocaleString()}</span>
             </div>
           </div>
           <DialogFooter>
-            <Button type="submit" disabled={createLoanMutation.isPending}>
+            <Button type="submit" disabled={createLoanMutation.isPending || currentPrinciple <= 0} className="w-full">
               {createLoanMutation.isPending ? "Submitting..." : "Submit Application"}
             </Button>
           </DialogFooter>

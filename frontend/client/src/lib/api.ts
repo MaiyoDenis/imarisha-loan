@@ -217,6 +217,7 @@ export const api = {
     // Loan Products
     getLoanProducts: () => fetchAPI("/loan-products"),
     getLoanProduct: (id: number | string) => fetchAPI(`/loan-products/${id}`),
+    getProductCategories: () => fetchAPI("/product-categories"),
     createLoanProduct: (data: any) => fetchAPI("/loan-products", {
         method: "POST",
         body: JSON.stringify(data),

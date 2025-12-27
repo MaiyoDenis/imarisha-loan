@@ -6,11 +6,10 @@ import { api } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/loading";
-import { AlertCircle, TrendingUp, Users, DollarSign, Percent, Download } from "lucide-react";
+import { AlertCircle, TrendingUp, Users, DollarSign, Percent, Download, Calendar, Smartphone, Settings } from "lucide-react";
 import KPICard from "@/components/dashboards/KPICard";
 import { ExportDataModal } from "@/components/field-officer/ExportDataModal";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-var COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
+import { VisitScheduleWidget } from "@/components/field-officer/VisitScheduleWidget";
 export function FieldOfficerDashboard() {
     var _a = useLocation(), setLocation = _a[1];
     var _b = useState(false), showExportData = _b[0], setShowExportData = _b[1];
@@ -75,88 +74,35 @@ export function FieldOfficerDashboard() {
             <KPICard title="Avg. Repayment Rate" value={analytics.averageRepayment.toFixed(1)} unit="%" icon={<Percent size={24}/>} status={analytics.averageRepayment >= 90 ? 'success' : analytics.averageRepayment >= 70 ? 'warning' : 'critical'}/>
           </div>
 
-      {/* Charts Section */}
-      {groups && groups.length > 0 && (<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Financial Overview Chart */}
-          <Card className="col-span-1">
-            <CardHeader>
-              <CardTitle>Financial Overview by Group</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={groups} margin={{
-                top: 20,
-                right: 30,
-                left: 20,
-                bottom: 5,
-            }}>
-                    <CartesianGrid strokeDasharray="3 3"/>
-                    <XAxis dataKey="name"/>
-                    <YAxis />
-                    <Tooltip cursor={{ fill: 'transparent' }} formatter={function (value) { return "KES ".concat(new Intl.NumberFormat('en-KE').format(value)); }}/>
-                    <Legend />
-                    <Bar dataKey="totalSavings" name="Total Savings" fill="#8884d8"/>
-                    <Bar dataKey="totalLoansOutstanding" name="Outstanding Loans" fill="#82ca9d"/>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Repayment Performance Chart */}
-          <Card className="col-span-1">
-            <CardHeader>
-              <CardTitle>Repayment Performance</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={groups} layout="vertical" margin={{
-                top: 20,
-                right: 30,
-                left: 40,
-                bottom: 5,
-            }}>
-                    <CartesianGrid strokeDasharray="3 3"/>
-                    <XAxis type="number" domain={[0, 100]}/>
-                    <YAxis dataKey="name" type="category" width={100}/>
-                    <Tooltip cursor={{ fill: 'transparent' }} formatter={function (value) { return "".concat(value, "%"); }}/>
-                    <Legend />
-                    <Bar dataKey="repaymentRate" name="Repayment Rate (%)" fill="#ffc658">
-                      {groups.map(function (entry, index) { return (<Cell key={"cell-".concat(index)} fill={entry.repaymentRate >= 90 ? '#4ade80' : entry.repaymentRate >= 70 ? '#facc15' : '#f87171'}/>); })}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Member Distribution Chart */}
-          <Card className="col-span-1 lg:col-span-2">
-            <CardHeader>
-              <CardTitle>Member Distribution</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={groups} cx="50%" cy="50%" labelLine={false} label={function (_a) {
-            var name = _a.name, percent = _a.percent;
-            return "".concat(name, " ").concat(((percent || 0) * 100).toFixed(0), "%");
-        }} outerRadius={100} fill="#8884d8" dataKey="totalMembers" nameKey="name">
-                      {groups.map(function (entry, index) { return (<Cell key={"cell-".concat(index)} fill={COLORS[index % COLORS.length]}/>); })}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </div>)}
-
-      {/* Mobile Tools Section - Moved to Sidebar */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Button variant="outline" className="h-24 flex flex-col gap-2" onClick={() => setLocation("/field-officer/groups")}>
+              <Users className="h-6 w-6" />
+              <span>Manage Groups</span>
+            </Button>
+            <Button variant="outline" className="h-24 flex flex-col gap-2" onClick={() => setLocation("/field-officer/schedule")}>
+              <Calendar className="h-6 w-6" />
+              <span>View Schedule</span>
+            </Button>
+            <Button variant="outline" className="h-24 flex flex-col gap-2" onClick={() => setLocation("/mobile-features")}>
+              <Smartphone className="h-6 w-6" />
+              <span>Mobile Tools</span>
+            </Button>
+            <Button variant="outline" className="h-24 flex flex-col gap-2" onClick={() => setLocation("/settings")}>
+              <Settings className="h-6 w-6" />
+              <span>Settings</span>
+            </Button>
+          </CardContent>
+        </Card>
+        
+        <div className="lg:col-span-1">
+          <VisitScheduleWidget groupsCount={analytics.totalGroups} />
+        </div>
+      </div>
 
       <ExportDataModal open={showExportData} onOpenChange={setShowExportData} groups={groups || []}/>
     </div>

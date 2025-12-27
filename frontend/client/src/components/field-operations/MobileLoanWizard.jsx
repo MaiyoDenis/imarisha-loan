@@ -99,17 +99,40 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 import React, { useState } from "react";
-import { Box, Stepper, Step, StepLabel, Button, TextField, Typography, Card, CardContent, LinearProgress, Stack, Alert, Select, MenuItem, FormControl, InputLabel, } from "@mui/material";
+import { Box, Stepper, Step, StepLabel, Button, TextField, Typography, Card, CardContent, LinearProgress, Stack, Alert, Select, MenuItem, FormControl, InputLabel, IconButton, } from "@mui/material";
+import { Delete, Add } from "@mui/icons-material";
 import { useCreateApplication, useUpdateApplicationStep } from "@/hooks/use-field-operations";
-var steps = ["Select Loan Type", "Enter Amount", "Verification", "Collateral", "Review & Submit"];
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
+
+var steps = ["Select Loan Type", "Select Products", "Verification", "Collateral", "Review & Submit"];
 export var MobileLoanWizard = function (_a) {
     var memberId = _a.memberId, onSuccess = _a.onSuccess;
     var _b = useState(0), activeStep = _b[0], setActiveStep = _b[1];
-    var _c = useState({}), formData = _c[0], setFormData = _c[1];
+    var _c = useState({ items: [] }), formData = _c[0], setFormData = _c[1];
     var _d = useState(null), appId = _d[0], setAppId = _d[1];
     var _e = useState(null), error = _e[0], setError = _e[1];
+    
+    var loanTypes = useQuery({
+        queryKey: ["loan-types"],
+        queryFn: api.getLoanTypes,
+    }).data || [];
+    
+    var products = useQuery({
+        queryKey: ["loan-products"],
+        queryFn: api.getLoanProducts,
+    }).data || [];
+
     var createAppMutation = useCreateApplication();
     var updateStepMutation = useUpdateApplicationStep();
+
+    var calculateTotal = function() {
+        return (formData.items || []).reduce(function(sum, item) {
+            var p = products.find(function(prod) { return prod.id === parseInt(item.productId); });
+            return sum + (p ? parseFloat(p.sellingPrice) * item.quantity : 0);
+        }, 0);
+    };
+
     var handleNext = function () {
         return __awaiter(void 0, void 0, void 0, function () {
             var result, err_1;
@@ -122,7 +145,7 @@ export var MobileLoanWizard = function (_a) {
                         return [4 /*yield*/, createAppMutation.mutateAsync({
                                 memberId: memberId,
                                 loanTypeId: parseInt(formData.loanTypeId || "0"),
-                                amount: parseFloat(formData.amount || "0"),
+                                items: formData.items || []
                             })];
                     case 1:
                         result = _a.sent();
@@ -134,7 +157,7 @@ export var MobileLoanWizard = function (_a) {
                         return [4 /*yield*/, updateStepMutation.mutateAsync({
                                 appId: appId,
                                 step: activeStep + 1,
-                                formData: formData,
+                                formData: __assign(__assign({}, formData), { amount: calculateTotal() }),
                             })];
                     case 3:
                         _a.sent();
@@ -160,16 +183,34 @@ export var MobileLoanWizard = function (_a) {
             return (__assign(__assign({}, prev), (_a = {}, _a[field] = value, _a)));
         });
     };
+
+    var addItem = function() {
+        var items = [...(formData.items || []), { productId: "", quantity: 1 }];
+        handleChange("items", items);
+    };
+
+    var updateItem = function(index, field, value) {
+        var items = [...(formData.items || [])];
+        items[index][field] = value;
+        handleChange("items", items);
+    };
+
+    var removeItem = function(index) {
+        var items = [...(formData.items || [])];
+        items.splice(index, 1);
+        handleChange("items", items);
+    };
+
     var progress = ((activeStep + 1) / steps.length) * 100;
     return (<Card>
       <CardContent>
         <Typography variant="h6" sx={{ mb: 2 }}>
-          Loan Application Wizard
+          Product Loan Wizard
         </Typography>
 
         <LinearProgress variant="determinate" value={progress} sx={{ mb: 3 }}/>
 
-        <Stepper activeStep={activeStep} sx={{ mb: 3 }}>
+        <Stepper activeStep={activeStep} sx={{ mb: 3 }} alternativeLabel>
           {steps.map(function (label) {
             return (<Step key={label}>
               <StepLabel>{label}</StepLabel>
@@ -181,27 +222,49 @@ export var MobileLoanWizard = function (_a) {
             {error}
           </Alert>)}
 
-        <Box sx={{ mb: 3 }}>
+        <Box sx={{ mb: 3, minHeight: '300px' }}>
           {activeStep === 0 && (<FormControl fullWidth>
               <InputLabel>Loan Type</InputLabel>
               <Select value={formData.loanTypeId || ""} onChange={function (e) { return handleChange("loanTypeId", e.target.value); }} label="Loan Type">
-                <MenuItem value="1">Personal Loan</MenuItem>
-                <MenuItem value="2">Business Loan</MenuItem>
-                <MenuItem value="3">Agriculture Loan</MenuItem>
-                <MenuItem value="4">Emergency Loan</MenuItem>
+                {loanTypes.map(function(type) {
+                    return <MenuItem key={type.id} value={type.id.toString()}>{type.name}</MenuItem>;
+                })}
               </Select>
             </FormControl>)}
 
           {activeStep === 1 && (<Stack spacing={2}>
-              <TextField label="Loan Amount" type="number" value={formData.amount || ""} onChange={function (e) { return handleChange("amount", e.target.value); }} fullWidth inputProps={{ step: "100" }}/>
-              <TextField label="Purpose" multiline rows={3} value={formData.purpose || ""} onChange={function (e) { return handleChange("purpose", e.target.value); }} fullWidth/>
+              <Typography variant="subtitle2">Select Products & Quantities</Typography>
+              {(formData.items || []).map(function(item, index) {
+                  return (
+                    <Box key={index} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                        <FormControl fullWidth size="small">
+                            <InputLabel>Product</InputLabel>
+                            <Select value={item.productId} onChange={function(e) { return updateItem(index, 'productId', e.target.value); }} label="Product">
+                                {products.map(function(p) {
+                                    return <MenuItem key={p.id} value={p.id.toString()} disabled={p.stockQuantity <= 0}>
+                                        {p.name} (KES {parseFloat(p.sellingPrice).toLocaleString()})
+                                    </MenuItem>;
+                                })}
+                            </Select>
+                        </FormControl>
+                        <TextField label="Qty" type="number" size="small" sx={{ width: '80px' }} value={item.quantity} onChange={function(e) { return updateItem(index, 'quantity', parseInt(e.target.value)); }} />
+                        <IconButton onClick={function() { return removeItem(index); }} color="error">
+                            <Delete />
+                        </IconButton>
+                    </Box>
+                  );
+              })}
+              <Button startIcon={<Add />} onClick={addItem} variant="outlined" fullWidth>Add Product</Button>
+              <Box sx={{ p: 2, bgcolor: 'action.hover', borderRadius: 1, mt: 2 }}>
+                  <Typography variant="body1" fontWeight="bold">Total Principle: KES {calculateTotal().toLocaleString()}</Typography>
+              </Box>
             </Stack>)}
 
           {activeStep === 2 && (<Stack spacing={2}>
               <TextField label="Identification Number" value={formData.idNumber || ""} onChange={function (e) { return handleChange("idNumber", e.target.value); }} fullWidth/>
               <TextField label="Phone Number" value={formData.phone || ""} onChange={function (e) { return handleChange("phone", e.target.value); }} fullWidth/>
               <Typography variant="caption" color="textSecondary">
-                Photo ID will be captured in next step
+                Verification data will be saved to your application.
               </Typography>
             </Stack>)}
 
@@ -216,16 +279,16 @@ export var MobileLoanWizard = function (_a) {
               </Typography>
               <Stack spacing={1}>
                 <Typography variant="body2">
-                  <strong>Loan Type:</strong> {formData.loanTypeId}
+                  <strong>Loan Type:</strong> {loanTypes.find(function(lt) { return lt.id === parseInt(formData.loanTypeId); })?.name}
                 </Typography>
                 <Typography variant="body2">
-                  <strong>Amount:</strong> KES {parseFloat(formData.amount || "0").toLocaleString()}
+                  <strong>Total Principle:</strong> KES {calculateTotal().toLocaleString()}
                 </Typography>
                 <Typography variant="body2">
-                  <strong>Purpose:</strong> {formData.purpose}
+                  <strong>Items:</strong> {(formData.items || []).length} products selected
                 </Typography>
                 <Typography variant="body2">
-                  <strong>Collateral:</strong> {formData.collateral}
+                  <strong>Collateral:</strong> {formData.collateral || "None"}
                 </Typography>
               </Stack>
             </Box>)}
@@ -235,7 +298,7 @@ export var MobileLoanWizard = function (_a) {
           <Button onClick={handleBack} disabled={activeStep === 0} variant="outlined">
             Back
           </Button>
-          <Button onClick={handleNext} variant="contained" disabled={createAppMutation.isPending || updateStepMutation.isPending}>
+          <Button onClick={handleNext} variant="contained" disabled={createAppMutation.isPending || updateStepMutation.isPending || (activeStep === 1 && (!formData.items || formData.items.length === 0))}>
             {activeStep === steps.length - 1 ? "Submit" : "Next"}
           </Button>
         </Stack>

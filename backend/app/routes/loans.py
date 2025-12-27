@@ -132,21 +132,59 @@ def create_loan():
     
     # Add items if any
     for item in loan_items:
+        product = item['product']
+        quantity = item['quantity']
+        
+        # Double check stock one last time before committing
+        if product.stock_quantity < quantity:
+            db.session.rollback()
+            return jsonify({'error': f'Insufficient stock for {product.name}'}), 400
+            
+        # Deduct stock immediately on application
+        product.stock_quantity -= quantity
+        
         loan_item = LoanProductItem(
             loan_id=loan.id,
-            product_id=item['product'].id,
-            quantity=item['quantity'],
+            product_id=product.id,
+            quantity=quantity,
             unit_price=item['unit_price'],
             total_price=item['total_price']
         )
         db.session.add(loan_item)
         
-        # Update stock? Maybe on disbursement, but let's reserve it now or just check?
-        # Usually stock is deducted on disbursement. For now let's just record the item.
-        
     db.session.commit()
     
     return jsonify(loan.to_dict()), 201
+
+@bp.route('/<int:id>/cancel', methods=['POST'])
+@login_required
+def cancel_loan(id):
+    from flask import session
+    user_id = session.get('user_id')
+    loan = Loan.query.get(id)
+    if not loan:
+        return jsonify({'error': 'Loan not found'}), 404
+        
+    # Check if user is the owner or an admin
+    is_owner = loan.member.user_id == user_id
+    from app.models import User
+    user = User.query.get(user_id)
+    is_admin = user and user.role.name == 'admin'
+    
+    if not (is_owner or is_admin):
+        return jsonify({'error': 'Unauthorized'}), 403
+        
+    if loan.status != 'pending':
+        return jsonify({'error': 'Only pending loans can be cancelled'}), 400
+        
+    # Restore stock
+    for item in loan.items:
+        item.product.stock_quantity += item.quantity
+        
+    loan.status = 'cancelled'
+    db.session.commit()
+    
+    return jsonify(loan.to_dict())
 
 @bp.route('/<int:id>', methods=['GET'])
 @login_required
@@ -202,8 +240,12 @@ def reject_loan(id):
     if not loan:
         return jsonify({'error': 'Loan not found'}), 404
         
-    if loan.status != 'pending':
-        return jsonify({'error': 'Loan is not pending approval'}), 400
+    if loan.status not in ['pending', 'under_review']:
+        return jsonify({'error': 'Loan is not in a rejectable state'}), 400
+        
+    # Restore stock if items exist
+    for item in loan.items:
+        item.product.stock_quantity += item.quantity
         
     loan.status = 'rejected'
     loan.rejected_date = datetime.utcnow()
@@ -224,13 +266,6 @@ def disburse_loan(id):
         
     if loan.status != 'approved':
         return jsonify({'error': 'Loan must be approved before disbursement'}), 400
-        
-    # Deduct stock if items exist
-    for item in loan.items:
-        product = item.product
-        if product.stock_quantity < item.quantity:
-            return jsonify({'error': f'Insufficient stock for {product.name}'}), 400
-        product.stock_quantity -= item.quantity
         
     loan.status = 'disbursed'
     loan.disbursement_date = datetime.utcnow()

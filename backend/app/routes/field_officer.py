@@ -231,9 +231,14 @@ def get_member_dashboard(member_id):
     if not member:
         return jsonify({'error': 'Member not found'}), 404
     
-    if user.role.name != 'admin':
+    # Allow admin or the member themselves or the member's loan officer
+    if user.role.name == 'admin':
+        pass
+    elif user.id == member.user_id:
+        pass
+    else:
         group = member.group
-        if not group or group.loan_officer_id != user_id:
+        if not group or group.loan_officer_id != user.id:
             return jsonify({'error': 'Unauthorized'}), 403
     
     member_data = member.to_dict()
@@ -244,7 +249,11 @@ def get_member_dashboard(member_id):
         'phone': member.user.phone
     }
     
-    active_loans = Loan.query.filter_by(member_id=member_id, status='disbursed').all()
+    # Include pending, approved, and disbursed loans in the dashboard summary
+    active_loans = Loan.query.filter(
+        Loan.member_id == member_id,
+        Loan.status.in_(['pending', 'approved', 'disbursed', 'released'])
+    ).all()
     
     loans_data = []
     total_outstanding = Decimal('0')
@@ -253,7 +262,12 @@ def get_member_dashboard(member_id):
         loan_dict = loan.to_dict()
         days_until_due = (loan.due_date - datetime.utcnow()).days if loan.due_date else None
         loan_dict['daysUntilDue'] = days_until_due
-        loan_dict['status'] = 'overdue' if days_until_due and days_until_due < 0 else 'active'
+        
+        # Determine status for display
+        if loan.status == 'disbursed':
+            loan_dict['status'] = 'overdue' if days_until_due and days_until_due < 0 else 'active'
+        else:
+            loan_dict['status'] = loan.status
         
         loans_data.append(loan_dict)
         total_outstanding += Decimal(loan.outstanding_balance)
@@ -308,7 +322,6 @@ def get_member_dashboard(member_id):
 
 @bp.route('/members/<int:member_id>/apply-loan', methods=['POST'])
 @login_required
-@role_required(['field_officer', 'loan_officer', 'admin'])
 def apply_loan_for_member(member_id):
     from flask import session
     user_id = session.get('user_id')
@@ -321,10 +334,17 @@ def apply_loan_for_member(member_id):
     if member.status != 'active':
         return jsonify({'error': 'Member must have active status to apply for loans'}), 400
     
-    if user.role.name != 'admin':
+    # Allow admin or the member themselves or the member's loan officer
+    if user.role.name == 'admin':
+        pass
+    elif user.id == member.user_id:
+        pass
+    elif user.role.name in ['field_officer', 'loan_officer']:
         group = member.group
-        if not group or group.loan_officer_id != user_id:
+        if not group or group.loan_officer_id != user.id:
             return jsonify({'error': 'Unauthorized'}), 403
+    else:
+        return jsonify({'error': 'Unauthorized'}), 403
     
     data = request.get_json()
     loan_type_id = data.get('loanTypeId')
@@ -398,11 +418,22 @@ def apply_loan_for_member(member_id):
     db.session.add(loan)
     db.session.flush()
     
+    # Add items if any
     for item_info in loan_items:
+        product = item_info['product']
+        quantity = item_info['quantity']
+        
+        # Deduct stock
+        if product.stock_quantity < quantity:
+            db.session.rollback()
+            return jsonify({'error': f'Insufficient stock for {product.name}'}), 400
+            
+        product.stock_quantity -= quantity
+        
         product_item = LoanProductItem(
             loan_id=loan.id,
-            product_id=item_info['product'].id,
-            quantity=item_info['quantity'],
+            product_id=product.id,
+            quantity=quantity,
             unit_price=item_info['unit_price'],
             total_price=item_info['total_price']
         )

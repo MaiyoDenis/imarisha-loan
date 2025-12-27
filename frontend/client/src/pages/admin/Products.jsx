@@ -72,6 +72,10 @@ export default function ProductManagement() {
         queryKey: ['loan-products'],
         queryFn: api.getLoanProducts,
     }), _f = _e.data, products = _f === void 0 ? [] : _f, isLoading = _e.isLoading, refetch = _e.refetch;
+    var _catQuery = useQuery({
+        queryKey: ['product-categories'],
+        queryFn: api.getProductCategories,
+    }), _categories = _catQuery.data, categories = _categories === void 0 ? [] : _categories;
     var handleAddProduct = function (e) { return __awaiter(_this, void 0, void 0, function () {
         var error_1;
         return __generator(this, function (_a) {
@@ -207,9 +211,14 @@ export default function ProductManagement() {
                 <div>
                   <label className="block text-sm font-semibold text-foreground mb-2">Category</label>
                   <select value={formData.categoryId} onChange={function (e) { return setFormData(__assign(__assign({}, formData), { categoryId: e.target.value })); }} className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
-                    <option value="1">Energy</option>
-                    <option value="2">Electronics</option>
-                    <option value="3">Agriculture</option>
+                    {categories.map(function (cat) { return (<option key={cat.id} value={cat.id.toString()}>
+                        {cat.name}
+                      </option>); })}
+                    {categories.length === 0 && (<>
+                        <option value="1">Energy</option>
+                        <option value="2">Electronics</option>
+                        <option value="3">Agriculture</option>
+                      </>)}
                   </select>
                 </div>
                 <div>

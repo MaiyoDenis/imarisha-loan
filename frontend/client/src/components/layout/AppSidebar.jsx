@@ -66,7 +66,8 @@ const menuSections = [
       { icon: Building2, label: "Branches", href: "/branches", roles: ["admin"] },
       { icon: Users, label: "Staff & Users", href: "/users", roles: ["admin", "branch_manager"] },
       { icon: Users, label: "Members", href: "/members", roles: ["admin", "executive", "operations_manager"] },
-      { icon: Users, label: "Groups", href: "/groups", roles: ["admin", "executive", "operations_manager", "field_officer"] },
+      { icon: Users, label: "Groups", href: "/groups", roles: ["admin", "executive", "operations_manager"] },
+      { icon: Users, label: "Groups", href: "/field-officer/groups", roles: ["field_officer"] },
       { icon: UserCheck, label: "Member Approval", href: "/member-approval", roles: ["procurement_officer", "branch_manager", "admin"] },
     ]
   },
@@ -74,7 +75,7 @@ const menuSections = [
     title: "Operations & Inventory",
     items: [
       { icon: MapPin, label: "Field Operations", href: "/field-operations", roles: ["admin", "field_officer"] },
-      { icon: Calendar, label: "Visit Schedules", href: "/field-officer/schedule", roles: ["field_officer"] },
+      { icon: Calendar, label: "Schedule", href: "/field-officer/schedule", roles: ["field_officer"] },
       { icon: Store, label: "Store & Inventory", href: "/store", roles: ["branch_manager", "admin", "procurement_officer"] },
       { icon: Smartphone, label: "Mobile Tools", href: "/mobile-features", roles: ["admin", "executive", "field_officer"] },
     ]

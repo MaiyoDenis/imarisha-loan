@@ -329,6 +329,81 @@ class LoanService:
             db.session.rollback()
             return {'status': 'error', 'message': str(e)}
 
+    def auto_repay_from_drawdown(self, member_id: int) -> Dict[str, Any]:
+        """Automatically repay loans using funds available in the drawdown account"""
+        try:
+            from app.models import DrawdownAccount
+            drawdown = DrawdownAccount.query.filter_by(member_id=member_id).first()
+            
+            if not drawdown or drawdown.balance <= 0:
+                return {'status': 'no_funds', 'balance': 0}
+            
+            # Find all loans with outstanding balance, starting with oldest/overdue
+            loans = Loan.query.filter(
+                Loan.member_id == member_id,
+                Loan.status.in_(['disbursed', 'pending', 'approved']),
+                Loan.outstanding_balance > 0
+            ).order_by(Loan.due_date.asc(), Loan.created_at.asc()).all()
+            
+            if not loans:
+                return {'status': 'no_loans', 'balance': float(drawdown.balance)}
+            
+            total_repaid = Decimal('0')
+            initial_balance = Decimal(str(drawdown.balance))
+            current_balance = initial_balance
+            
+            import uuid
+            
+            for loan in loans:
+                if current_balance <= 0:
+                    break
+                
+                repayment_amount = min(current_balance, Decimal(str(loan.outstanding_balance)))
+                
+                # Update loan
+                loan.outstanding_balance = Decimal(str(loan.outstanding_balance)) - repayment_amount
+                if loan.outstanding_balance <= 0:
+                    loan.outstanding_balance = Decimal('0')
+                    loan.status = 'completed'
+                
+                # Update drawdown balance
+                current_balance -= repayment_amount
+                
+                # Create transaction record
+                transaction = Transaction(
+                    transaction_id=str(uuid.uuid4()),
+                    member_id=member_id,
+                    account_type='drawdown',
+                    transaction_type='loan_repayment',
+                    amount=repayment_amount,
+                    balance_before=Decimal(str(drawdown.balance)),
+                    balance_after=current_balance,
+                    reference=f"Auto-Repayment - {loan.loan_number}",
+                    loan_id=loan.id,
+                    status='confirmed',
+                    confirmed_at=datetime.utcnow()
+                )
+                db.session.add(transaction)
+                
+                # Update actual account balance for next iteration/commit
+                drawdown.balance = current_balance
+                total_repaid += repayment_amount
+            
+            db.session.commit()
+            
+            return {
+                'status': 'success',
+                'total_repaid': float(total_repaid),
+                'initial_balance': float(initial_balance),
+                'final_balance': float(current_balance),
+                'loans_affected': len(loans)
+            }
+            
+        except Exception as e:
+            logging.error(f"Error in auto_repay_from_drawdown: {str(e)}")
+            db.session.rollback()
+            return {'status': 'error', 'message': str(e)}
+
     def check_due_loans(self):
         """Check for due loans and send reminders"""
         try:
