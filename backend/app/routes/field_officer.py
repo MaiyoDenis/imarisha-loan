@@ -249,18 +249,27 @@ def get_member_dashboard(member_id):
         'phone': member.user.phone
     }
     
-    # Include pending, approved, and disbursed loans in the dashboard summary
+    # Include approved and disbursed loans in the dashboard summary (Active/Outstanding)
+    # Pending loans are shown in history but don't count towards outstanding until approved/disbursed
     active_loans = Loan.query.filter(
         Loan.member_id == member_id,
-        Loan.status.in_(['pending', 'approved', 'disbursed', 'released'])
+        Loan.status.in_(['approved', 'disbursed', 'released'])
     ).all()
+    
+    # Get all loans for history (including pending)
+    all_loans = Loan.query.filter_by(member_id=member_id).all()
     
     loans_data = []
     total_outstanding = Decimal('0')
     
     for loan in active_loans:
         loan_dict = loan.to_dict()
-        days_until_due = (loan.due_date - datetime.utcnow()).days if loan.due_date else None
+        # Ensure we only show daysUntilDue if due_date is actually set
+        days_until_due = None
+        if loan.due_date:
+            delta = (loan.due_date - datetime.utcnow())
+            days_until_due = delta.days + (1 if delta.seconds > 0 else 0)
+        
         loan_dict['daysUntilDue'] = days_until_due
         
         # Determine status for display
@@ -271,6 +280,22 @@ def get_member_dashboard(member_id):
         
         loans_data.append(loan_dict)
         total_outstanding += Decimal(loan.outstanding_balance)
+
+    # Prepare loan history (all loans)
+    history_data = []
+    for loan in all_loans:
+        h_dict = loan.to_dict()
+        
+        # Add days until due for history as well
+        h_days = None
+        if loan.due_date:
+            h_delta = (loan.due_date - datetime.utcnow())
+            h_days = h_delta.days + (1 if h_delta.seconds > 0 else 0)
+        h_dict['daysUntilDue'] = h_days
+        
+        if loan.status == 'disbursed':
+            h_dict['status'] = 'overdue' if h_days is not None and h_days < 0 else 'active'
+        history_data.append(h_dict)
     
     savings = member.savings_account
     savings_balance = Decimal('0')
@@ -296,13 +321,13 @@ def get_member_dashboard(member_id):
         max_loan_limit = Decimal('0')
     else:
         max_loan_limit = savings_balance * Decimal('4')
-        # Apply minimum and maximum limits only if active
-        max_loan_limit = max(max_loan_limit, Decimal('5000'))  # Minimum 5000
+        # Apply maximum limit only if active
         max_loan_limit = min(max_loan_limit, Decimal('50000'))  # Maximum 50000
     
     available_loan = max(Decimal('0'), max_loan_limit - total_outstanding)
     
     member_data['activeLoans'] = loans_data
+    member_data['loanHistory'] = history_data
     member_data['totalOutstanding'] = str(total_outstanding)
     member_data['savingsBalance'] = str(savings_balance)
     member_data['drawdownBalance'] = str(drawdown_balance)

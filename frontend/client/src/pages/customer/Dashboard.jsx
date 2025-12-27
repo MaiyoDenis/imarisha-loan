@@ -10,6 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ApplyLoanForm } from "@/components/field-officer/ApplyLoanForm";
+import { RepaymentForm } from "@/components/field-officer/RepaymentForm";
+import { LoanSchedule } from "@/components/field-officer/LoanSchedule";
 import KPICard from "@/components/dashboards/KPICard";
 import { PiggyBank, DollarSign, Percent, CreditCard, TrendingUp, ShoppingBag, Phone, Code } from "lucide-react";
 import { TransferFundsForm } from "@/components/field-officer/TransferFundsForm";
@@ -65,6 +67,9 @@ function CustomerDashboardView({ memberId }) {
     var [showTransferForm, setShowTransferForm] = useState(false);
     var [showDepositForm, setShowDepositForm] = useState(false);
     var [depositAccountType, setDepositAccountType] = useState(null);
+    var [showRepaymentForm, setShowRepaymentForm] = useState(false);
+    var [showSchedule, setShowSchedule] = useState(false);
+    var [selectedLoanId, setSelectedLoanId] = useState(null);
 
     var cancelMutation = useMutation({
         mutationFn: function (id) { return api.post("/loans/".concat(id, "/cancel"), {}); },
@@ -234,9 +239,51 @@ function CustomerDashboardView({ memberId }) {
                     </Card>
                 )}
 
+                {showRepaymentForm && (
+                    <Card className="border-secondary/50 !bg-transparent">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+                            <div>
+                                <CardTitle>Loan Repayment</CardTitle>
+                                <CardDescription>
+                                    Make a payment towards your loan
+                                </CardDescription>
+                            </div>
+                            <Button variant="ghost" onClick={() => setShowRepaymentForm(false)}>✕</Button>
+                        </CardHeader>
+                        <CardContent>
+                            <RepaymentForm 
+                                memberId={memberId} 
+                                loanId={selectedLoanId}
+                                onSuccess={() => {
+                                    setShowRepaymentForm(false);
+                                    refetch();
+                                }}
+                            />
+                        </CardContent>
+                    </Card>
+                )}
+
+                {showSchedule && (
+                    <Card className="border-primary/50 !bg-transparent">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+                            <div>
+                                <CardTitle>Repayment Schedule</CardTitle>
+                                <CardDescription>
+                                    Monthly installment plan
+                                </CardDescription>
+                            </div>
+                            <Button variant="ghost" onClick={() => setShowSchedule(false)}>✕</Button>
+                        </CardHeader>
+                        <CardContent>
+                            <LoanSchedule loanId={selectedLoanId} />
+                        </CardContent>
+                    </Card>
+                )}
+
                 <Tabs defaultValue="loans" className="w-full">
                     <TabsList className="bg-transparent p-1 rounded-lg border border-border">
                         <TabsTrigger value="loans">Active Loans ({m.activeLoans.length})</TabsTrigger>
+                        <TabsTrigger value="history">Loan History</TabsTrigger>
                         <TabsTrigger value="products">Product Catalog</TabsTrigger>
                         <TabsTrigger value="transactions">Recent Transactions</TabsTrigger>
                     </TabsList>
@@ -263,10 +310,103 @@ function CustomerDashboardView({ memberId }) {
                                                     }`}>
                                                         {loan.status.toUpperCase()}
                                                     </span>
+                                                    {loan.dueDate && (
+                                                        <span className="text-xs text-purple-600 font-medium bg-purple-50 px-2 py-1 rounded-full">
+                                                            Due {new Date(loan.dueDate).toLocaleDateString()}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div className="text-right flex flex-col items-end gap-3">
+                                                <p className="text-xl font-bold text-primary">KES {parseFloat(loan.outstandingBalance).toLocaleString()}</p>
+                                                <div className="flex gap-2">
+                                                    {(loan.status === "active" || loan.status === "disbursed" || loan.status === "approved") && (
+                                                        <>
+                                                            <Button 
+                                                                variant="outline" 
+                                                                size="sm" 
+                                                                className="h-8 text-xs border-primary/30 hover:bg-primary/5"
+                                                                onClick={() => {
+                                                                    setSelectedLoanId(loan.id);
+                                                                    setShowSchedule(true);
+                                                                }}
+                                                            >
+                                                                Schedule
+                                                            </Button>
+                                                            <Button 
+                                                                variant="secondary" 
+                                                                size="sm" 
+                                                                className="h-8 text-xs font-bold"
+                                                                onClick={() => {
+                                                                    setSelectedLoanId(loan.id);
+                                                                    setShowRepaymentForm(true);
+                                                                }}
+                                                            >
+                                                                Pay Loan
+                                                            </Button>
+                                                        </>
+                                                    )}
+                                                    {loan.status === 'pending' && (
+                                                        <Button 
+                                                            variant="ghost" 
+                                                            size="sm" 
+                                                            className="h-8 text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
+                                                            onClick={(e) => { e.stopPropagation(); cancelMutation.mutate(loan.id); }}
+                                                            disabled={cancelMutation.isPending}
+                                                        >
+                                                            {cancelMutation.isPending ? "Cancelling..." : "Cancel"}
+                                                        </Button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))
+                        )}
+                    </TabsContent>
+                    <TabsContent value="history" className="mt-6">
+                        <Card className="border-2 !bg-transparent mb-6">
+                            <CardContent className="pt-6 space-y-6">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="bg-transparent p-6 rounded-lg border border-primary/30">
+                                        <p className="text-xs text-muted-foreground mb-2">Total Borrowed</p>
+                                        <p className="text-3xl font-bold text-primary">
+                                            KES {new Intl.NumberFormat('en-KE').format(parseFloat(m.totalBorrowed))}
+                                        </p>
+                                    </div>
+                                    <div className="bg-transparent p-6 rounded-lg border border-green-200">
+                                        <p className="text-xs text-muted-foreground mb-2">Total Repaid</p>
+                                        <p className="text-3xl font-bold text-secondary">
+                                            KES {new Intl.NumberFormat('en-KE').format(parseFloat(m.totalRepaid))}
+                                        </p>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {m.loanHistory && m.loanHistory.length > 0 ? (
+                            m.loanHistory.map(loan => (
+                                <Card key={loan.id} className="mb-4 !bg-transparent border-2">
+                                    <CardContent className="pt-6">
+                                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                            <div className="space-y-1 flex-1">
+                                                <p className="font-bold text-lg">{loan.loanNumber}</p>
+                                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                                                        loan.status === "active" || loan.status === "disbursed"
+                                                        ? "bg-green-100 text-green-700"
+                                                        : loan.status === "pending"
+                                                        ? "bg-yellow-100 text-yellow-700"
+                                                        : "bg-gray-100 text-gray-700"
+                                                    }`}>
+                                                        {loan.status.toUpperCase()}
+                                                    </span>
+                                                    <span>Applied: {new Date(loan.applicationDate).toLocaleDateString()}</span>
                                                 </div>
                                             </div>
                                             <div className="text-right flex flex-col items-end gap-2">
-                                                <p className="text-xl font-bold text-primary">KES {parseFloat(loan.outstandingBalance).toLocaleString()}</p>
+                                                <p className="text-xl font-bold">KES {parseFloat(loan.principleAmount).toLocaleString()}</p>
                                                 {loan.status === 'pending' && (
                                                     <Button 
                                                         variant="ghost" 
@@ -283,6 +423,10 @@ function CustomerDashboardView({ memberId }) {
                                     </CardContent>
                                 </Card>
                             ))
+                        ) : (
+                            <div className="text-center py-12 border-2 border-dashed rounded-xl">
+                                <p className="text-muted-foreground">No loan history available</p>
+                            </div>
                         )}
                     </TabsContent>
                     <TabsContent value="products" className="mt-6">

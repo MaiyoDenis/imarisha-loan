@@ -10,6 +10,8 @@ import { AlertCircle, ChevronLeft, DollarSign, TrendingUp, CreditCard, PiggyBank
 import { ApplyLoanForm } from "@/components/field-officer/ApplyLoanForm";
 import { TransferFundsForm } from "@/components/field-officer/TransferFundsForm";
 import { DepositForm } from "@/components/field-officer/DepositForm";
+import { RepaymentForm } from "@/components/field-officer/RepaymentForm";
+import { LoanSchedule } from "@/components/field-officer/LoanSchedule";
 import Layout from "@/components/layout/Layout";
 import KPICard from "@/components/dashboards/KPICard";
 export function MemberDashboardPage() {
@@ -19,6 +21,9 @@ export function MemberDashboardPage() {
     var _d = useState(false), showTransferForm = _d[0], setShowTransferForm = _d[1];
     var _e = useState(false), showDepositForm = _e[0], setShowDepositForm = _e[1];
     var _f = useState(null), depositAccountType = _f[0], setDepositAccountType = _f[1];
+    var [showRepaymentForm, setShowRepaymentForm] = useState(false);
+    var [showSchedule, setShowSchedule] = useState(false);
+    var [selectedLoanId, setSelectedLoanId] = useState(null);
     var memberId = (params === null || params === void 0 ? void 0 : params.memberId) ? parseInt(params.memberId) : null;
     var _g = useQuery({
         queryKey: ["memberDashboard", memberId],
@@ -203,6 +208,47 @@ export function MemberDashboardPage() {
           </CardContent>
         </Card>)}
 
+      {showRepaymentForm && (
+          <Card className="border-secondary/50 !bg-transparent">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+                  <div>
+                      <CardTitle>Loan Repayment</CardTitle>
+                      <CardDescription>
+                          Make a payment towards this loan
+                      </CardDescription>
+                  </div>
+                  <Button variant="ghost" onClick={() => setShowRepaymentForm(false)}>✕</Button>
+              </CardHeader>
+              <CardContent>
+                  <RepaymentForm 
+                      memberId={memberId} 
+                      loanId={selectedLoanId}
+                      onSuccess={() => {
+                          setShowRepaymentForm(false);
+                          refetch();
+                      }}
+                  />
+              </CardContent>
+          </Card>
+      )}
+
+      {showSchedule && (
+          <Card className="border-primary/50 !bg-transparent">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+                  <div>
+                      <CardTitle>Repayment Schedule</CardTitle>
+                      <CardDescription>
+                          Monthly installment plan
+                      </CardDescription>
+                  </div>
+                  <Button variant="ghost" onClick={() => setShowSchedule(false)}>✕</Button>
+              </CardHeader>
+              <CardContent>
+                  <LoanSchedule loanId={selectedLoanId} />
+              </CardContent>
+          </Card>
+      )}
+
       <Tabs defaultValue="loans" className="w-full">
         <TabsList className="bg-transparent p-1 rounded-lg border border-gray-200/20">
           <TabsTrigger value="loans" className="data-[state=active]:bg-[#3E2723] data-[state=active]:text-white data-[state=active]:border-[#FFD700] data-[state=active]:border">
@@ -250,21 +296,46 @@ export function MemberDashboardPage() {
                         </p>
                       </div>
                       <div className="bg-transparent p-3 rounded-lg border border-gray-200/20 sm:p-0 sm:border-0">
-                        <p className="text-xs text-muted-foreground mb-1">Due In</p>
+                        <p className="text-xs text-muted-foreground mb-1">Due Date</p>
                         <p className="font-bold text-lg text-purple-600">
-                          {loan.daysUntilDue !== undefined
-                ? Math.max(0, loan.daysUntilDue)
-                : "-"}{" "}
-                          days
+                          {loan.dueDate ? new Date(loan.dueDate).toLocaleDateString() : "-"}
                         </p>
                       </div>
                     </div>
+                  </div>
+                  <div className="mt-4 pt-4 border-t flex justify-end gap-2">
+                      {(loan.status === "active" || loan.status === "disbursed" || loan.status === "approved") && (
+                          <>
+                              <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="h-8 text-xs border-primary/30 hover:bg-primary/5"
+                                  onClick={() => {
+                                      setSelectedLoanId(loan.id);
+                                      setShowSchedule(true);
+                                  }}
+                              >
+                                  Schedule
+                              </Button>
+                              <Button 
+                                  variant="secondary" 
+                                  size="sm" 
+                                  className="h-8 text-xs font-bold"
+                                  onClick={() => {
+                                      setSelectedLoanId(loan.id);
+                                      setShowRepaymentForm(true);
+                                  }}
+                              >
+                                  Pay Loan
+                              </Button>
+                          </>
+                      )}
                   </div>
                 </CardContent>
               </Card>); }))}
         </TabsContent>
 
-        <TabsContent value="history" className="mt-6">
+        <TabsContent value="history" className="mt-6 space-y-4">
           <Card className="border-2 !bg-transparent">
             <CardContent className="pt-6 space-y-6">
               <div className="grid grid-cols-2 gap-4">
@@ -283,6 +354,45 @@ export function MemberDashboardPage() {
               </div>
             </CardContent>
           </Card>
+
+          {m.loanHistory && m.loanHistory.length > 0 ? (
+            m.loanHistory.map(function (loan) {
+              return (
+                <Card key={loan.id} className="hover:shadow-md transition-shadow border-2 !bg-transparent">
+                  <CardContent className="pt-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                      <div className="space-y-1 flex-1">
+                        <p className="font-semibold text-lg">{loan.loanNumber}</p>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <span className={"px-2 py-1 rounded-full text-xs font-semibold ".concat(
+                            loan.status === "active" || loan.status === "disbursed"
+                              ? "bg-green-100 text-green-700"
+                              : loan.status === "pending"
+                                ? "bg-yellow-100 text-yellow-700"
+                                : "bg-gray-100 text-gray-700"
+                          )}>
+                            {loan.status.toUpperCase()}
+                          </span>
+                          <span>Applied: {new Date(loan.applicationDate).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-lg">
+                          KES {new Intl.NumberFormat('en-KE').format(parseFloat(loan.principleAmount))}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })
+          ) : (
+            <Card className="border-dashed !bg-transparent">
+              <CardContent className="py-10 text-center">
+                <p className="text-muted-foreground">No loan history available</p>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="transactions" className="space-y-4 mt-6">

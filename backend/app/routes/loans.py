@@ -225,6 +225,17 @@ def approve_loan(id):
     loan.approval_date = datetime.utcnow()
     loan.approved_by = session.get('user_id')
     
+    # Set tentative due date upon approval
+    import calendar
+    def add_months(sourcedate, months):
+        month = sourcedate.month - 1 + months
+        year = sourcedate.year + month // 12
+        month = month % 12 + 1
+        day = min(sourcedate.day, calendar.monthrange(year,month)[1])
+        return datetime(year, month, day)
+        
+    loan.due_date = add_months(datetime.utcnow(), loan.loan_type.duration_months)
+    
     db.session.commit()
     
     return jsonify(loan.to_dict())
@@ -320,6 +331,16 @@ def process_loan_disbursement(loan_id):
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@bp.route('/<int:id>/schedule', methods=['GET'])
+@login_required
+def get_loan_schedule(id):
+    loan = Loan.query.get(id)
+    if not loan:
+        return jsonify({'error': 'Loan not found'}), 404
+    
+    schedule = loan_service.generate_repayment_schedule(loan)
+    return jsonify(schedule)
 
 @bp.route('/<int:member_id>/loan-limit', methods=['GET'])
 @login_required

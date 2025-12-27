@@ -336,9 +336,43 @@ def get_loan_limit(id):
     total_savings = member.savings_account.balance if member.savings_account else 0
     loan_limit = total_savings * 4
     
+    # Apply maximum limit of 50,000
+    loan_limit = min(loan_limit, 50000)
+    
     return jsonify({
         'member_id': id,
         'total_savings': float(total_savings),
         'loan_limit': float(loan_limit),
         'calculation': f"4 × {total_savings} = {loan_limit}"
     })
+
+@bp.route('/<int:id>/sync-status', methods=['POST'])
+def sync_member_status(id):
+    """Force sync member status based on registration fee payment"""
+    member = Member.query.get(id)
+    if not member:
+        return jsonify({'error': 'Member not found'}), 404
+        
+    updated = False
+    
+    # Check if registration fee is actually paid (balance >= 0)
+    if not member.registration_fee_paid and member.drawdown_account and member.drawdown_account.balance >= 0:
+        member.registration_fee_paid = True
+        updated = True
+        
+    # Activate if they are inactive but fee is paid
+    if member.status == 'inactive' and member.registration_fee_paid:
+        member.status = 'active'
+        updated = True
+        
+    if updated:
+        db.session.commit()
+        return jsonify({
+            'message': 'Member status synced successfully',
+            'member': member.to_dict()
+        })
+    else:
+        return jsonify({
+            'message': 'No status changes needed',
+            'member': member.to_dict()
+        })

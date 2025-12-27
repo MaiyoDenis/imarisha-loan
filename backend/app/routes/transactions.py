@@ -216,6 +216,37 @@ def approve_transaction(transaction_id):
     if transaction.transaction_type == 'deposit':
         account.balance += transaction.amount
         
+        # Check if member needs activation and registration fee deduction
+        member = Member.query.get(transaction.member_id)
+        if member and not member.registration_fee_paid:
+            if member.drawdown_account:
+                # If drawdown balance is now >= 0, it means fee is paid
+                if member.drawdown_account.balance >= 0:
+                    member.registration_fee_paid = True
+                    
+                    # If this was a savings deposit, we should record the fee clearance in drawdown
+                    if transaction.account_type == 'savings':
+                        fee_txn_id = f"TXN-{datetime.now().strftime('%Y%m%d%H%M%S')}-FEE-{uuid.uuid4().hex[:4].upper()}"
+                        fee_txn = Transaction(
+                            transaction_id=fee_txn_id,
+                            member_id=member.id,
+                            account_type='drawdown',
+                            transaction_type='registration_fee',
+                            amount=member.registration_fee,
+                            balance_before=member.drawdown_account.balance - member.registration_fee,
+                            balance_after=member.drawdown_account.balance,
+                            reference=f'Registration fee cleared by deposit {transaction.transaction_id}',
+                            processed_by=user_id,
+                            status='confirmed',
+                            confirmed_by=user_id,
+                            confirmed_at=datetime.utcnow()
+                        )
+                        db.session.add(fee_txn)
+                
+                # Activate member if they were inactive (approved) and fee is now paid
+                if member.status == 'inactive' and member.registration_fee_paid:
+                    member.status = 'active'
+        
         # Auto-repay loans if deposited to drawdown
         if transaction.account_type == 'drawdown':
             db.session.flush() # Ensure balance is updated

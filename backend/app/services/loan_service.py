@@ -398,11 +398,48 @@ class LoanService:
                 'final_balance': float(current_balance),
                 'loans_affected': len(loans)
             }
-            
         except Exception as e:
             logging.error(f"Error in auto_repay_from_drawdown: {str(e)}")
             db.session.rollback()
             return {'status': 'error', 'message': str(e)}
+
+    def generate_repayment_schedule(self, loan: Loan) -> List[Dict[str, Any]]:
+        """Generate a monthly repayment schedule for a loan"""
+        try:
+            total_amount = Decimal(str(loan.total_amount))
+            duration = loan.loan_type.duration_months
+            monthly_payment = (total_amount / Decimal(str(duration))).quantize(Decimal('0.01'))
+            
+            schedule = []
+            start_date = loan.disbursement_date or loan.approval_date or loan.application_date
+            
+            import calendar
+            def add_months(sourcedate, months):
+                month = sourcedate.month - 1 + months
+                year = sourcedate.year + month // 12
+                month = month % 12 + 1
+                day = min(sourcedate.day, calendar.monthrange(year,month)[1])
+                return datetime(year, month, day)
+
+            remaining_balance = total_amount
+            for i in range(1, duration + 1):
+                due_date = add_months(start_date, i)
+                # Last payment might be slightly different due to rounding
+                current_payment = monthly_payment if i < duration else remaining_balance
+                remaining_balance -= current_payment
+                
+                schedule.append({
+                    'installment_number': i,
+                    'due_date': due_date.isoformat(),
+                    'amount': float(current_payment),
+                    'remaining_balance': float(max(Decimal('0'), remaining_balance)),
+                    'status': 'upcoming' if due_date > datetime.utcnow() else 'due'
+                })
+                
+            return schedule
+        except Exception as e:
+            logging.error(f"Error generating repayment schedule: {str(e)}")
+            return []
 
     def check_due_loans(self):
         """Check for due loans and send reminders"""

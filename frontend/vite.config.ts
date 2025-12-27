@@ -12,6 +12,23 @@ export default defineConfig({
     tailwindcss(),
     metaImagesPlugin(),
   ],
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'wouter',
+      '@tanstack/react-query',
+      'lucide-react',
+      'recharts',
+      '@mui/material',
+      '@mui/icons-material',
+      '@emotion/react',
+      '@emotion/styled',
+      'date-fns',
+      'clsx',
+      'tailwind-merge',
+    ],
+  },
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "client", "src"),
